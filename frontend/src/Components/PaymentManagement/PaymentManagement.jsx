@@ -1208,7 +1208,6 @@ const CheckoutPage = () => {
                   <p className="guarantee">30-day money-back guarantee</p>
                 </div>
 
-
               </div>
             </div>
           </div>

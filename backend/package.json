@@ -20,9 +20,14 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.0",
     "multer": "^2.0.2",
+    "node-cron": "^3.0.3",
     "nodemailer": "^7.0.6",
     "nodemon": "^3.1.10",
+<<<<<<< HEAD
     "qrcode": "^1.5.4",
+=======
+    "puppeteer": "^24.23.0",
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
     "socket.io": "^4.8.1"
   }
 }

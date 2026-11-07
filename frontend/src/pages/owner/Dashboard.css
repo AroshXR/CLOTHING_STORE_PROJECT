@@ -1,19 +1,34 @@
+<<<<<<< HEAD
 .owner-dashboard-page {
+=======
+.pasindu-owner-dashboard-page {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   flex: 1;
   width: 100%;
   min-height: 100vh;
   background: #f6f7fb;
   padding: 28px 20px 40px;
 }
+<<<<<<< HEAD
 
 .owner-dashboard {
+=======
+ 
+.pasindu-owner-dashboard {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
 }
+<<<<<<< HEAD
 
 /* Hero Header */
 .dashboard__header {
+=======
+ 
+/* Hero Header */
+.pasindu-dashboard__header {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   background: linear-gradient(135deg, #000000 0%, #333333 100%);
   color: #fff;
   border-radius: 16px;
@@ -23,6 +38,7 @@
   position: relative;
   text-align: center;
 }
+<<<<<<< HEAD
 
 .dashboard__header-content {
   max-width: 800px;
@@ -30,20 +46,39 @@
 }
 
 .dashboard__header-content h1 {
+=======
+ 
+.pasindu-dashboard__header-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+ 
+.pasindu-dashboard__header-content h1 {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   margin: 0;
   font-size: 2.5rem;
   font-weight: 700;
 }
+<<<<<<< HEAD
 
 .dashboard__header-content p {
+=======
+ 
+.pasindu-dashboard__header-content p {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   margin: 8px auto 0;
   color: #e5e7eb;
   opacity: 0.9;
   font-size: 1rem;
   max-width: 700px;
 }
+<<<<<<< HEAD
 
 .dashboard__refresh-btn {
+=======
+ 
+.pasindu-dashboard__refresh-btn {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   position: absolute;
   top: 30px;
   right: 30px;
@@ -60,6 +95,7 @@
   align-items: center;
   gap: 8px;
 }
+<<<<<<< HEAD
 
 .dashboard__refresh-btn:hover {
   transform: translateY(-2px);
@@ -68,11 +104,22 @@
 
 /* Stats Grid */
 .dashboard__stats-grid {
+=======
+ 
+.pasindu-dashboard__refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+ 
+/* Stats Grid */
+.pasindu-dashboard__stats-grid {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   margin-bottom: 30px;
 }
+<<<<<<< HEAD
 
 @media (max-width: 1200px) {
   .dashboard__stats-grid {
@@ -87,6 +134,22 @@
 }
 
 .stat-card {
+=======
+ 
+@media (max-width: 1200px) {
+  .pasindu-dashboard__stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+ 
+@media (max-width: 640px) {
+  .pasindu-dashboard__stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+ 
+.pasindu-stat-card {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -99,14 +162,20 @@
   overflow: hidden;
   transition: 0.25s ease;
 }
+<<<<<<< HEAD
 
 .stat-card::before {
+=======
+ 
+.pasindu-stat-card::before {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: radial-gradient(600px 120px at -10% -10%, rgba(0, 0, 0, 0.06), transparent 60%);
 }
+<<<<<<< HEAD
 
 .stat-card:hover {
   transform: translateY(-3px);
@@ -114,12 +183,26 @@
 }
 
 .stat-card__header {
+=======
+ 
+.pasindu-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+}
+ 
+.pasindu-stat-card__header {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
 }
+<<<<<<< HEAD
 
 .stat-card__info h3 {
+=======
+ 
+.pasindu-stat-card__info h3 {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   margin: 0;
   font-size: 0.875rem;
   color: #6b7280;
@@ -127,15 +210,25 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+<<<<<<< HEAD
 
 .stat-card__info p {
+=======
+ 
+.pasindu-stat-card__info p {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   margin: 8px 0 0;
   font-size: 2rem;
   font-weight: 700;
   color: #111;
 }
+<<<<<<< HEAD
 
 .stat-card__icon {
+=======
+ 
+.pasindu-stat-card__icon {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   display: flex;
   align-items: center;
   justify-content: center;
@@ -145,6 +238,7 @@
   background: #f1f5f9;
   border: 1px solid #e5e7eb;
 }
+<<<<<<< HEAD
 
 .stat-card__icon img {
   width: 24px;
@@ -153,10 +247,21 @@
 
 /* Main Content Grid */
 .dashboard__content-grid {
+=======
+ 
+.pasindu-stat-card__icon img {
+  width: 24px;
+  height: 24px;
+}
+ 
+/* Main Content Grid */
+.pasindu-dashboard__content-grid {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
 }
+<<<<<<< HEAD
 
 @media (min-width: 1024px) {
   .dashboard__content-grid {
@@ -166,6 +271,17 @@
 
 /* Info Cards (Recent Bookings & Monthly Revenue) */
 .info-card {
+=======
+ 
+@media (min-width: 1024px) {
+  .pasindu-dashboard__content-grid {
+    grid-template-columns: 1.5fr 1fr;
+  }
+}
+ 
+/* Info Cards (Recent Bookings & Monthly Revenue) */
+.pasindu-info-card {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   padding: 28px;
   border: 1px solid #ececec;
   border-radius: 14px;
@@ -175,14 +291,20 @@
   overflow: hidden;
   transition: 0.25s ease;
 }
+<<<<<<< HEAD
 
 .info-card::before {
+=======
+ 
+.pasindu-info-card::before {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: radial-gradient(600px 120px at -10% -10%, rgba(0, 0, 0, 0.06), transparent 60%);
 }
+<<<<<<< HEAD
 
 .info-card:hover {
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
@@ -193,20 +315,43 @@
 }
 
 .info-card__header h2 {
+=======
+ 
+.pasindu-info-card:hover {
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+}
+ 
+.pasindu-info-card__header {
+  margin-bottom: 20px;
+}
+ 
+.pasindu-info-card__header h2 {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   margin: 0;
   font-size: 1.5rem;
   color: #111;
   font-weight: 700;
 }
+<<<<<<< HEAD
 
 .info-card__header p {
+=======
+ 
+.pasindu-info-card__header p {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   margin: 4px 0 0;
   color: #6b7280;
   font-size: 0.95rem;
 }
+<<<<<<< HEAD
 
 /* Recent Bookings List */
 .booking-item {
+=======
+ 
+/* Recent Bookings List */
+.pasindu-booking-item {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -217,6 +362,7 @@
   border: 1px solid #f1f5f9;
   transition: all 0.2s ease;
 }
+<<<<<<< HEAD
 
 .booking-item:hover {
   background: #f1f5f9;
@@ -224,12 +370,26 @@
 }
 
 .booking-item__left {
+=======
+ 
+.pasindu-booking-item:hover {
+  background: #f1f5f9;
+  border-color: #e5e7eb;
+}
+ 
+.pasindu-booking-item__left {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   display: flex;
   align-items: center;
   gap: 12px;
 }
+<<<<<<< HEAD
 
 .booking-item__icon {
+=======
+ 
+.pasindu-booking-item__icon {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   display: flex;
   align-items: center;
   justify-content: center;
@@ -239,6 +399,7 @@
   background: #fff;
   border: 1px solid #e5e7eb;
 }
+<<<<<<< HEAD
 
 .booking-item__icon img {
   width: 24px;
@@ -246,32 +407,61 @@
 }
 
 .booking-item__details h4 {
+=======
+ 
+.pasindu-booking-item__icon img {
+  width: 24px;
+  height: 24px;
+}
+ 
+.pasindu-booking-item__details h4 {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   margin: 0;
   font-size: 1rem;
   color: #111;
   font-weight: 600;
 }
+<<<<<<< HEAD
 
 .booking-item__details p {
+=======
+ 
+.pasindu-booking-item__details p {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   margin: 4px 0 0;
   font-size: 0.875rem;
   color: #6b7280;
 }
+<<<<<<< HEAD
 
 .booking-item__right {
+=======
+ 
+.pasindu-booking-item__right {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 6px;
 }
+<<<<<<< HEAD
 
 .booking-item__price {
+=======
+ 
+.pasindu-booking-item__price {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   font-size: 1rem;
   font-weight: 700;
   color: #111;
 }
+<<<<<<< HEAD
 
 .booking-item__status {
+=======
+ 
+.pasindu-booking-item__status {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -281,6 +471,7 @@
   border: 1px solid #e5e7eb;
   text-transform: capitalize;
 }
+<<<<<<< HEAD
 
 /* Monthly Revenue Card */
 .revenue-card {
@@ -288,6 +479,15 @@
 }
 
 .revenue-card__amount {
+=======
+ 
+/* Monthly Revenue Card */
+.pasindu-revenue-card {
+  text-align: center;
+}
+ 
+.pasindu-revenue-card__amount {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   margin-top: 24px;
   font-size: 3rem;
   font-weight: 700;
@@ -297,19 +497,31 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+<<<<<<< HEAD
 
 /* Empty State */
 .empty-state {
+=======
+ 
+/* Empty State */
+.pasindu-empty-state {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   text-align: center;
   padding: 40px 20px;
   color: #9ca3af;
 }
+<<<<<<< HEAD
 
 .empty-state i {
+=======
+ 
+.pasindu-empty-state i {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
   font-size: 3rem;
   margin-bottom: 12px;
   opacity: 0.5;
 }
+<<<<<<< HEAD
 
 .empty-state p {
   margin: 0;
@@ -327,11 +539,31 @@
   }
 
   .dashboard__refresh-btn {
+=======
+ 
+.pasindu-empty-state p {
+  margin: 0;
+  font-size: 1rem;
+}
+ 
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pasindu-dashboard__header {
+    padding: 60px 20px 30px;
+  }
+ 
+  .pasindu-dashboard__header-content h1 {
+    font-size: 2rem;
+  }
+ 
+  .pasindu-dashboard__refresh-btn {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
     top: 20px;
     right: 20px;
     padding: 10px 16px;
     font-size: 0.875rem;
   }
+<<<<<<< HEAD
 
   .dashboard__stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -351,17 +583,44 @@
   }
 
   .booking-item {
+=======
+ 
+  .pasindu-dashboard__stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+ 
+  .pasindu-stat-card {
+    padding: 20px;
+  }
+ 
+  .pasindu-stat-card__info p {
+    font-size: 1.75rem;
+  }
+ 
+  .pasindu-info-card {
+    padding: 20px;
+  }
+ 
+  .pasindu-booking-item {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
+<<<<<<< HEAD
 
   .booking-item__right {
+=======
+ 
+  .pasindu-booking-item__right {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
     flex-direction: row;
     align-items: center;
     width: 100%;
     justify-content: space-between;
   }
+<<<<<<< HEAD
 
   .revenue-card__amount {
     font-size: 2.5rem;
@@ -379,6 +638,25 @@
   }
 
   .stat-card__icon img {
+=======
+ 
+  .pasindu-revenue-card__amount {
+    font-size: 2.5rem;
+  }
+}
+ 
+@media (max-width: 480px) {
+  .pasindu-booking-item__icon {
+    display: none;
+  }
+ 
+  .pasindu-stat-card__icon {
+    width: 40px;
+    height: 40px;
+  }
+ 
+  .pasindu-stat-card__icon img {
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
     width: 20px;
     height: 20px;
   }

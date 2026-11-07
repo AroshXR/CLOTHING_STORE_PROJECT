@@ -49,23 +49,36 @@ const Dashboard = () => {
 
 
   return (
+<<<<<<< HEAD
     <div className='owner-dashboard-page'>
       <div className='owner-dashboard'>
         {/* Header Section */}
         <header className='dashboard__header'>
           <div className='dashboard__header-content'>
+=======
+    <div className='pasindu-owner-dashboard-page'>
+      <div className='pasindu-owner-dashboard'>
+        {/* Header Section */}
+        <header className='pasindu-dashboard__header'>
+          <div className='pasindu-dashboard__header-content'>
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
             <h1>Owner Dashboard</h1>
             <p>Monitor overall platform performance including total outfits, bookings, revenue, and recent activities</p>
           </div>
           <button 
             onClick={fetchDashboard}
+<<<<<<< HEAD
             className='dashboard__refresh-btn'
+=======
+            className='pasindu-dashboard__refresh-btn'
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
           >
             <i className='bx bx-refresh'></i> Refresh Data
           </button>
         </header>
 
         {/* Stats Grid */}
+<<<<<<< HEAD
         <section className='dashboard__stats-grid'>
           {dashboardCards.map((card, index) => (
             <div key={index} className='stat-card'>
@@ -75,6 +88,17 @@ const Dashboard = () => {
                   <p>{card.value}</p>
                 </div>
                 <div className='stat-card__icon'>
+=======
+        <section className='pasindu-dashboard__stats-grid'>
+          {dashboardCards.map((card, index) => (
+            <div key={index} className='pasindu-stat-card'>
+              <div className='pasindu-stat-card__header'>
+                <div className='pasindu-stat-card__info'>
+                  <h3>{card.title}</h3>
+                  <p>{card.value}</p>
+                </div>
+                <div className='pasindu-stat-card__icon'>
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
                   <img src={card.icon} alt={card.title} />
                 </div>
               </div>
@@ -83,21 +107,37 @@ const Dashboard = () => {
         </section>
 
         {/* Main Content Grid */}
+<<<<<<< HEAD
         <section className='dashboard__content-grid'>
           {/* Recent Bookings */}
           <div className='info-card'>
             <div className='info-card__header'>
+=======
+        <section className='pasindu-dashboard__content-grid'>
+          {/* Recent Bookings */}
+          <div className='pasindu-info-card'>
+            <div className='pasindu-info-card__header'>
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
               <h2>Recent Bookings</h2>
               <p>Latest customer bookings and their status</p>
             </div>
             {data.recentBookings.length > 0 ? (
               data.recentBookings.map((booking, index) => (
+<<<<<<< HEAD
                 <div key={index} className='booking-item'>
                   <div className='booking-item__left'>
                     <div className='booking-item__icon'>
                       <img src={assets.listIconColored} alt="Booking" />
                     </div>
                     <div className='booking-item__details'>
+=======
+                <div key={index} className='pasindu-booking-item'>
+                  <div className='pasindu-booking-item__left'>
+                    <div className='pasindu-booking-item__icon'>
+                      <img src={assets.listIconColored} alt="Booking" />
+                    </div>
+                    <div className='pasindu-booking-item__details'>
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
                       <h4>{booking.outfit.brand} {booking.outfit.model}</h4>
                       <p>{new Date(booking.createdAt).toLocaleDateString('en-US', { 
                         year: 'numeric', 
@@ -106,14 +146,24 @@ const Dashboard = () => {
                       })}</p>
                     </div>
                   </div>
+<<<<<<< HEAD
                   <div className='booking-item__right'>
                     <span className='booking-item__price'>{currency} {booking.price}</span>
                     <span className='booking-item__status'>{booking.status}</span>
+=======
+                  <div className='pasindu-booking-item__right'>
+                    <span className='pasindu-booking-item__price'>{currency} {booking.price}</span>
+                    <span className='pasindu-booking-item__status'>{booking.status}</span>
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
                   </div>
                 </div>
               ))
             ) : (
+<<<<<<< HEAD
               <div className='empty-state'>
+=======
+              <div className='pasindu-empty-state'>
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
                 <i className='bx bx-calendar-x'></i>
                 <p>No recent bookings available</p>
               </div>
@@ -121,12 +171,21 @@ const Dashboard = () => {
           </div>
 
           {/* Monthly Revenue */}
+<<<<<<< HEAD
           <div className='info-card revenue-card'>
             <div className='info-card__header'>
               <h2>Monthly Revenue</h2>
               <p>Total revenue for the current month</p>
             </div>
             <div className='revenue-card__amount'>
+=======
+          <div className='pasindu-info-card pasindu-revenue-card'>
+            <div className='pasindu-info-card__header'>
+              <h2>Monthly Revenue</h2>
+              <p>Total revenue for the current month</p>
+            </div>
+            <div className='pasindu-revenue-card__amount'>
+>>>>>>> 5b77134b53745c3759d5a08c9c2e35a3c49fcc9d
               {currency} {data.monthlyRevenue.toLocaleString()}
             </div>
           </div>
