@@ -1,6 +1,7 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { useAuth } from "../../AuthGuard/AuthGuard";
+import { useAuth } from "../../AuthGuard/authGuard";
 import "./OrderSummaryPage.css";
 import { useNavigate } from "react-router-dom";
 const toNumber = (value) => {
@@ -82,7 +83,7 @@ export default function OrderSummaryPage() {
             setError("");
             try {
                 const token = typeof getToken === "function" ? getToken() : null;
-                const response = await axios.get("http://localhost:5001/orders", {
+                const response = await axios.get(`${API_ORIGIN}/orders`, {
                     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
                 });
                 const list = Array.isArray(response.data?.data)
@@ -494,7 +495,7 @@ export default function OrderSummaryPage() {
                                 </div>
 
                                 <div className="tableWrapper">
-                                    <table className="orderTable">
+                                    <div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table className="orderTable">
                                         <thead>
                                             <tr>
                                                 <th>Order ID</th>
@@ -543,7 +544,7 @@ export default function OrderSummaryPage() {
                                                 </tr>
                                             )}
                                         </tbody>
-                                    </table>
+                                    </table></div>
                                 </div>
                             </div>
                         )}

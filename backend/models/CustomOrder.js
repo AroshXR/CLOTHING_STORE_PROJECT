@@ -33,6 +33,9 @@ const DesignSchema = new mongoose.Schema(
 const CustomOrderSchema = new mongoose.Schema(
   {
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    sourceDesignId: { type: mongoose.Schema.Types.ObjectId, ref: 'ClothCustomizer', index: true },
+    salesOrderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', unique: true, sparse: true },
+    paymentId: { type: mongoose.Schema.Types.ObjectId, ref: 'PaymentDetails' },
     config: { type: ConfigSchema, required: true },
     design: { type: DesignSchema },
     measurements: { type: MeasurementSchema },

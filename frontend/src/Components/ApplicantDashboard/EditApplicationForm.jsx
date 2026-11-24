@@ -1,3 +1,4 @@
+import UIIcon from '../Layout/UIIcon';
 import React, { useState, useEffect } from 'react';
 import './EditApplicationForm.css';
 
@@ -153,7 +154,7 @@ const EditApplicationForm = ({ application, onSubmit, onClose, onPrev = () => {}
             onClick={handleClose}
             disabled={isSubmitting}
           >
-            <i className="bx bx-x"></i>
+            <UIIcon className="bx bx-x"></UIIcon>
           </button>
         </div>
 
@@ -165,7 +166,7 @@ const EditApplicationForm = ({ application, onSubmit, onClose, onPrev = () => {}
               onClick={onPrev}
               disabled={!hasPrev || isSubmitting}
             >
-              <i className="bx bx-chevron-left"></i> Previous
+              <UIIcon className="bx bx-chevron-left"></UIIcon> Previous
             </button>
             <button
               type="button"
@@ -173,7 +174,7 @@ const EditApplicationForm = ({ application, onSubmit, onClose, onPrev = () => {}
               onClick={onNext}
               disabled={!hasNext || isSubmitting}
             >
-              Next <i className="bx bx-chevron-right"></i>
+              Next <UIIcon className="bx bx-chevron-right"></UIIcon>
             </button>
           </div>
         )}

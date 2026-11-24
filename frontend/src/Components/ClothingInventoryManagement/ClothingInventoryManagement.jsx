@@ -1,7 +1,10 @@
+import UIIcon from '../Layout/UIIcon';
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../MediaImage';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
+
+
 import './ClothingInventoryManagement.css';
 import { Line } from 'react-chartjs-2';
 import {
@@ -15,7 +18,7 @@ import {
 } from 'chart.js';
 
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+const API_BASE_URL = API_ORIGIN;
 
 // Predefined options
 const CATEGORY_OPTIONS = [
@@ -323,7 +326,7 @@ const ClothingInventoryManagement = () => {
   if (loading) {
     return (
       <div className="clothing-inventory-loading">
-        <NavBar />
+        
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading inventory...</p>
@@ -344,15 +347,15 @@ const ClothingInventoryManagement = () => {
             </>
           )}
         </div>
-        <Footer />
+        
       </div>
     );
   }
 
   return (
     <div className="clothing-inventory-page">
-      <NavBar />
-      <main className="clothing-inventory">
+      
+      <section className="clothing-inventory">
         <header className="inventory-header">
           <div className="header-content">
             <h1>Clothing Inventory Management</h1>
@@ -362,7 +365,7 @@ const ClothingInventoryManagement = () => {
             className="btn btn-primary add-item-btn"
             onClick={() => setShowAddForm(true)}
           >
-            <i className='bx bx-plus'></i>
+            <UIIcon className='bx bx-plus'></UIIcon>
             Add New Item
           </button>
           
@@ -371,7 +374,7 @@ const ClothingInventoryManagement = () => {
         {/* Filters and Search */}
         <div className="inventory-filters">
           <div className="search-box">
-            <i className='bx bx-search'></i>
+            <UIIcon className='bx bx-search'></UIIcon>
             <input
               type="text"
               placeholder="Search items..."
@@ -412,7 +415,7 @@ const ClothingInventoryManagement = () => {
               <div className="form-header">
                 <h2>{editingItem ? 'Edit Item' : 'Add New Item'}</h2>
                 <button className="close-btn" onClick={handleCancel}>
-                  <i className='bx bx-x'></i>
+                  <UIIcon className='bx bx-x'></UIIcon>
                 </button>
               </div>
               
@@ -626,7 +629,7 @@ const ClothingInventoryManagement = () => {
                   </div>
                 )}
                 <div className="item-image">
-                  <img src={item.imageUrl} alt={item.name} />
+                  <MediaImage src={item.imageUrl} alt={item.name} />
                   <div className={`stock-badge ${item.stock === 0 ? 'out-of-stock' : item.stock < 10 ? 'low-stock' : 'in-stock'}`}>
                     {item.stock === 0 ? 'Out of Stock' : item.stock < 10 ? 'Low Stock' : 'In Stock'}
                   </div>
@@ -637,15 +640,15 @@ const ClothingInventoryManagement = () => {
                   <p className="item-price">${item.price}</p>
                   <div className="item-meta">
                     <span className="meta-item">
-                      <i className='bx bx-category'></i>
+                      <UIIcon className='bx bx-category'></UIIcon>
                       {item.category}
                     </span>
                     <span className="meta-item">
-                      <i className='bx bx-purchase-tag'></i>
+                      <UIIcon className='bx bx-purchase-tag'></UIIcon>
                       {item.brand}
                     </span>
                     <span className="meta-item">
-                      <i className='bx bx-package'></i>
+                      <UIIcon className='bx bx-package'></UIIcon>
                       Stock: {item.stock}
                     </span>
                   </div>
@@ -657,14 +660,14 @@ const ClothingInventoryManagement = () => {
                     className="btn btn-sm btn-primary"
                     onClick={() => handleEdit(item)}
                   >
-                    <i className='bx bx-edit'></i>
+                    <UIIcon className='bx bx-edit'></UIIcon>
                     Edit
                   </button>
                   <button 
                     className="btn btn-sm btn-danger"
                     onClick={() => handleDelete(item._id)}
                   >
-                    <i className='bx bx-trash'></i>
+                    <UIIcon className='bx bx-trash'></UIIcon>
                     Delete
                   </button>
                 </div>
@@ -672,7 +675,7 @@ const ClothingInventoryManagement = () => {
             ))
           ) : (
             <div className="no-items">
-              <i className='bx bx-package'></i>
+              <UIIcon className='bx bx-package'></UIIcon>
               <h3>No items found</h3>
               <p>Try adjusting your search or filters</p>
             </div>
@@ -886,8 +889,8 @@ const ClothingInventoryManagement = () => {
             <span className="summary-number danger">{clothingItems.filter(item => item.stock === 0).length}</span>
           </div>
         </div>
-      </main>
-      <Footer />
+      </section>
+      
     </div>
   );
 };

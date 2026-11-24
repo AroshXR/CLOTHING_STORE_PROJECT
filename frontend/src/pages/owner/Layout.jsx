@@ -1,20 +1,6 @@
-import React from 'react'
-import NavbarOwner from '../../Components/pasindu/owner/NavbarOwner'
-import { Outlet } from 'react-router-dom'
-import Sidebar from '../../Components/pasindu/owner/Sidebar'
-
-const Layout = () => {
-  return (
-    <div className='flex flex-col'>
-      <NavbarOwner />
-      <div className='flex'>
-        <Sidebar />
-        <Outlet />
-      </div>
-
-        
-    </div>
-  )
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Sidebar from '../../Components/pasindu/owner/Sidebar';
+export default function Layout() {
+  return <div className="ui-owner-layout"><Sidebar /><div className="ui-owner-content"><Outlet /></div></div>;
 }
-
-export default Layout

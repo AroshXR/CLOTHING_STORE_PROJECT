@@ -1,7 +1,8 @@
+@layer app-legacy {
 /* Removed Tailwind imports and custom variants */
 
 /* Color Variables */
-:root {
+:where(.ui-page[data-page="suppliers"]) {
   --background: #65656545;
   --foreground: #0e0e0f;
   --card: #f9fafb;
@@ -37,25 +38,23 @@
   --sidebar-ring: rgba(12, 12, 12, 0.5);
 }
 
-body {
+:where(.ui-page[data-page="suppliers"]) {
   background: var(--background);
   color: var(--foreground);
   border-color: var(--border);
   outline-color: var(--ring);
-  font-family: "Open Sans", sans-serif;
   margin: 0;
   padding: 0;
 }
 
 /* Supplier Management Styles */
-.supplier-container {
+:where(.ui-page[data-page="suppliers"]) .supplier-container {
   max-width: flex;
   margin: 0 auto;
   padding: 20px;
-  font-family: "Open Sans", sans-serif;
 }
 
-.dashboard-header {
+:where(.ui-page[data-page="suppliers"]) .dashboard-header {
   
  background: linear-gradient(135deg, #000000 0%, #333333 100%);
   padding: 20px;
@@ -66,14 +65,13 @@ body {
   text-align: center;
 }
 
-.dashboard-header h1 {
-  font-family: "Montserrat", sans-serif;
+:where(.ui-page[data-page="suppliers"]) .dashboard-header h1 {
   font-weight: 900;
   font-size: 2.5rem;
   margin: 0;
 }
 
-.dashboard-grid {
+:where(.ui-page[data-page="suppliers"]) .dashboard-grid {
   display: flex;
   justify-content: space-between;
  
@@ -82,7 +80,7 @@ body {
   margin-bottom: 30px;
 }
 
-.metric-card {
+:where(.ui-page[data-page="suppliers"]) .metric-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -93,32 +91,31 @@ body {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.metric-card:hover {
+:where(.ui-page[data-page="suppliers"]) .metric-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.metric-card h3 {
+:where(.ui-page[data-page="suppliers"]) .metric-card h3 {
   color: var(--primary);
-  font-family: "Montserrat", sans-serif;
   font-weight: 700;
   margin: 0 0 10px 0;
   font-size: 1.1rem;
 }
 
-.metric-value {
+:where(.ui-page[data-page="suppliers"]) .metric-value {
   font-size: 2rem;
   font-weight: bold;
   color: var(--foreground);
   margin: 10px 0;
 }
 
-.metric-description {
+:where(.ui-page[data-page="suppliers"]) .metric-description {
   color: var(--muted-foreground);
   font-size: 0.9rem;
 }
 
-.navigation-tabs {
+:where(.ui-page[data-page="suppliers"]) .navigation-tabs {
   display: flex;
   background: var(--muted);
   border-radius: var(--radius);
@@ -128,7 +125,7 @@ body {
  
 }
 
-.nav-tab {
+:where(.ui-page[data-page="suppliers"]) .nav-tab {
   flex: 1;
   padding: 12px 20px;
   background: transparent;
@@ -141,24 +138,24 @@ body {
   white-space: nowrap;
 }
 
-.nav-tab.active {
+:where(.ui-page[data-page="suppliers"]) .nav-tab.active {
   background: var(--primary);
   color: var(--primary-foreground);
 }
 
-.nav-tab:hover:not(.active) {
+:where(.ui-page[data-page="suppliers"]) .nav-tab:hover:not(.active) {
   background: var(--accent);
   color: var(--accent-foreground);
 }
 
-.search-container {
+:where(.ui-page[data-page="suppliers"]) .search-container {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
   align-items: center;
 }
 
-.search-input {
+:where(.ui-page[data-page="suppliers"]) .search-input {
   flex: 1;
   padding: 12px 16px;
   border: 1px solid var(--border);
@@ -168,13 +165,13 @@ body {
   font-size: 1rem;
 }
 
-.search-input:focus {
+:where(.ui-page[data-page="suppliers"]) .search-input:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 2px var(--ring);
 }
 
-.btn {
+:where(.ui-page[data-page="suppliers"]) .btn {
   padding: 12px 20px;
   border: none;
   border-radius: var(--radius);
@@ -187,35 +184,35 @@ body {
   text-align: center;
 }
 
-.btn-primary {
+:where(.ui-page[data-page="suppliers"]) .btn-primary {
   background: var(--primary);
   color: var(--primary-foreground);
 }
 
-.btn-primary:hover {
+:where(.ui-page[data-page="suppliers"]) .btn-primary:hover {
   background: var(--secondary);
 }
 
-.btn-secondary {
+:where(.ui-page[data-page="suppliers"]) .btn-secondary {
   background: var(--secondary);
   color: var(--secondary-foreground);
 }
 
-.btn-destructive {
+:where(.ui-page[data-page="suppliers"]) .btn-destructive {
   background: var(--destructive);
   color: var(--destructive-foreground);
 }
 
-.btn-success {
+:where(.ui-page[data-page="suppliers"]) .btn-success {
   background: #22c55e;
   color: white;
 }
 
-.btn-success:hover {
+:where(.ui-page[data-page="suppliers"]) .btn-success:hover {
   background: #16a34a;
 }
 
-.btn-small {
+:where(.ui-page[data-page="suppliers"]) .btn-small {
   padding: 5px 8px;
   font-size: 0.75rem;
   margin: 1px;
@@ -224,7 +221,7 @@ body {
 }
 
 /* Action buttons container */
-.action-buttons {
+:where(.ui-page[data-page="suppliers"]) .action-buttons {
   display: flex;
   gap: 3px;
   flex-wrap: nowrap;
@@ -233,13 +230,13 @@ body {
 }
 
 /* Ensure action column has enough width */
-.data-table th:last-child,
-.data-table td:last-child {
+:where(.ui-page[data-page="suppliers"]) .data-table th:last-child,
+:where(.ui-page[data-page="suppliers"]) .data-table td:last-child {
   min-width: 150px;
   width: 150px;
 }
 
-.data-table {
+:where(.ui-page[data-page="suppliers"]) .data-table {
   width: 100%;
   border-collapse: collapse;
   background: var(--card);
@@ -248,24 +245,24 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.data-table th,
-.data-table td {
+:where(.ui-page[data-page="suppliers"]) .data-table th,
+:where(.ui-page[data-page="suppliers"]) .data-table td {
   padding: 12px 16px;
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
 
-.data-table th {
+:where(.ui-page[data-page="suppliers"]) .data-table th {
   background: var(--muted);
   font-weight: 600;
   color: var(--foreground);
 }
 
-.data-table tr:hover {
+:where(.ui-page[data-page="suppliers"]) .data-table tr:hover {
   background: var(--muted);
 }
 
-.modal-overlay {
+:where(.ui-page[data-page="suppliers"]) .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -278,7 +275,7 @@ body {
   z-index: 1000;
 }
 
-.modal-content {
+:where(.ui-page[data-page="suppliers"]) .modal-content {
   background: var(--card);
   border-radius: var(--radius);
   padding: 30px;
@@ -288,21 +285,20 @@ body {
   overflow-y: auto;
 }
 
-.modal-header {
+:where(.ui-page[data-page="suppliers"]) .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.modal-header h2 {
+:where(.ui-page[data-page="suppliers"]) .modal-header h2 {
   margin: 0;
   color: var(--foreground);
-  font-family: "Montserrat", sans-serif;
   font-weight: 700;
 }
 
-.close-btn {
+:where(.ui-page[data-page="suppliers"]) .close-btn {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -316,20 +312,20 @@ body {
   justify-content: center;
 }
 
-.form-group {
+:where(.ui-page[data-page="suppliers"]) .form-group {
   margin-bottom: 20px;
 }
 
-.form-label {
+:where(.ui-page[data-page="suppliers"]) .form-label {
   display: block;
   margin-bottom: 5px;
   font-weight: 500;
   color: var(--foreground);
 }
 
-.form-input,
-.form-select,
-.form-textarea {
+:where(.ui-page[data-page="suppliers"]) .form-input,
+:where(.ui-page[data-page="suppliers"]) .form-select,
+:where(.ui-page[data-page="suppliers"]) .form-textarea {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid var(--border);
@@ -340,27 +336,27 @@ body {
   box-sizing: border-box;
 }
 
-.form-textarea {
+:where(.ui-page[data-page="suppliers"]) .form-textarea {
   resize: vertical;
   min-height: 100px;
 }
 
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
+:where(.ui-page[data-page="suppliers"]) .form-input:focus,
+:where(.ui-page[data-page="suppliers"]) .form-select:focus,
+:where(.ui-page[data-page="suppliers"]) .form-textarea:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 2px var(--ring);
 }
 
-.form-actions {
+:where(.ui-page[data-page="suppliers"]) .form-actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
   margin-top: 30px;
 }
 
-.chart-container {
+:where(.ui-page[data-page="suppliers"]) .chart-container {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -368,66 +364,65 @@ body {
   margin-bottom: 20px;
 }
 
-.chart-title {
-  font-family: "Montserrat", sans-serif;
+:where(.ui-page[data-page="suppliers"]) .chart-title {
   font-weight: 700;
   color: var(--foreground);
   margin-bottom: 15px;
 }
 
-.status-badge {
+:where(.ui-page[data-page="suppliers"]) .status-badge {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: 500;
 }
 
-.status-active {
+:where(.ui-page[data-page="suppliers"]) .status-active {
   background: #dcfce7;
   color: #166534;
 }
 
-.status-inactive {
+:where(.ui-page[data-page="suppliers"]) .status-inactive {
   background: #fef2f2;
   color: #991b1b;
 }
 
-.status-pending {
+:where(.ui-page[data-page="suppliers"]) .status-pending {
   background: #fef3c7;
   color: #92400e;
 }
 
-.status-completed {
+:where(.ui-page[data-page="suppliers"]) .status-completed {
   background: #dcfce7;
   color: #166534;
 }
 
 /* Report Generation Filters and Layout */
-.report-filters {
+:where(.ui-page[data-page="suppliers"]) .report-filters {
   background: var(--muted);
   padding: 20px;
   border-radius: var(--radius);
   margin-bottom: 20px;
 }
 
-.filter-row {
+:where(.ui-page[data-page="suppliers"]) .filter-row {
   display: flex;
   gap: 15px;
   margin-bottom: 15px;
   flex-wrap: wrap;
 }
 
-.filter-row:last-child {
+:where(.ui-page[data-page="suppliers"]) .filter-row:last-child {
   margin-bottom: 0;
 }
 
-.filter-row .form-group {
+:where(.ui-page[data-page="suppliers"]) .filter-row .form-group {
   flex: 1;
   min-width: 200px;
   margin-bottom: 0;
 }
 
-.report-actions {
+:where(.ui-page[data-page="suppliers"]) .report-actions {
   display: flex;
   gap: 10px;
   margin-top: 20px;
@@ -435,7 +430,7 @@ body {
 }
 
 /* Report Viewer */
-.report-viewer {
+:where(.ui-page[data-page="suppliers"]) .report-viewer {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -443,20 +438,18 @@ body {
   margin-top: 20px;
 }
 
-.report-viewer h4 {
-  font-family: "Montserrat", sans-serif;
+:where(.ui-page[data-page="suppliers"]) .report-viewer h4 {
   font-weight: 700;
   color: var(--foreground);
   margin-bottom: 15px;
   margin-top: 0;
 }
 
-.report-content {
+:where(.ui-page[data-page="suppliers"]) .report-content {
   background: var(--muted);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 15px;
-  font-family: "Courier New", monospace;
   font-size: 0.9rem;
   line-height: 1.4;
   color: var(--foreground);
@@ -469,70 +462,70 @@ body {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-  .supplier-container {
+  :where(.ui-page[data-page="suppliers"]) .supplier-container {
     padding: 10px;
   }
 }
 
-  .dashboard-grid {
+  :where(.ui-page[data-page="suppliers"]) .dashboard-grid {
     grid-template-columns: 1fr;
   }
 
-  .navigation-tabs {
+  :where(.ui-page[data-page="suppliers"]) .navigation-tabs {
     flex-direction: column;
   }
 
-  .nav-tab {
+  :where(.ui-page[data-page="suppliers"]) .nav-tab {
     text-align: center;
   }
 
-  .search-container {
+  :where(.ui-page[data-page="suppliers"]) .search-container {
     flex-direction: column;
   }
 
-  .data-table {
+  :where(.ui-page[data-page="suppliers"]) .data-table {
     font-size: 0.9rem;
   }
 
-  .modal-content {
+  :where(.ui-page[data-page="suppliers"]) .modal-content {
     padding: 20px;
   }
 
-  .action-buttons {
+  :where(.ui-page[data-page="suppliers"]) .action-buttons {
     flex-direction: row;
     flex-wrap: nowrap;
     gap: 2px;
   }
 
-  .data-table th:last-child,
-  .data-table td:last-child {
+  :where(.ui-page[data-page="suppliers"]) .data-table th:last-child,
+:where(.ui-page[data-page="suppliers"]) .data-table td:last-child {
     min-width: 120px;
     width: 120px;
   }
 
-  .filter-row {
+  :where(.ui-page[data-page="suppliers"]) .filter-row {
     flex-direction: column;
   }
 
-  .filter-row .form-group {
+  :where(.ui-page[data-page="suppliers"]) .filter-row .form-group {
     min-width: auto;
   }
 
-  .report-actions {
+  :where(.ui-page[data-page="suppliers"]) .report-actions {
     flex-direction: column;
     gap: 10px;
   }
 
-  .report-actions button {
+  :where(.ui-page[data-page="suppliers"]) .report-actions button {
     margin-left: 0 !important;
     margin-bottom: 5px;
   }
 
-  .report-content {
+  :where(.ui-page[data-page="suppliers"]) .report-content {
     font-size: 0.8rem;
     
   }
-  .supbtn{
+  :where(.ui-page[data-page="suppliers"]) .supbtn{
    padding: 12px 20px;
   border: none;
   border-radius: var(--radius);
@@ -548,12 +541,12 @@ body {
   }
 
 /* Validation Error Styles */
-.form-input-error {
+:where(.ui-page[data-page="suppliers"]) .form-input-error {
   border-color: #ef4444 !important;
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1) !important;
 }
 
-.form-error {
+:where(.ui-page[data-page="suppliers"]) .form-error {
   color: #ef4444;
   font-size: 0.875rem;
   margin-top: 0.25rem;
@@ -563,58 +556,58 @@ body {
   font-weight: 500;
 }
 
-.form-error::before {
+:where(.ui-page[data-page="suppliers"]) .form-error::before {
   content: "⚠";
   font-size: 0.75rem;
 }
 
 /* Form enhancements */
-.form-label {
+:where(.ui-page[data-page="suppliers"]) .form-label {
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: #374151;
 }
 
-.form-input:focus,
-.form-select:focus {
+:where(.ui-page[data-page="suppliers"]) .form-input:focus,
+:where(.ui-page[data-page="suppliers"]) .form-select:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
-.form-input::placeholder {
+:where(.ui-page[data-page="suppliers"]) .form-input::placeholder {
   color: #9ca3af;
   font-style: italic;
 }
 
 /* Submit button loading state */
-.btn:disabled {
+:where(.ui-page[data-page="suppliers"]) .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.btn-primary:disabled {
+:where(.ui-page[data-page="suppliers"]) .btn-primary:disabled {
   background-color: #9ca3af;
   border-color: #9ca3af;
 }
 
 /* Modal enhancements */
-.modal-content {
+:where(.ui-page[data-page="suppliers"]) .modal-content {
   max-height: 90vh;
   overflow-y: auto;
 }
 
 /* Form group spacing */
-.form-group {
+:where(.ui-page[data-page="suppliers"]) .form-group {
   margin-bottom: 1.5rem;
 }
 
-.form-group:last-child {
+:where(.ui-page[data-page="suppliers"]) .form-group:last-child {
   margin-bottom: 0;
 }
 
 /* Success message styling */
-.success-message {
+:where(.ui-page[data-page="suppliers"]) .success-message {
   background-color: #10b981;
   color: white;
   padding: 0.75rem 1rem;
@@ -625,13 +618,13 @@ body {
   gap: 0.5rem;
 }
 
-.success-message::before {
+:where(.ui-page[data-page="suppliers"]) .success-message::before {
   content: "✓";
   font-weight: bold;
 }
 
 /* Error message styling */
-.error-message {
+:where(.ui-page[data-page="suppliers"]) .error-message {
   background-color: #ef4444;
   color: white;
   padding: 0.75rem 1rem;
@@ -642,29 +635,29 @@ body {
   gap: 0.5rem;
 }
 
-.error-message::before {
+:where(.ui-page[data-page="suppliers"]) .error-message::before {
   content: "✗";
   font-weight: bold;
 }
 
 /* Form field focus enhancements */
-.form-group:focus-within .form-label {
+:where(.ui-page[data-page="suppliers"]) .form-group:focus-within .form-label {
   color: #3b82f6;
 }
 
 /* Responsive form improvements */
 @media (max-width: 768px) {
-  .form-group {
+  :where(.ui-page[data-page="suppliers"]) .form-group {
     margin-bottom: 1rem;
   }
   
-  .form-error {
+  :where(.ui-page[data-page="suppliers"]) .form-error {
     font-size: 0.8rem;
   }
   
-  .modal-content {
+  :where(.ui-page[data-page="suppliers"]) .modal-content {
     margin: 1rem;
     max-height: 95vh;
   }
 }
- 
+}

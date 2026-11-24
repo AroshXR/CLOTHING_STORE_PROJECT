@@ -1,15 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
+
+
 import './Unauthorized.css';
 
 function Unauthorized() {
     const navigate = useNavigate();
 
     return (
-        <div className="w-full min-h-screen flex flex-col">
-            <NavBar />
+        <div className="w-full flex flex-col">
+            
             <div className="unauthorized-container">
                 <div className="unauthorized-content">
                     <div className="unauthorized-icon">🚫</div>
@@ -32,7 +32,7 @@ function Unauthorized() {
                     </div>
                 </div>
             </div>
-            <Footer />
+            
         </div>
     );
 }

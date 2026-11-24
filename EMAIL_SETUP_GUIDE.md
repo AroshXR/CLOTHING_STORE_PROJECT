@@ -21,7 +21,7 @@
 4. Click **App passwords**
 5. Select **Mail** as the app
 6. Select **Other (Custom name)** as device
-7. Enter: "Klassy T Shirts Inventory"
+7. Enter: "Your Store Inventory"
 8. Click **Generate**
 9. **Copy the 16-character password** (e.g., `abcd efgh ijkl mnop`)
 
@@ -69,7 +69,7 @@ curl -X POST http://localhost:5001/inventory/alerts/check
 ## 📧 What Emails Look Like
 
 You'll receive professional HTML emails with:
-- 🏢 **Klassy T Shirts Header**
+- 🏢 **Your Store Header**
 - 📊 **Item Details** (name, current stock, minimum stock)
 - ⚠️ **Alert Level** (Low Stock / Out of Stock)
 - 📋 **Recommended Actions**

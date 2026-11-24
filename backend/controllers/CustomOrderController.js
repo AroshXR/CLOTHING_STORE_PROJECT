@@ -1,227 +1,88 @@
+const mongoose = require('mongoose');
 const CustomOrder = require('../models/CustomOrder');
 const Tailor = require('../models/Tailor');
-const ClothCustomizer = require('../models/ClothCustomizerModel');
+const Order = require('../models/OrderModel');
+const History = require('../models/OrderStatus');
+const HttpError = require('../utils/HttpError');
+const { isAdmin } = require('../middleware/auth');
+const { runTransaction } = require('../services/checkoutService');
+const states = ['pending', 'assigned', 'accepted', 'in_progress', 'completed', 'delivered', 'cancelled'];
+const nextStates = { assigned: ['accepted'], accepted: ['in_progress'], in_progress: ['completed'], completed: ['delivered'] };
+const checkId = id => { if (!mongoose.isValidObjectId(id)) throw new HttpError(400, 'Invalid order ID'); };
+const populate = query => query.populate('customerId', 'username email').populate('assignedTailor', 'name userId isActive');
 
-// Helpers
-const isAdmin = (user) => user?.type === 'Admin' || user?.role === 'admin';
-
-const canViewOrder = async (user, order) => {
-  if (!user || !order) return false;
-  if (isAdmin(user)) return true;
-  if (String(order.customerId) === String(user._id)) return true;
-  if (order.assignedTailor) {
-    const tailor = await Tailor.findById(order.assignedTailor);
-    if (tailor && String(tailor.userId) === String(user._id)) return true;
-  }
-  return false;
-};
-
-// Admin: migrate data from ClothCustomizerModel into CustomOrder
-exports.migrateFromCustomizer = async (req, res) => {
-  try {
-    const { limit = 500, dryRun = 'false' } = req.query;
-    const docs = await ClothCustomizer.find({}).sort({ createdAt: -1 }).limit(Number(limit));
-    let created = 0;
-
-    // Very simple existence check: look for a CustomOrder with same customerId and createdAt within 5 minutes window
-    const windowMs = 5 * 60 * 1000;
-
-    for (const c of docs) {
-      const near = await CustomOrder.findOne({
-        customerId: c.userId,
-        createdAt: { $gte: new Date(c.createdAt.getTime() - windowMs), $lte: new Date(c.createdAt.getTime() + windowMs) }
-      });
-      if (near) continue; // likely already migrated
-
-      if (dryRun === 'true') { created += 1; continue; }
-
-      await CustomOrder.create({
-        customerId: c.userId,
-        config: {
-          clothingType: c.clothingType || 'tshirt',
-          size: c.size || 'M',
-          color: c.color || 'white',
-          quantity: typeof c.quantity === 'number' ? c.quantity : 1,
-          notes: c.nickname || undefined,
-        },
-        // Basic projection; advanced mapping of designs could be added if needed
-        design: c.selectedDesign ? { designImageUrl: c.selectedDesign.preview || undefined, designMeta: c.selectedDesign } : undefined,
-        status: 'pending',
-        price: typeof c.totalPrice === 'number' ? c.totalPrice : undefined,
-        previewGallery: Array.isArray(c.placedDesigns) ? c.placedDesigns.map(d => d?.preview).filter(Boolean) : [],
-        createdAt: c.createdAt,
-        updatedAt: c.updatedAt,
-      });
-      created += 1;
-    }
-
-    return res.json({ status: 'ok', migrated: created, scanned: docs.length, dryRun: dryRun === 'true' });
-  } catch (err) {
-    console.error('migrateFromCustomizer error:', err);
-    return res.status(500).json({ status: 'error', message: 'Migration failed' });
-  }
-};
-
-// Customer: create custom order
-exports.createOrder = async (req, res) => {
-  try {
-    const { config, design, measurements, price, previewGallery } = req.body || {};
-    if (!config?.clothingType || !config?.size || !config?.color) {
-      return res.status(400).json({ status: 'error', message: 'config.clothingType, config.size, and config.color are required' });
-    }
-    const doc = await CustomOrder.create({
-      customerId: req.user._id,
-      config,
-      design,
-      measurements,
-      status: 'pending',
-      price,
-      previewGallery: Array.isArray(previewGallery) ? previewGallery : [],
-    });
-    res.status(201).json({ status: 'ok', data: doc });
-  } catch (err) {
-    console.error('createOrder error:', err);
-    res.status(500).json({ status: 'error', message: 'Failed to create order' });
-  }
-};
-
-// Admin: list all orders
+async function authorizedOrder(user, id) {
+  checkId(id);
+  const order = await populate(CustomOrder.findById(id));
+  if (!order) throw new HttpError(404, 'Order not found');
+  if (isAdmin(user) || String(order.customerId?._id || order.customerId) === String(user._id) ||
+      String(order.assignedTailor?.userId) === String(user._id)) return order;
+  throw new HttpError(404, 'Order not found');
+}
+exports.authorizedOrder = authorizedOrder;
+exports.createOrder = async () => { throw new HttpError(409, 'Place custom clothing orders through checkout'); };
 exports.listAll = async (req, res) => {
-  try {
-    const { status, tailorId, id, unassigned } = req.query;
-    const q = {};
-    if (status) q.status = status;
-    if (tailorId) q.assignedTailor = tailorId;
-    if (id) q._id = id;
-    if (unassigned === 'true') {
-      // Match orders where assignedTailor is null or not set
-      q.$or = [
-        { assignedTailor: { $exists: false } },
-        { assignedTailor: null },
-      ];
-    }
-
-    const docs = await CustomOrder.find(q)
-      .populate('customerId', 'username email')
-      .populate({ path: 'assignedTailor', select: 'name userId isActive' })
-      .sort({ createdAt: -1 });
-
-    res.json({ status: 'ok', count: docs.length, data: docs });
-  } catch (err) {
-    console.error('listAll error:', err);
-    res.status(500).json({ status: 'error', message: 'Failed to list orders' });
+  const query = {};
+  if (req.query.status) {
+    if (!states.includes(req.query.status)) throw new HttpError(400, 'Invalid order status');
+    query.status = req.query.status;
   }
+  if (req.query.tailorId) { checkId(req.query.tailorId); query.assignedTailor = req.query.tailorId; }
+  if (req.query.id) { checkId(req.query.id); query._id = req.query.id; }
+  if (req.query.unassigned === 'true') query.assignedTailor = null;
+  const docs = await populate(CustomOrder.find(query).sort({ createdAt: -1 }));
+  res.json({ status: 'ok', count: docs.length, data: docs });
 };
-
-// Customer: my orders
 exports.listMine = async (req, res) => {
-  try {
-    const docs = await CustomOrder.find({ customerId: req.user._id }).sort({ createdAt: -1 });
-    res.json({ status: 'ok', count: docs.length, data: docs });
-  } catch (err) {
-    console.error('listMine error:', err);
-    res.status(500).json({ status: 'error', message: 'Failed to list my orders' });
-  }
+  const docs = await populate(CustomOrder.find({ customerId: req.user._id }).sort({ createdAt: -1 }));
+  res.json({ status: 'ok', count: docs.length, data: docs });
 };
-
-// Tailor: assigned to me
 exports.listAssignedToMe = async (req, res) => {
-  try {
-    // Find the Tailor profile for current user
-    const tailor = await Tailor.findOne({ userId: req.user._id });
-    if (!tailor) return res.status(403).json({ status: 'error', message: 'No tailor profile' });
-
-    const docs = await CustomOrder.find({ assignedTailor: tailor._id })
-      .sort({ createdAt: -1 });
-
-    res.json({ status: 'ok', count: docs.length, data: docs });
-  } catch (err) {
-    console.error('listAssignedToMe error:', err);
-    res.status(500).json({ status: 'error', message: 'Failed to list assigned orders' });
-  }
+  const tailor = await Tailor.findOne({ userId: req.user._id, isActive: true });
+  if (!tailor) return res.json({ status: 'ok', count: 0, data: [] });
+  const docs = await populate(CustomOrder.find({ assignedTailor: tailor._id }).sort({ createdAt: -1 }));
+  res.json({ status: 'ok', count: docs.length, data: docs });
 };
-
-// Get one order (authorized)
-exports.getOne = async (req, res) => {
-  try {
-    const order = await CustomOrder.findById(req.params.id)
-      .populate({ path: 'assignedTailor', select: 'name userId isActive' });
-    if (!order) return res.status(404).json({ status: 'error', message: 'Order not found' });
-
-    const allowed = await canViewOrder(req.user, order);
-    if (!allowed) return res.status(403).json({ status: 'error', message: 'Not allowed to view this order' });
-
-    res.json({ status: 'ok', data: order });
-  } catch (err) {
-    console.error('getOne error:', err);
-    res.status(500).json({ status: 'error', message: 'Failed to get order' });
-  }
-};
-
-// Admin: assign tailor
+exports.getOne = async (req, res) => res.json({ status: 'ok', data: await authorizedOrder(req.user, req.params.id) });
 exports.assignTailor = async (req, res) => {
-  try {
-    const { tailorId } = req.body || {};
-    if (!tailorId) return res.status(400).json({ status: 'error', message: 'tailorId is required' });
-
-    const order = await CustomOrder.findById(req.params.id);
-    if (!order) return res.status(404).json({ status: 'error', message: 'Order not found' });
-
-    // Confirm that the target is a valid Tailor profile
-    const tailor = await Tailor.findById(tailorId);
-    if (!tailor || !tailor.isActive) {
-      return res.status(400).json({ status: 'error', message: 'Invalid or inactive tailor' });
-    }
-
-    order.assignedTailor = tailor._id;
-    order.assignedAt = new Date();
-    if (order.status === 'pending') order.status = 'assigned';
-    await order.save();
-
-    res.json({ status: 'ok', message: 'Order assigned', data: order });
-  } catch (err) {
-    console.error('assignTailor error:', err);
-    res.status(500).json({ status: 'error', message: 'Failed to assign tailor' });
-  }
+  checkId(req.params.id); checkId(req.body.tailorId);
+  const data = await runTransaction(async session => {
+    const order = await CustomOrder.findById(req.params.id).session(session);
+    if (!order) throw new HttpError(404, 'Order not found');
+    if (!['pending', 'assigned'].includes(order.status)) throw new HttpError(409, 'Only orders awaiting production can be reassigned');
+    const tailor = await Tailor.findOne({ _id: req.body.tailorId, isActive: true }).session(session);
+    if (!tailor) throw new HttpError(400, 'Select an active tailor');
+    order.assignedTailor = tailor._id; order.assignedAt = new Date(); order.status = 'assigned';
+    await order.save({ session });
+    if (order.salesOrderId) await Order.updateOne({ _id: order.salesOrderId }, { $set: { fulfillmentStatus: 'assigned', status: 'processing' } }, { session });
+    await History.create([{ customOrderId: order._id, clothCustomizerId: order.sourceDesignId,
+      status: 'assigned', tailorId: tailor._id, createdBy: req.user._id }], { session });
+    return order;
+  });
+  res.json({ status: 'ok', message: 'Tailor assigned', data });
 };
-
-// Tailor/Admin: update status with allowed transitions
 exports.updateStatus = async (req, res) => {
-  try {
-    const { status } = req.body || {};
-    const order = await CustomOrder.findById(req.params.id);
-    if (!order) return res.status(404).json({ status: 'error', message: 'Order not found' });
-
-    // Admin override
-    if (isAdmin(req.user)) {
-      order.status = status;
-      await order.save();
-      return res.json({ status: 'ok', data: order });
+  checkId(req.params.id);
+  const status = req.body.status;
+  if (!states.includes(status)) throw new HttpError(400, 'Invalid production status');
+  if (status === 'cancelled') throw new HttpError(409, 'Cancel the payment arrangement to cancel its orders and release stock');
+  const data = await runTransaction(async session => {
+    const order = await CustomOrder.findById(req.params.id).session(session);
+    if (!order) throw new HttpError(404, 'Order not found');
+    if (!isAdmin(req.user)) {
+      const tailor = await Tailor.findOne({ userId: req.user._id, isActive: true }).session(session);
+      if (!tailor || String(order.assignedTailor) !== String(tailor._id)) throw new HttpError(403, 'You are not assigned to this order');
     }
-
-    // Tailor transitions
-    const tailor = await Tailor.findOne({ userId: req.user._id });
-    if (!tailor || String(order.assignedTailor) !== String(tailor._id)) {
-      return res.status(403).json({ status: 'error', message: 'Not assigned to this order' });
-    }
-
-    const allowedTransitions = {
-      assigned: ['accepted'],
-      accepted: ['in_progress'],
-      in_progress: ['completed'],
-      completed: ['delivered'],
-    };
-
-    const nexts = allowedTransitions[order.status] || [];
-    if (!nexts.includes(status)) {
-      return res.status(400).json({ status: 'error', message: `Invalid status transition from ${order.status} to ${status}` });
-    }
-
+    if (order.status === status) return order;
+    if (!(nextStates[order.status] || []).includes(status)) throw new HttpError(409, 'Invalid production status transition');
     order.status = status;
-    await order.save();
-    res.json({ status: 'ok', data: order });
-  } catch (err) {
-    console.error('updateStatus error:', err);
-    res.status(500).json({ status: 'error', message: 'Failed to update status' });
-  }
+    await order.save({ session });
+    if (order.salesOrderId) await Order.updateOne({ _id: order.salesOrderId }, {
+      $set: { fulfillmentStatus: status, status: status === 'delivered' ? 'completed' : 'processing' }
+    }, { session });
+    await History.create([{ customOrderId: order._id, clothCustomizerId: order.sourceDesignId,
+      status, tailorId: order.assignedTailor, createdBy: req.user._id }], { session });
+    return order;
+  });
+  res.json({ status: 'ok', data });
 };

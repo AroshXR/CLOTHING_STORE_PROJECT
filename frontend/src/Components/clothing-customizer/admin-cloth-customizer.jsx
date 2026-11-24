@@ -1,9 +1,11 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../MediaImage';
 import React, { useState, useEffect } from 'react';
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
+
+
 import './ClothCustomizer.css';
 import axios from 'axios';
-import { useAuth } from '../../AuthGuard/AuthGuard';
+import { useAuth } from '../../AuthGuard/authGuard';
 
 import print1 from './customizer_preset_designs/print 1.jpg'
 import print2 from './customizer_preset_designs/print 2.jpg'
@@ -32,7 +34,7 @@ export default function AdminClothCustomizer() {
 	const fetchPrices = async () => {
 		try {
 			console.log('Fetching prices...');
-			const response = await axios.get('http://localhost:5001/customizer-prices');
+			const response = await axios.get(`${API_ORIGIN}/customizer-prices`);
 			console.log('Fetch response:', response.data);
 			if (response.data.status === "ok") {
 				setPrices(response.data.data);
@@ -59,7 +61,7 @@ export default function AdminClothCustomizer() {
 			console.log('Updating prices:', prices);
 			console.log('Token:', token);
 			
-			const response = await axios.put('http://localhost:5001/customizer-prices', prices, {
+			const response = await axios.put(`${API_ORIGIN}/customizer-prices`, prices, {
 				headers: {
 					Authorization: `Bearer ${token}`
 				}
@@ -151,11 +153,11 @@ export default function AdminClothCustomizer() {
 	if (loading) {
 		return (
 			<div className="arosh-admin-cloth-customizer-page">
-				<NavBar />
-				<main className="arosh-admin-cloth-customizer">
+				
+				<section className="arosh-admin-cloth-customizer">
 					<div className="arosh-loading">Loading prices...</div>
-				</main>
-				<Footer />
+				</section>
+				
 			</div>
 		);
 	}
@@ -163,19 +165,19 @@ export default function AdminClothCustomizer() {
 	if (!prices) {
 		return (
 			<div className="arosh-admin-cloth-customizer-page">
-				<NavBar />
-				<main className="arosh-admin-cloth-customizer">
+				
+				<section className="arosh-admin-cloth-customizer">
 					<div className="arosh-error">Failed to load prices</div>
-				</main>
-				<Footer />
+				</section>
+				
 			</div>
 		);
 	}
 
 	return (
 		<div className="arosh-admin-cloth-customizer-page">
-			<NavBar />
-			<main className="arosh-admin-cloth-customizer">
+			
+			<section className="arosh-admin-cloth-customizer">
 				<header className="arosh-admin-cloth-customizer__header">
 					<h1>Admin Cloth Customizer</h1>
 					<p>Manage customizer pricing and configurations.</p>
@@ -232,7 +234,7 @@ export default function AdminClothCustomizer() {
 								{processedPresetDesigns.map((design) => (
 									<div key={design.id} className={`arosh-preset-design ${!design.isActive ? 'inactive' : ''}`}>
 										<div className="arosh-design-info">
-											<img src={design.preview} alt={design.name} className="arosh-design-preview" />
+											<MediaImage src={design.preview} alt={design.name} className="arosh-design-preview" />
 											<div className="arosh-design-details">
 												<input
 													type="text"
@@ -292,8 +294,8 @@ export default function AdminClothCustomizer() {
 						</div>
 					</div>
 				</section>
-			</main>
-			<Footer />
+			</section>
+			
 		</div>
 	);
 }

@@ -1,13 +1,5 @@
-import React from 'react'
-
-const Title = ({title,subTitle}) => {
-  return (
-    <div>
-        <h1 className='font-medium text-3xl'> {title} </h1>
-        <p className='text-sm md:text-base text-gray-500/90 mt-2 max-w-156'> {subTitle} </p>
-        
-    </div>
-  )
+import React from 'react';
+import PageHeader from '../../Layout/PageHeader';
+export default function Title({ title, subTitle }) {
+  return <PageHeader title={title} description={subTitle} />;
 }
-
-export default Title

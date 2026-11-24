@@ -1,26 +1,28 @@
+import { useBranding } from '../../config/branding';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
+
+
 import './LearnMore.css';
 
 const LearnMore = () => {
+  const { branding } = useBranding();
   const navigate = useNavigate();
 
   return (
     <div className="learn-more-container">
-      <NavBar />
+      
       
       {/* Hero Section */}
       <section className="learn-hero">
         <div className="learn-hero-content">
-          <div className="kicker">About Klassy T‑Shirts</div>
+          <div className="kicker">About {branding.name}</div>
           <h1 className="learn-hero-title">
             Discover the Art of 
             <span className="gradient-text"> Custom T-Shirt Design</span>
           </h1>
           <p className="learn-hero-description">
-            Welcome to Klassy T-Shirts - where creativity meets quality. Learn how we're revolutionizing 
+            Welcome to {branding.name} - where creativity meets quality. Learn how we're revolutionizing
             the custom apparel industry with innovative design tools and premium materials.
           </p>
           <div className="accent-bar"/>
@@ -34,7 +36,7 @@ const LearnMore = () => {
             <div className="story-content">
               <h2>Our Story</h2>
               <p>
-                Founded with a passion for self-expression and quality craftsmanship, Klassy T-Shirts 
+                Founded with a passion for self-expression and quality craftsmanship, {branding.name}
                 began as a vision to make custom apparel accessible to everyone. We believe that clothing 
                 should be more than just fabric - it should be a canvas for your creativity.
               </p>
@@ -117,7 +119,7 @@ const LearnMore = () => {
         <div className="container">
           <div className="section-header">
             <h2>What Makes Us Different</h2>
-            <p>Discover the features that set Klassy T-Shirts apart from the competition</p>
+            <p>Discover the features that set {branding.name} apart from the competition</p>
           </div>
           
           <div className="features-detailed">
@@ -260,7 +262,7 @@ const LearnMore = () => {
             <h2>Ready to Create Your Perfect T-Shirt?</h2>
             <p>
               Join thousands of satisfied customers who have brought their creative visions to life 
-              with Klassy T-Shirts. Start designing today and experience the difference quality makes.
+              with {branding.name}. Start designing today and experience the difference quality makes.
             </p>
             <div className="cta-buttons">
               <button 
@@ -280,7 +282,7 @@ const LearnMore = () => {
         </div>
       </section>
 
-      <Footer />
+      
     </div>
   );
 };

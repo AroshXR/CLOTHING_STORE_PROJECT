@@ -1,10 +1,12 @@
+import { API_BASE_URL as API_ORIGIN } from '../config/api';
+import MediaImage from '../Components/MediaImage';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import Title from '../Components/pasindu/Title'
-import Navbar from '../Components/pasindu/Navbar'
+
 import axios from 'axios'
-import { useAuth } from '../AuthGuard/AuthGuard'
+import { useAuth } from '../AuthGuard/authGuard'
 import './MyBookings.css'
 
 const MyBookings = () => {
@@ -27,7 +29,7 @@ const MyBookings = () => {
         return;
       }
 
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+      const BASE_URL = API_ORIGIN;
       const token = getToken();
       
       const { data } = await axios.get(`${BASE_URL}/api/booking/user`, {
@@ -78,9 +80,9 @@ const MyBookings = () => {
 
   return (
     <div>
-      <Navbar></Navbar>
+      
 
-    <div className='px-6 md:px-16 lg:px-24 xl:px-32 2xl:px-48 mt-16 text-sm max-w-8xl'> 
+    <div className="text-sm"> 
      
       <div className="flex justify-between items-center">
         <Title title='My Bookings' subTitle='View and manage your all bookings' align="left" />
@@ -119,7 +121,7 @@ const MyBookings = () => {
             {/* Outfit Image + Info */}
             <div className='md:col-span-1'>
               <div className='rounded-md overflow-hidden mb-3'>
-                <img src={booking.outfit.image} alt="" className='w-60 h-60 aspect-video object-cover object-top'  />  
+                <MediaImage src={booking.outfit.image} alt="" className='w-60 h-60 aspect-video object-cover object-top'  />
               </div>
 
               <p className='text-lg font-medium mt-2'>{booking.outfit.brand} {booking.outfit.model} </p>
@@ -140,7 +142,7 @@ const MyBookings = () => {
               </div>
 
               <div className='flex items-start gap-2 mt-3'>
-                <img src={assets.calendar_icon_colored} alt="" className='w-4 h-4 mt-1' />
+                <MediaImage src={assets.calendar_icon_colored} alt="" className='w-4 h-4 mt-1' />
                 <div>
                   <p className='text-gray-500'>Rental Period</p>
                   <p>{booking.reservationDate.split('T')[0]} To {booking.returnDate.split('T')[0]} </p>
@@ -148,7 +150,7 @@ const MyBookings = () => {
               </div>
 
               <div className='flex items-start gap-2 mt-3'>
-                <img src={assets.location_icon} alt="" className='w-4 h-4 mt-1' />
+                <MediaImage src={assets.location_icon} alt="" className='w-4 h-4 mt-1' />
                 <div>
                   <p className='text-red-500'>Pickup Location</p>
                   <p>{booking.outfit.location} </p> 
@@ -157,7 +159,7 @@ const MyBookings = () => {
 
               {/* Contact Information */}
               <div className='flex items-start gap-2 mt-3'>
-                <img src={assets.phone_icon || assets.location_icon} alt="" className='w-4 h-4 mt-1' />
+                <MediaImage src={assets.phone_icon || assets.location_icon} alt="" className='w-4 h-4 mt-1' />
                 <div>
                   <p className='text-gray-500'>Contact</p>
                   <p className='text-sm'>{booking.phone}</p>
@@ -170,57 +172,20 @@ const MyBookings = () => {
             <div className='md:col-span-1 flex flex-col justify-between gap-6'>
               <div className='text-sm text-gray-500 text-right'>
                 <p>Total Price</p>
-                <h1 className='text-2xl font-semibold text-primary'>{currency}{booking.price}</h1>
+                <h1 className='text-2xl font-semibold text-primary'>{currency || '$'}{booking.collectionAmount ?? booking.price}</h1>
                 <p>Booked On {booking.createdAt.split('T')[0]} </p>
               </div>
               
               {/* Action Buttons */}
               <div className="flex flex-col gap-2">
-                {/* Payment Buttons - Only show for confirmed bookings */}
-                {booking.status === 'confirmed' && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        navigate('/paymentManagement');
-                      }}
-                      className="flex-1 px-4 py-2 bg-black hover:bg-gray-800 text-white rounded font-medium transition-all duration-300"
-                    >
-                      Pay Now
-                    </button>
-                    <button
-                      onClick={async () => {
-                        try {
-                          const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
-                          const token = getToken();
-                          
-                          // Customer clicks "Pay on Return" button
-// Frontend sends request to backend
-                          const { data } = await axios.post(
-                            `${BASE_URL}/api/booking/send-pay-on-return-email`,
-                            { bookingId: booking._id },
-                            {
-                              headers: {
-                                Authorization: `Bearer ${token}`
-                              }
-                            }
-                          );
-                          
-                          if (data?.success) {
-                            alert('✅ Pay on Return confirmation email sent successfully! Please check your email for booking details.');
-                          } else {
-                            alert(data?.message || 'Failed to send confirmation email');
-                          }
-                        } catch (err) {
-                          console.error(err);
-                          alert('Error sending confirmation email');
-                        }
-                      }}
-                      className="flex-1 px-4 py-2 bg-black hover:bg-gray-800 text-white rounded font-medium transition-all duration-300"
-                    >
-                      Pay on Return
-                    </button>
-                  </div>
+                {booking.status === 'confirmed' && !['pending', 'paid'].includes(booking.paymentStatus) && (
+                  <button onClick={() => {
+                    sessionStorage.setItem('directPurchase', JSON.stringify({ type: 'booking', id: booking._id, bookingId: booking._id, quantity: 1 }));
+                    navigate('/paymentManagement');
+                  }} className="supbtn supbtn-primary">Arrange cash collection</button>
                 )}
+                {booking.paymentStatus === 'pending' && <p>Cash due on collection</p>}
+                {booking.paymentStatus === 'paid' && <p>Cash payment received</p>}
                 
                 <div className="flex gap-2">
                   {/* Edit Button - Only show for pending bookings */}
@@ -234,11 +199,12 @@ const MyBookings = () => {
                   )}
                   
                   {/* Remove Booking Button */}
+                  {booking.status === 'pending' && !['pending', 'paid'].includes(booking.paymentStatus) &&
                   <button
                     onClick={async () => {
                       if (window.confirm('Are you sure you want to remove this booking?')) {
                         try {
-                          const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+                          const BASE_URL = API_ORIGIN;
                           const token = getToken();
                           
                           const { data } = await axios.delete(`${BASE_URL}/api/booking/${booking._id}`, {
@@ -263,6 +229,7 @@ const MyBookings = () => {
                   >
                     Remove
                   </button>
+                  }
                 </div>
               </div>
             </div>

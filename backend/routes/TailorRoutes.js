@@ -10,7 +10,7 @@ const ensureAdmin = (req, res, next) => {
 };
 
 // Tailor self registration / update
-router.post('/register', protect, registerTailor);
+router.post('/register', protect, (req, res, next) => req.user.type === 'Tailor' ? next() : res.sendStatus(403), registerTailor);
 
 // Tailor profile
 router.get('/me', protect, getMyTailorProfile);

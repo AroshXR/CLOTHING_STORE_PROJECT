@@ -1,10 +1,12 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../../Components/MediaImage';
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Title from '../../Components/pasindu/owner/Title'
 import { assets } from '../../assets/assets'
 import "./RainbowButton.css";
-import { useAuth } from '../../AuthGuard/AuthGuard'
+import { useAuth } from '../../AuthGuard/authGuard'
 
 const EditOutfit = () => {
   const { outfitId } = useParams()
@@ -39,7 +41,7 @@ const EditOutfit = () => {
   const fetchOutfitDetails = async () => {
     try {
       setLoading(true)
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+      const BASE_URL = API_ORIGIN
       const token = getToken()
       
       const { data } = await axios.get(`${BASE_URL}/api/owner/outfit/${outfitId}`, {
@@ -86,7 +88,7 @@ const EditOutfit = () => {
   const onSubmitHandler = async (e) => {
     e.preventDefault();
     try {
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+      const BASE_URL = API_ORIGIN
       const form = new FormData()
       
       // Add main image if changed
@@ -125,15 +127,15 @@ const EditOutfit = () => {
 
   if (loading) {
     return (
-      <div className='px-4 py-10 md:px-10 flex-1 flex items-center justify-center'>
+      <div className="flex-1 flex items-center justify-center">
         <div className="text-gray-500">Loading outfit details...</div>
       </div>
     )
   }
 
   return (
-    <div className='px-4 py-10 md:px-10 flex-1 '>
-      <div className="w-[800px] h-full bg-gradient-to-br from-[#e6e5e5] to-[#858585] rounded-[50px] p-10 ml-40 shadow-lg shadow-gray-400/30 relative overflow-hidden">
+    <div className="flex-1">
+      <div className="w-[800px] h-full bg-gradient-to-br from-[#e6e5e5] to-[#858585] rounded-[50px] shadow-lg shadow-gray-400/30 relative overflow-hidden">
         
         <div className="text-center mt-26">
           <Title title="Edit Outfit" subTitle="Update the details of your outfit listing, including pricing, availability, and specifications." />
@@ -144,7 +146,7 @@ const EditOutfit = () => {
           {/* Main Outfit Image */}
           <div className='flex items-center gap-2 w-full '>
             <label htmlFor="main-outfit-image">
-              <img 
+              <MediaImage
                 src={mainImage ? URL.createObjectURL(mainImage) : currentMainImage || assets.upload_icon} 
                 alt=""  
                 className='h-14 rounded cursor-pointer'
@@ -161,7 +163,7 @@ const EditOutfit = () => {
               {[0, 1, 2].map((index) => (
                 <div key={index} className='flex items-center gap-2'>
                   <label htmlFor={`additional-image-${index}`}>
-                    <img 
+                    <MediaImage
                       src={
                         additionalImages[index] ? URL.createObjectURL(additionalImages[index]) : 
                         currentAdditionalImages[index] || assets.upload_icon

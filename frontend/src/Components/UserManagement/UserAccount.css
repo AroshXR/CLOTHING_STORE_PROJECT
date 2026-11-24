@@ -1,4 +1,5 @@
-.user-account-page {
+@layer app-legacy {
+:where(.ui-page[data-page="account"]) .user-account-page {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -9,7 +10,7 @@
         linear-gradient(180deg, #fafafa, #f5f6f8 60%, #f1f2f5);
 }
 
-.user-account-content {
+:where(.ui-page[data-page="account"]) .user-account-content {
     flex: 1;
     width: min(1400px, 95%);
     margin: 2rem auto 3rem;
@@ -18,7 +19,7 @@
     gap: 1.5rem;
 }
 
-.user-account-header {
+:where(.ui-page[data-page="account"]) .user-account-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -32,22 +33,22 @@
     position: relative;
 }
 
-.header-nav-actions { display: flex; align-items: center; gap: .5rem; }
-.header-nav-btn { padding: 8px 14px; border-radius: 999px; border: 2px solid transparent; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease; }
-.header-nav-btn.primary { background: linear-gradient(135deg, #000, #2b2b2b); color: #fff; }
-.header-nav-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,.25); }
-.header-nav-btn.secondary { background: #fff; color: #111; border-color: #e5e5e5; }
-.header-nav-btn.secondary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,.15); }
+:where(.ui-page[data-page="account"]) .header-nav-actions { display: flex; align-items: center; gap: .5rem; }
+:where(.ui-page[data-page="account"]) .header-nav-btn { padding: 8px 14px; border-radius: 999px; border: 2px solid transparent; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease; }
+:where(.ui-page[data-page="account"]) .header-nav-btn.primary { background: linear-gradient(135deg, #000, #2b2b2b); color: #fff; }
+:where(.ui-page[data-page="account"]) .header-nav-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,.25); }
+:where(.ui-page[data-page="account"]) .header-nav-btn.secondary { background: #fff; color: #111; border-color: #e5e5e5; }
+:where(.ui-page[data-page="account"]) .header-nav-btn.secondary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,.15); }
 
-.user-account-header h1 {
+:where(.ui-page[data-page="account"]) .user-account-header h1 {
     margin: 0;
     font-size: 2rem;
     color: #fff;
 }
 
-.user-account-header h1 i { margin-right: 8px; vertical-align: middle; }
+:where(.ui-page[data-page="account"]) .user-account-header h1 i { margin-right: 8px; vertical-align: middle; }
 
-.header-notification-indicator {
+:where(.ui-page[data-page="account"]) .header-notification-indicator {
     display: inline-block;
     background: rgba(220, 38, 38, 0.9);
     color: white;
@@ -65,22 +66,22 @@
 }
 
 /* Subtitle under the black header */
-.account-subtitle {
+:where(.ui-page[data-page="account"]) .account-subtitle {
     margin: 8px 0 0;
     color: #515151;
 }
 
 /* Hide the helper description within the header so only title, buttons, and badge remain */
-.user-account-header > div p { display: none; }
+:where(.ui-page[data-page="account"]) .user-account-header > div p { display: none; }
 
 /* Ensure the status badge reads well on dark background */
-.user-account-header .status-tag {
+:where(.ui-page[data-page="account"]) .user-account-header .status-tag {
     background: rgba(255,255,255,0.12);
     color: #fff;
     border: 1px solid rgba(255,255,255,0.22);
 }
 
-.panel {
+:where(.ui-page[data-page="account"]) .panel {
     background: #ffffff;
     border-radius: 12px;
     padding: 2rem;
@@ -93,17 +94,17 @@
     transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease, background-color .2s ease;
 }
 
-.panel:hover {
+:where(.ui-page[data-page="account"]) .panel:hover {
     transform: translateY(-2px);
     box-shadow: 0 16px 28px rgba(15,23,42,0.10);
     border-color: #e6eaf0;
 }
 
-.panel.error {
+:where(.ui-page[data-page="account"]) .panel.error {
     border: 1px solid #fca5a5;
 }
 
-.panel h2 {
+:where(.ui-page[data-page="account"]) .panel h2 {
     margin: 0;
     font-size: 1.5rem;
     display: flex;
@@ -111,7 +112,7 @@
     gap: 10px;
 }
 
-.panel h2::before {
+:where(.ui-page[data-page="account"]) .panel h2::before {
     content: "";
     width: 6px;
     height: 20px;
@@ -119,22 +120,22 @@
     background: linear-gradient(135deg, #000, #2b2b2b);
 }
 
-.panel-description { margin: 0; color: #515151; }
+:where(.ui-page[data-page="account"]) .panel-description { margin: 0; color: #515151; }
 
 /* Better spacing for grid */
-.form-grid {
+:where(.ui-page[data-page="account"]) .form-grid {
     grid-row-gap: 1rem;
     grid-column-gap: 1rem;
 }
 
-.form-grid {
+:where(.ui-page[data-page="account"]) .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1rem;
 }
 
-.form-grid label,
-.form-vertical label {
+:where(.ui-page[data-page="account"]) .form-grid label,
+:where(.ui-page[data-page="account"]) .form-vertical label {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -142,53 +143,53 @@
     color: #0f172a;
 }
 
-.form-grid input,
-.form-vertical textarea,
-.form-vertical input,
-.form-grid textarea { padding: 0.8rem 0.9rem; border-radius: 10px; border: 1px solid #e5e7eb; background: #f9fafb; font-size: 0.98rem; transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease; box-shadow: inset 0 1px 0 rgba(255,255,255,0.6); }
+:where(.ui-page[data-page="account"]) .form-grid input,
+:where(.ui-page[data-page="account"]) .form-vertical textarea,
+:where(.ui-page[data-page="account"]) .form-vertical input,
+:where(.ui-page[data-page="account"]) .form-grid textarea { padding: 0.8rem 0.9rem; border-radius: 10px; border: 1px solid #e5e7eb; background: #f9fafb; font-size: 0.98rem; transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease; box-shadow: inset 0 1px 0 rgba(255,255,255,0.6); }
 
-.form-grid input:hover,
-.form-vertical textarea:hover,
-.form-vertical input:hover,
-.form-grid textarea:hover { border-color: #54739a; }
+:where(.ui-page[data-page="account"]) .form-grid input:hover,
+:where(.ui-page[data-page="account"]) .form-vertical textarea:hover,
+:where(.ui-page[data-page="account"]) .form-vertical input:hover,
+:where(.ui-page[data-page="account"]) .form-grid textarea:hover { border-color: #54739a; }
 
-.form-grid input:focus,
-.form-vertical textarea:focus,
-.form-vertical input:focus { outline: none; border-color: #111111; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12); background: #fff; }
+:where(.ui-page[data-page="account"]) .form-grid input:focus,
+:where(.ui-page[data-page="account"]) .form-vertical textarea:focus,
+:where(.ui-page[data-page="account"]) .form-vertical input:focus { outline: none; border-color: #111111; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12); background: #fff; }
 
 /* Valid/invalid feedback using native constraints */
-.form-grid input:invalid,
-.form-vertical input:invalid,
-.form-vertical textarea:invalid {
+:where(.ui-page[data-page="account"]) .form-grid input:invalid,
+:where(.ui-page[data-page="account"]) .form-vertical input:invalid,
+:where(.ui-page[data-page="account"]) .form-vertical textarea:invalid {
     border-color: #0c0000;
 }
 
-.form-grid input:valid,
-.form-vertical input:valid,
-.form-vertical textarea:valid {
+:where(.ui-page[data-page="account"]) .form-grid input:valid,
+:where(.ui-page[data-page="account"]) .form-vertical input:valid,
+:where(.ui-page[data-page="account"]) .form-vertical textarea:valid {
     border-color: #000000;
 }
 
 /* Disabled inputs */
-.form-grid input:disabled,
-.form-grid textarea:disabled,
-.form-vertical input:disabled,
-.form-vertical textarea:disabled { background: #ffffff; color: #6b7280; }
+:where(.ui-page[data-page="account"]) .form-grid input:disabled,
+:where(.ui-page[data-page="account"]) .form-grid textarea:disabled,
+:where(.ui-page[data-page="account"]) .form-vertical input:disabled,
+:where(.ui-page[data-page="account"]) .form-vertical textarea:disabled { background: #ffffff; color: #6b7280; }
 
-.form-vertical {
+:where(.ui-page[data-page="account"]) .form-vertical {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
 /* Textareas: better control */
-.form-vertical textarea,
-.form-grid textarea {
+:where(.ui-page[data-page="account"]) .form-vertical textarea,
+:where(.ui-page[data-page="account"]) .form-grid textarea {
     resize: vertical;
     min-height: 120px;
 }
 
-.form-actions {
+:where(.ui-page[data-page="account"]) .form-actions {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -199,7 +200,7 @@
     border-top: 30px solid #ffffff;
 }
 
-.form-actions button {
+:where(.ui-page[data-page="account"]) .form-actions button {
     padding: 0.65rem 1.5rem;
     border-radius: 999px;
     border: 2px solid #111;
@@ -211,28 +212,28 @@
     min-width: 160px;
 }
 
-.form-actions button:hover:not(:disabled) {
+:where(.ui-page[data-page="account"]) .form-actions button:hover:not(:disabled) {
     transform: translateY(-1px) scale(1.01);
     box-shadow: 0 10px 20px rgba(0, 0, 0, .25);
 }
 
-.form-actions button:focus-visible {
+:where(.ui-page[data-page="account"]) .form-actions button:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px rgba(0,0,0,0.12);
 }
 
-.form-actions button:disabled {
+:where(.ui-page[data-page="account"]) .form-actions button:disabled {
     cursor: not-allowed;
     opacity: 0.6;
 }
 
-.form-actions .danger {
+:where(.ui-page[data-page="account"]) .form-actions .danger {
     background: #dc3545;
     border-color: #dc3545;
     color: #fff;
 }
 
-.form-actions .danger:hover:not(:disabled) {
+:where(.ui-page[data-page="account"]) .form-actions .danger:hover:not(:disabled) {
     filter: brightness(1.02);
     box-shadow: 0 10px 20px rgba(220, 53, 69, .35);
     transform: translateY(-1px);
@@ -240,46 +241,46 @@
 
 /* Ensure only the primary action buttons on the account page are black */
 
-.user-account-page .form-actions .primary-btn:hover:not(:disabled) {
+:where(.ui-page[data-page="account"]) .user-account-page .form-actions .primary-btn:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 10px 20px rgba(0,0,0,.25);
 }
 
 /* Responsive behavior: stack buttons on smaller screens */
 @media (max-width: 720px) {
-    .form-actions {
+    :where(.ui-page[data-page="account"]) .form-actions {
         flex-wrap: wrap;
         gap: 0.75rem;
     }
-    .form-actions button {
+    :where(.ui-page[data-page="account"]) .form-actions button {
         flex: 1 1 calc(50% - 0.75rem);
     }
 }
 
 @media (max-width: 480px) {
-    .form-actions {
+    :where(.ui-page[data-page="account"]) .form-actions {
         justify-content: center;
     }
-    .form-actions button {
+    :where(.ui-page[data-page="account"]) .form-actions button {
         flex: 1 1 100%;
         min-width: 0;
     }
 }
 
-.form-feedback {
+:where(.ui-page[data-page="account"]) .form-feedback {
     margin: 0;
     font-weight: 600;
 }
 
-.form-feedback.success {
+:where(.ui-page[data-page="account"]) .form-feedback.success {
     color: #059669;
 }
 
-.form-feedback.error {
+:where(.ui-page[data-page="account"]) .form-feedback.error {
     color: #dc2626;
 }
 
-.status-tag {
+:where(.ui-page[data-page="account"]) .status-tag {
     padding: 0.35rem 0.75rem;
     border-radius: 999px;
     font-size: 0.85rem;
@@ -288,40 +289,40 @@
     letter-spacing: 0.05em;
 }
 
-.status-unverified {
+:where(.ui-page[data-page="account"]) .status-unverified {
     background: rgba(148, 163, 184, 0.15);
     color: #475569;
 }
 
-.status-pending {
+:where(.ui-page[data-page="account"]) .status-pending {
     background: rgba(250, 204, 21, 0.2);
     color: #b45309;
 }
 
-.status-verified {
+:where(.ui-page[data-page="account"]) .status-verified {
     background: rgba(34, 197, 94, 0.18);
     color: #166534;
 }
 
-.status-rejected {
+:where(.ui-page[data-page="account"]) .status-rejected {
     background: rgba(239, 68, 68, 0.18);
     color: #b91c1c;
 }
 
 /* Status glow accents */
-.status-verified { box-shadow: 0 0 0 1px rgba(22, 101, 52, 0.25), 0 0 12px rgba(34, 197, 94, 0.18); }
-.status-pending { box-shadow: 0 0 0 1px rgba(180, 83, 9, 0.25), 0 0 12px rgba(250, 204, 21, 0.18); }
-.status-rejected { box-shadow: 0 0 0 1px rgba(185, 28, 28, 0.25), 0 0 12px rgba(239, 68, 68, 0.18); }
-.status-unverified { box-shadow: 0 0 0 1px rgba(71, 85, 105, 0.25), 0 0 12px rgba(148, 163, 184, 0.15); }
+:where(.ui-page[data-page="account"]) .status-verified { box-shadow: 0 0 0 1px rgba(22, 101, 52, 0.25), 0 0 12px rgba(34, 197, 94, 0.18); }
+:where(.ui-page[data-page="account"]) .status-pending { box-shadow: 0 0 0 1px rgba(180, 83, 9, 0.25), 0 0 12px rgba(250, 204, 21, 0.18); }
+:where(.ui-page[data-page="account"]) .status-rejected { box-shadow: 0 0 0 1px rgba(185, 28, 28, 0.25), 0 0 12px rgba(239, 68, 68, 0.18); }
+:where(.ui-page[data-page="account"]) .status-unverified { box-shadow: 0 0 0 1px rgba(71, 85, 105, 0.25), 0 0 12px rgba(148, 163, 184, 0.15); }
 
-.panel-header {
+:where(.ui-page[data-page="account"]) .panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 /* Notification Badge */
-.notification-badge {
+:where(.ui-page[data-page="account"]) .notification-badge {
     background: #c73131;
     color: white;
     font-size: 0.75rem;
@@ -337,12 +338,12 @@
     50% { opacity: 0.7; }
 }
 
-.notification-summary {
+:where(.ui-page[data-page="account"]) .notification-summary {
     font-size: 0.9rem;
     color: #64748b;
 }
 
-.notification-list {
+:where(.ui-page[data-page="account"]) .notification-list {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -353,11 +354,11 @@
 }
 
 /* Subtle divider between stacked notifications on hover */
-.notification + .notification:hover {
+:where(.ui-page[data-page="account"]) .notification + .notification:hover {
     filter: saturate(1.02);
 }
 
-.notification {
+:where(.ui-page[data-page="account"]) .notification {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -373,13 +374,13 @@
     max-width: none;
 }
 
-.notification.unread {
+:where(.ui-page[data-page="account"]) .notification.unread {
     border-color: #3b82f6;
     background: #f8faff;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
 }
 
-.notification.unread::before {
+:where(.ui-page[data-page="account"]) .notification.unread::before {
     content: '';
     position: absolute;
     left: 0;
@@ -390,12 +391,12 @@
     border-radius: 12px 0 0 12px;
 }
 
-.notification.read {
+:where(.ui-page[data-page="account"]) .notification.read {
     opacity: 0.8;
     background: #f9fafb;
 }
 
-.notification.success {
+:where(.ui-page[data-page="account"]) .notification.success {
     border-color: #ade0cf;
     display: block;          /* make it behave like the blue box */
     width: 100%;             /* full width of container */
@@ -408,12 +409,12 @@
     margin-bottom: 16px;  
 }
 
-.notification.success.unread {
+:where(.ui-page[data-page="account"]) .notification.success.unread {
     background: #f0fdf4;
     border-color: #10b981;
 }
 
-.notification.success.unread::before {
+:where(.ui-page[data-page="account"]) .notification.success.unread::before {
     background: #045a3d;
     content: '';
     position: absolute;
@@ -424,33 +425,36 @@
     border-radius: 12px 0 0 12px;
 }
 
-.notification.error {
+:where(.ui-page[data-page="account"]) .notification.error {
     border-color: #ef4444;
 }
 
-.notification.error.unread {
+:where(.ui-page[data-page="account"]) .notification.error.unread {
     background: #fef2f2;
     border-color: #ef4444;
 }
 
-.notification.error.unread::before {
+:where(.ui-page[data-page="account"]) .notification.error.unread::before {
     background: #ef4444;
 }
 
-.notification:hover { 
+:where(.ui-page[data-page="account"]) .notification:hover { 
     transform: translateY(-1px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); 
 }
 
 /* Reduce motion preferences */
 @media (prefers-reduced-motion: reduce) {
-    .header-notification-indicator,
-    .notification-badge { animation: none; }
-    .notification:hover, .panel:hover, .form-actions button:hover:not(:disabled) { transform: none; }
-    .header-nav-btn.primary:hover, .header-nav-btn.secondary:hover { transform: none; }
+    :where(.ui-page[data-page="account"]) .header-notification-indicator,
+:where(.ui-page[data-page="account"]) .notification-badge { animation: none; }
+    :where(.ui-page[data-page="account"]) .notification:hover,
+:where(.ui-page[data-page="account"]) .panel:hover,
+:where(.ui-page[data-page="account"]) .form-actions button:hover:not(:disabled) { transform: none; }
+    :where(.ui-page[data-page="account"]) .header-nav-btn.primary:hover,
+:where(.ui-page[data-page="account"]) .header-nav-btn.secondary:hover { transform: none; }
 }
 
-.notification-content {
+:where(.ui-page[data-page="account"]) .notification-content {
     display: flex;
     align-items: flex-start;
     gap: 1.5rem;
@@ -459,7 +463,7 @@
     width: 100%;
 }
 
-.notification-icon {
+:where(.ui-page[data-page="account"]) .notification-icon {
     font-size: 1.5rem;
     margin-top: 0.1rem;
     min-width: 2rem;
@@ -467,67 +471,67 @@
     justify-content: center;
 }
 
-.notification.success .notification-icon {
+:where(.ui-page[data-page="account"]) .notification.success .notification-icon {
     color: #0faf7a;
 }
 
-.notification.error .notification-icon {
+:where(.ui-page[data-page="account"]) .notification.error .notification-icon {
     color: #ef4444;
 }
 
-.notification.info .notification-icon {
+:where(.ui-page[data-page="account"]) .notification.info .notification-icon {
     color: #3b82f6;
 }
 
-.notification-text {
+:where(.ui-page[data-page="account"]) .notification-text {
     flex: 1;
     min-width: 0; /* Allow text to wrap properly */
     width: 100%;
 }
 
-.notification-message {
+:where(.ui-page[data-page="account"]) .notification-message {
     margin-bottom: 1rem;
     line-height: 1.6;
 }
 
-.notification-message p {
+:where(.ui-page[data-page="account"]) .notification-message p {
     margin: 0 0 0.25rem 0;
     font-weight: 400;
     line-height: 1.5;
     font-size: 0.9rem;
 }
 
-.notification-message p:first-child {
+:where(.ui-page[data-page="account"]) .notification-message p:first-child {
     font-weight: 600;
     font-size: 1rem;
     color: #1f2937;
     margin-bottom: 0.5rem;
 }
 
-.notification-message p.line-break {
+:where(.ui-page[data-page="account"]) .notification-message p.line-break {
     margin: 0.5rem 0;
     height: 0.5rem;
 }
 
-.notification-message p:empty {
+:where(.ui-page[data-page="account"]) .notification-message p:empty {
     margin: 0.25rem 0;
 }
 
 /* Style for emoji and bullet points */
-.notification-message p:contains("•"),
-.notification-message p:contains("📋"),
-.notification-message p:contains("📅"),
-.notification-message p:contains("✅"),
-.notification-message p:contains("🎯"),
-.notification-message p:contains("📝"),
-.notification-message p:contains("💡"),
-.notification-message p:contains("🔄"),
-.notification-message p:contains("📞") {
+:where(.ui-page[data-page="account"]) .notification-message p:contains("•"),
+:where(.ui-page[data-page="account"]) .notification-message p:contains("📋"),
+:where(.ui-page[data-page="account"]) .notification-message p:contains("📅"),
+:where(.ui-page[data-page="account"]) .notification-message p:contains("✅"),
+:where(.ui-page[data-page="account"]) .notification-message p:contains("🎯"),
+:where(.ui-page[data-page="account"]) .notification-message p:contains("📝"),
+:where(.ui-page[data-page="account"]) .notification-message p:contains("💡"),
+:where(.ui-page[data-page="account"]) .notification-message p:contains("🔄"),
+:where(.ui-page[data-page="account"]) .notification-message p:contains("📞") {
     font-weight: 500;
     color: #374151;
 }
 
-.notification-meta {
+:where(.ui-page[data-page="account"]) .notification-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -539,7 +543,7 @@
     width: 100%;
 }
 
-.notification-meta small {
+:where(.ui-page[data-page="account"]) .notification-meta small {
     color: #64748b;
     font-size: 0.75rem;
     display: flex;
@@ -547,20 +551,20 @@
     gap: 0.25rem;
 }
 
-.notification-type {
+:where(.ui-page[data-page="account"]) .notification-type {
     background: #f3f4f6;
     padding: 0.2rem 0.5rem;
     border-radius: 12px;
     font-weight: 500;
 }
 
-.notification-truncated {
+:where(.ui-page[data-page="account"]) .notification-truncated {
     color: #9ca3af;
     font-style: italic;
     margin: 0.25rem 0;
 }
 
-.notification-expand-btn {
+:where(.ui-page[data-page="account"]) .notification-expand-btn {
     background: none;
     border: none;
     color: #000000;
@@ -574,12 +578,12 @@
     transition: color 0.2s ease;
 }
 
-.notification-expand-btn:hover {
+:where(.ui-page[data-page="account"]) .notification-expand-btn:hover {
     color: #1d4ed8;
     text-decoration: underline;
 }
 
-.notification-actions {
+:where(.ui-page[data-page="account"]) .notification-actions {
     display: flex;
     gap: 0.75rem;
     flex-shrink: 0;
@@ -588,7 +592,7 @@
     min-width: 120px;
 }
 
-.notification-action-btn {
+:where(.ui-page[data-page="account"]) .notification-action-btn {
     padding: 0.5rem;
     border-radius: 8px;
     border: 1px solid #e5e7eb;
@@ -602,65 +606,65 @@
     font-size: 1rem;
 }
 
-.notification-action-btn:hover {
+:where(.ui-page[data-page="account"]) .notification-action-btn:hover {
     background: #f3f4f6;
     color: #374151;
     transform: scale(1.05);
 }
 
-.notification-action-btn.danger {
+:where(.ui-page[data-page="account"]) .notification-action-btn.danger {
     color: #ffffff;
 }
 
-.notification-action-btn.danger:hover {
+:where(.ui-page[data-page="account"]) .notification-action-btn.danger:hover {
     background: #fef2f2;
     color: #530101;
 }
 
-.empty-state {
+:where(.ui-page[data-page="account"]) .empty-state {
     color: #64748b;
 }
 
 @media (max-width: 720px) {
-    .user-account-header {
+    :where(.ui-page[data-page="account"]) .user-account-header {
         flex-direction: column;
         align-items: flex-start;
     }
 
-    .panel-header {
+    :where(.ui-page[data-page="account"]) .panel-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
 
-    .notification {
+    :where(.ui-page[data-page="account"]) .notification {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.75rem;
     }
 
-    .notification-content {
+    :where(.ui-page[data-page="account"]) .notification-content {
         width: 100%;
     }
 
-    .notification-actions {
+    :where(.ui-page[data-page="account"]) .notification-actions {
         width: 100%;
         justify-content: flex-end;
     }
 
-    .notification-summary {
+    :where(.ui-page[data-page="account"]) .notification-summary {
         font-size: 0.85rem;
     }
 }
 
 /* Bookings Styles */
-.bookings-list {
+:where(.ui-page[data-page="account"]) .bookings-list {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.booking-card {
+:where(.ui-page[data-page="account"]) .booking-card {
     display: flex;
     align-items: center;
     gap: 1.5rem;
@@ -672,13 +676,13 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.booking-card:hover {
+:where(.ui-page[data-page="account"]) .booking-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
     border-color: #d1d5db;
 }
 
-.booking-image {
+:where(.ui-page[data-page="account"]) .booking-image {
     flex-shrink: 0;
     width: 80px;
     height: 80px;
@@ -687,19 +691,19 @@
     background: #f3f4f6;
 }
 
-.booking-image img {
+:where(.ui-page[data-page="account"]) .booking-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center;
 }
 
-.booking-details {
+:where(.ui-page[data-page="account"]) .booking-details {
     flex: 1;
     min-width: 0;
 }
 
-.booking-header {
+:where(.ui-page[data-page="account"]) .booking-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -707,7 +711,7 @@
     gap: 1rem;
 }
 
-.booking-header h4 {
+:where(.ui-page[data-page="account"]) .booking-header h4 {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
@@ -715,7 +719,7 @@
     line-height: 1.3;
 }
 
-.booking-status {
+:where(.ui-page[data-page="account"]) .booking-status {
     padding: 0.25rem 0.75rem;
     border-radius: 999px;
     font-size: 0.75rem;
@@ -725,20 +729,20 @@
     flex-shrink: 0;
 }
 
-.booking-status.confirmed {
+:where(.ui-page[data-page="account"]) .booking-status.confirmed {
     background: rgba(34, 197, 94, 0.18);
     color: #166534;
     border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
-.booking-info {
+:where(.ui-page[data-page="account"]) .booking-info {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
     margin-bottom: 0.75rem;
 }
 
-.booking-info-item {
+:where(.ui-page[data-page="account"]) .booking-info-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -746,17 +750,17 @@
     color: #4b5563;
 }
 
-.booking-info-item i {
+:where(.ui-page[data-page="account"]) .booking-info-item i {
     font-size: 1rem;
     color: #6b7280;
     flex-shrink: 0;
 }
 
-.booking-meta {
+:where(.ui-page[data-page="account"]) .booking-meta {
     margin-top: 0.5rem;
 }
 
-.booking-meta small {
+:where(.ui-page[data-page="account"]) .booking-meta small {
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -764,51 +768,52 @@
     font-size: 0.8rem;
 }
 
-.booking-actions {
+:where(.ui-page[data-page="account"]) .booking-actions {
     flex-shrink: 0;
     margin-left: auto;
 }
 
 /* Responsive design for booking cards */
 @media (max-width: 768px) {
-    .booking-card {
+    :where(.ui-page[data-page="account"]) .booking-card {
         flex-direction: column;
         align-items: flex-start;
         text-align: left;
     }
 
-    .booking-image {
+    :where(.ui-page[data-page="account"]) .booking-image {
         width: 100%;
         height: 120px;
     }
 
-    .booking-header {
+    :where(.ui-page[data-page="account"]) .booking-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
     }
 
-    .booking-info {
+    :where(.ui-page[data-page="account"]) .booking-info {
         flex-direction: column;
         gap: 0.5rem;
     }
 
-    .booking-actions {
+    :where(.ui-page[data-page="account"]) .booking-actions {
         width: 100%;
         margin-left: 0;
     }
 
-    .booking-actions button {
+    :where(.ui-page[data-page="account"]) .booking-actions button {
         width: 100%;
     }
 }
 
 @media (max-width: 480px) {
-    .booking-info {
+    :where(.ui-page[data-page="account"]) .booking-info {
         gap: 0.75rem;
     }
 
-    .booking-info-item {
+    :where(.ui-page[data-page="account"]) .booking-info-item {
         font-size: 0.85rem;
     }
+}
 }

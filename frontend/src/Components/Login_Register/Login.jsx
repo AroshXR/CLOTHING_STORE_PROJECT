@@ -1,11 +1,13 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../MediaImage';
 import React, { useState } from 'react'
 import './LoginPage.css';
 import loginImage from '../images/login-img.jpg';
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
+
+
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../AuthGuard/AuthGuard';
+import { useAuth } from '../../AuthGuard/authGuard';
 
 function LoginPage() {
 
@@ -65,7 +67,7 @@ function LoginPage() {
 
   const testBackendConnection = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/test');
+      const response = await axios.get(`${API_ORIGIN}/test`);
       console.log('Backend connection test:', response.data);
       return true;
     } catch (error) {
@@ -86,7 +88,7 @@ function LoginPage() {
   const sendRequest = async () => {
     try {
       console.log('Sending login request:', { username: user.username, type: user.type });
-      const response = await axios.post('http://localhost:5001/login', {
+      const response = await axios.post(`${API_ORIGIN}/login`, {
         username: user.username,
         password: user.password,
         type: user.type
@@ -136,7 +138,6 @@ function LoginPage() {
       }
 
       const response = await sendRequest();
-      console.log('Login response:', response);
 
       if (response.status === 'ok') {
         const { token, user: userData } = response.data;
@@ -161,15 +162,15 @@ function LoginPage() {
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col"> 
-      <NavBar />
+    <div className="w-full flex flex-col"> 
+      
 
       <div className="loginPage-container">
 
         <div className="login-header">
           <h1>Welcome Back!</h1>
           <p>Please login to continue</p>
-          <img className='loginImage' src={loginImage} alt="Login Illustration" />
+          <MediaImage className='loginImage' src={loginImage} alt="Login Illustration" />
         </div>
 
         <div className="login-container">
@@ -210,7 +211,7 @@ function LoginPage() {
       </div>
 
 
-      <Footer />
+      
     </div>
   )
 }

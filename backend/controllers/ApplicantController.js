@@ -1,3 +1,4 @@
+const { isAdmin } = require('../middleware/auth');
 const Applicant = require("../models/ApplicantModel");
 const User = require("../models/User");
 const { sendEmail } = require("../utils/email");
@@ -56,10 +57,11 @@ const getAllApplicants = async (req, res, next) => {
     const { status, gmail, page = 1, limit = 10 } = req.query;
     
     let query = {};
+    if (!isAdmin(req.user)) query.gmail = req.user.email.toLowerCase();
     if (status && ['pending', 'approved', 'rejected'].includes(status)) {
       query.status = status;
     }
-    if (gmail) {
+    if (gmail && isAdmin(req.user)) {
       query.gmail = String(gmail).toLowerCase();
     }
     
@@ -221,6 +223,7 @@ const updateApplicant = async (req, res, next) => {
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({ message: "Invalid applicant ID format" });
     }
+    if (!isAdmin(req.user) && (status !== undefined || (gmail && gmail.toLowerCase() !== req.user.email.toLowerCase()))) return res.status(403).json({ message: 'You cannot change application ownership or approval status' });
     // Fetch current applicant to enforce business rules
     const currentApplicant = await Applicant.findById(id).select('status');
     if (!currentApplicant) {
@@ -321,7 +324,7 @@ const updateApplicant = async (req, res, next) => {
     if (education !== undefined) updateData.education = education;
     if (skills !== undefined) updateData.skills = skills;
     if (coverLetter !== undefined) updateData.coverLetter = coverLetter;
-    if (status && ['pending', 'approved', 'rejected'].includes(status)) {
+    if (isAdmin(req.user) && status && ['pending', 'approved', 'rejected'].includes(status)) {
       updateData.status = status;
     }
     

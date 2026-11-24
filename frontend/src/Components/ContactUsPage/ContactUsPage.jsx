@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import './ContactUsPage.css';
 import { useNavigate } from 'react-router-dom';
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
+
+
+import { useBranding } from '../../config/branding';
 
 function ContactUs() {
+    const { branding } = useBranding();
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
     const navigate = useNavigate();
 
@@ -15,8 +17,10 @@ function ContactUs() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        alert('Your message has been sent!');
-        setFormData({ name: '', email: '', message: '' });
+        if (!branding.contactEmail) return;
+        const subject = encodeURIComponent('Enquiry from ' + formData.name);
+        const body = encodeURIComponent(formData.message + '\n\nName: ' + formData.name + '\nReply to: ' + formData.email);
+        window.location.href = 'mailto:' + branding.contactEmail + '?subject=' + subject + '&body=' + body;
     };
 
     const handleBack = () => {
@@ -26,14 +30,17 @@ function ContactUs() {
     return (
 
         <div>
-            <NavBar />
+            
             <button className='contact-back-button' onClick={handleBack}>
                 Back
             </button>
 
             <div className="contact-container">
                 <h1>Contact Us</h1>
-                <p>If you have any questions, feel free to reach out using the form below.</p>
+                {branding.contactEmail && <p>Email: <a href={'mailto:' + branding.contactEmail}>{branding.contactEmail}</a></p>}
+                {branding.contactPhone && <p>Phone: <a href={'tel:' + branding.contactPhone.replace(/[^\d+]/g, '')}>{branding.contactPhone}</a></p>}
+                {branding.address && <p style={{ whiteSpace: 'pre-line' }}>{branding.address}</p>}
+                <p>{branding.contactEmail ? 'Use the form below to prepare a message in your email app.' : 'Contact details will appear here once the store has configured them.'}</p>
 
                 <form onSubmit={handleSubmit} className="contact-form">
                     <div className="form-group">
@@ -72,10 +79,10 @@ function ContactUs() {
                         ></textarea>
                     </div>
 
-                    <button className='contact-form-button' type="submit">Send Message</button>
+                    <button className='contact-form-button' type="submit" disabled={!branding.contactEmail}>Open email draft</button>
                 </form>
             </div>
-            <Footer />
+            
         </div>
 
 

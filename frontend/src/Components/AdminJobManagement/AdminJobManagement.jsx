@@ -1,9 +1,13 @@
+import UIIcon from '../Layout/UIIcon';
+import { useBranding } from '../../config/branding';
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import './AdminJobManagement.css';
 import { useNavigate } from 'react-router-dom';
 
 const AdminJobManagement = () => {
+  const { branding } = useBranding();
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [showJobForm, setShowJobForm] = useState(false);
@@ -25,7 +29,7 @@ const AdminJobManagement = () => {
     deadline: ''
   });
 
-  const API_BASE_URL = 'http://localhost:5001';
+  const API_BASE_URL = API_ORIGIN;
 
   const filteredJobs = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -58,7 +62,7 @@ const AdminJobManagement = () => {
         alert('No applicant data to download');
         return;
       }
-      const titleRow = ['Klassy T Shirts'];
+      const titleRow = [`${branding.name}`];
       const sectionRow = ['Applicant Details'];
       const blankRow = [''];
       const headers = ['ID','Name','Email','Position','Department','Status','Applied At'];
@@ -365,14 +369,14 @@ const AdminJobManagement = () => {
             className="header-nav-btn secondary"
             onClick={() => navigate(-1)}
           >
-            <i className="bx bx-arrow-back"></i> Back
+            <UIIcon className="bx bx-arrow-back"></UIIcon> Back
           </button>
           <button
             type="button"
             className="header-nav-btn primary"
             onClick={() => navigate('/admin-applicants')}
           >
-            Next <i className="bx bx-arrow-forward"></i>
+            Next <UIIcon className="bx bx-arrow-forward"></UIIcon>
           </button>
         </div>
       </div>
@@ -385,7 +389,7 @@ const AdminJobManagement = () => {
             </h2>
             <div className="jobs-toolbar">
               <div className="search-input-wrapper">
-                <i className="bx bx-search job-search-icon"></i>
+                <UIIcon className="bx bx-search job-search-icon"></UIIcon>
                 <input
                   type="text"
                   className="job-search-input"
@@ -401,7 +405,7 @@ const AdminJobManagement = () => {
               <div className="error-message">{error}</div>
             ) : jobs.length === 0 ? (
               <div className="no-jobs">
-                <i className="bx bx-briefcase"></i>
+                <UIIcon className="bx bx-briefcase"></UIIcon>
                 <h3>No Jobs Posted</h3>
                 <p>Start by posting your first job opening</p>
               </div>
@@ -417,10 +421,10 @@ const AdminJobManagement = () => {
                     </div>
 
                     <div className="job-details">
-                      <p><i className="bx bx-building"></i> {job.department}</p>
-                      <p><i className="bx bx-map"></i> {job.location}</p>
-                      <p><i className="bx bx-time"></i> {job.type}</p>
-                      <p><i className="bx bx-calendar"></i> {job.experience}</p>
+                      <p><UIIcon className="bx bx-building"></UIIcon> {job.department}</p>
+                      <p><UIIcon className="bx bx-map"></UIIcon> {job.location}</p>
+                      <p><UIIcon className="bx bx-time"></UIIcon> {job.type}</p>
+                      <p><UIIcon className="bx bx-calendar"></UIIcon> {job.experience}</p>
                     </div>
 
                     <p className="job-description">{job.description}</p>
@@ -440,14 +444,14 @@ const AdminJobManagement = () => {
                         onClick={() => handleEdit(job)}
                         className="edit-btn"
                       >
-                        <i className="bx bx-edit"></i> Edit
+                        <UIIcon className="bx bx-edit"></UIIcon> Edit
                       </button>
 
                       <button
                         onClick={() => handleDelete(job._id || job.id)}
                         className="delete-btn"
                       >
-                        <i className="bx bx-trash"></i> Delete
+                        <UIIcon className="bx bx-trash"></UIIcon> Delete
                       </button>
                     </div>
                   </div>
@@ -456,7 +460,7 @@ const AdminJobManagement = () => {
             )}
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
               <button className="add-job-btn" onClick={() => { setShowJobForm(true); }}>
-                <i className="bx bx-plus"></i> Post New Job
+                <UIIcon className="bx bx-plus"></UIIcon> Post New Job
               </button>
             </div>
           </div>
@@ -467,7 +471,7 @@ const AdminJobManagement = () => {
                 <div className="form-header">
                   <h2>{editingJob ? 'Edit Job' : 'Post New Job'}</h2>
                   <button className="close-btn" onClick={closeForm}>
-                    <i className="bx bx-x"></i>
+                    <UIIcon className="bx bx-x"></UIIcon>
                   </button>
                 </div>
 
@@ -622,7 +626,7 @@ const AdminJobManagement = () => {
                           onClick={() => removeArrayItem('requirements', index)}
                           className="remove-btn"
                         >
-                          <i className="bx bx-minus"></i>
+                          <UIIcon className="bx bx-minus"></UIIcon>
                         </button>
                       </div>
                     ))}
@@ -631,7 +635,7 @@ const AdminJobManagement = () => {
                       onClick={() => addArrayItem('requirements')}
                       className="add-btn"
                     >
-                      <i className="bx bx-plus"></i> Add Requirement
+                      <UIIcon className="bx bx-plus"></UIIcon> Add Requirement
                     </button>
                   </div>
 
@@ -650,7 +654,7 @@ const AdminJobManagement = () => {
                           onClick={() => removeArrayItem('responsibilities', index)}
                           className="remove-btn"
                         >
-                          <i className="bx bx-minus"></i>
+                          <UIIcon className="bx bx-minus"></UIIcon>
                         </button>
                       </div>
                     ))}
@@ -659,7 +663,7 @@ const AdminJobManagement = () => {
                       onClick={() => addArrayItem('responsibilities')}
                       className="add-btn"
                     >
-                      <i className="bx bx-plus"></i> Add Responsibility
+                      <UIIcon className="bx bx-plus"></UIIcon> Add Responsibility
                     </button>
                   </div>
 

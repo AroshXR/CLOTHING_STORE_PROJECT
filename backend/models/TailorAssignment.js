@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const TailorAssignmentSchema = new mongoose.Schema({
-  clothCustomizerId: { type: mongoose.Schema.Types.ObjectId, ref: 'ClothCustomizer', required: true, index: true },
+  clothCustomizerId: { type: mongoose.Schema.Types.ObjectId, ref: 'ClothCustomizer', required: true },
   tailorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tailor', required: true, index: true },
   assignedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   assignedAt: { type: Date, default: Date.now },

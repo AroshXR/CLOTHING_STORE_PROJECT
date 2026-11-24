@@ -1,7 +1,9 @@
+import { useBranding } from '../../config/branding';
 import React from 'react'
 import { assets } from '../../assets/assets';
 
 const Testimonial = () => {
+  const { branding } = useBranding();
     const testimonials = [
         {   name: "Anjali Silva", 
             location: "Colombo, Sri Lanka",
@@ -16,12 +18,12 @@ const Testimonial = () => {
         {   name: "Nisha Fernando", 
             location: "Kandy, Sri Lanka", 
             image: assets.testimonial_image_1,  
-            testimonial: "Highly recommend Klassy Shirts! The dress I rented was perfect for my event, and the service was impeccable. Everything was taken care of with great attention to detail." }
+            testimonial: `Highly recommend ${branding.name}! The dress I rented was perfect for my event, and the service was impeccable. Everything was taken care of with great attention to detail.` }
     ];
   return (
    <div className="py-28 px-6 md:px-16 lg:px-24 xl:px-44">
 
-    <title title="What our customers say"  subTitle="Discover why fashion-forward individuals trust Klassy Shirts for their luxury party dress rentals."></title>
+    <title title="What our customers say"  subTitle={`Discover why fashion-forward individuals trust ${branding.name} for their luxury party dress rentals.`}></title>
 
             <div className="grid grid-col-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-18">
                 {testimonials.map((testimonial,index) => (

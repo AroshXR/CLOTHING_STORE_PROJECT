@@ -1,3 +1,4 @@
+import UIIcon from '../Layout/UIIcon';
 import React, { useState } from 'react';
 import './ApplicantForm.css';
 
@@ -178,7 +179,7 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
             onClick={handleClose}
             disabled={isSubmitting}
           >
-            <i className="bx bx-x"></i>
+            <UIIcon className="bx bx-x"></UIIcon>
           </button>
         </div>
 

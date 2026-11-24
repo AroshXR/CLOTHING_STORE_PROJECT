@@ -1,15 +1,15 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../MediaImage';
 ﻿import React, { useState } from 'react';
 import './LoginPage.css';
 import regImage from '../images/register-img.jpg';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
+
+
 
 function RegisterPage() {
     const history = useNavigate();
-    const [registerMode, setRegisterMode] = useState('user');
-    const [lastUserRole, setLastUserRole] = useState('Customer');
 
     const [user, setUser] = useState({
         username: '',
@@ -23,32 +23,6 @@ function RegisterPage() {
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleModeChange = (mode) => {
-        if (mode === registerMode) {
-            return;
-        }
-
-        if (mode === 'admin') {
-            if (user.type !== 'Admin') {
-                setLastUserRole(user.type || 'Customer');
-            }
-            setUser((prev) => ({
-                ...prev,
-                type: 'Admin'
-            }));
-        } else {
-            const restoredType = lastUserRole || 'Customer';
-            setUser((prev) => ({
-                ...prev,
-                type: restoredType === 'Admin' ? 'Customer' : restoredType
-            }));
-        }
-
-        setRegisterMode(mode);
-        if (error) {
-            setError('');
-        }
-    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -56,9 +30,6 @@ function RegisterPage() {
             ...prev,
             [name]: value
         }));
-        if (name === 'type') {
-            setLastUserRole(value);
-        }
         if (error) setError('');
     };
 
@@ -66,7 +37,7 @@ function RegisterPage() {
 
     const sendRequest = async () => {
         try {
-            const response = await axios.post('http://localhost:5001/register', {
+            const response = await axios.post(`${API_ORIGIN}/register`, {
                 username: user.username,
                 address: user.address,
                 email: user.email,
@@ -142,34 +113,18 @@ function RegisterPage() {
 
     return (
 
-        <div className="w-full min-h-screen flex flex-col">   {/* container  */}
-            <NavBar />
+        <div className="w-full flex flex-col">   {/* container  */}
+            
             <div className="loginPage-container">
                 <div className="login-header">
                     <h1>Create an Account</h1>
                     <p>Please fill in the details to register</p>
-                    <img className='loginImage' src={regImage} alt="Register Illustration" />
+                    <MediaImage className='loginImage' src={regImage} alt="Register Illustration" />
                 </div>
 
                 <div className="login-container">
                     <h2>Register</h2>
 
-                    <div className="register-mode-toggle">
-                        <button
-                            type="button"
-                            className={registerMode === 'user' ? 'mode-button active' : 'mode-button'}
-                            onClick={() => handleModeChange('user')}
-                        >
-                            User / Applicant / Tailor
-                        </button>
-                        <button
-                            type="button"
-                            className={registerMode === 'admin' ? 'mode-button active' : 'mode-button'}
-                            onClick={() => handleModeChange('admin')}
-                        >
-                            Admin
-                        </button>
-                    </div>
 
                     {error && (
                         <div className="error-message-container">
@@ -177,21 +132,12 @@ function RegisterPage() {
                         </div>
                     )}
                     <form onSubmit={handleSubmit}>
-                        {registerMode === 'user' ? (
-                            <div className="form-group">
-                                <label htmlFor="userType">Registering as:</label>
-                                <select id="userType" name="type" value={user.type} onChange={handleChange}>
-                                    <option value="Customer">Customer</option>
-                                    <option value="Applicant">Applicant</option>
-                                    <option value="Tailor">Tailor</option>
-                                </select>
-                            </div>
-                        ) : (
-                            <div className="admin-register-note">
-                                <strong>Admin registration</strong>
-                                <p>Register an administrator account to manage users, notifications, and identity verification.</p>
-                            </div>
-                        )}
+                        <div className="form-group">
+                            <label htmlFor="userType">Registering as:</label>
+                            <select id="userType" name="type" value={user.type} onChange={handleChange}>
+                                <option value="Customer">Customer</option><option value="Applicant">Applicant</option>
+                            </select>
+                        </div>
                         <div className="form-group">
                             <label htmlFor="username">Username:</label>
                             <input type="text" id="username" name="username" value={user.username} onChange={handleChange} required />
@@ -231,7 +177,7 @@ function RegisterPage() {
                     </form>
                 </div>
             </div>
-            <Footer />
+            
         </div>
 
 

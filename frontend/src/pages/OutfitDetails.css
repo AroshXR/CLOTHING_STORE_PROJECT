@@ -1,5 +1,6 @@
+@layer app-legacy {
 /* Back button */
-.back-button {
+:where(.ui-page[data-page="rental-detail"]) .back-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;              /* gap-2 */
@@ -10,9 +11,8 @@
   border: none;
 }
 
-.back-button img {
+:where(.ui-page[data-page="rental-detail"]) .back-button img {
   transform: rotate(180deg); /* rotate-180 */
   opacity: 0.65;             /* opacity-65 */
 }
-
-
+}

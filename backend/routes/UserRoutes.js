@@ -1,28 +1,19 @@
-const express = require("express");
-const router = express.Router();
-const { protect } = require("../middleware/auth");
-
-// Insert user controller
-const userController = require("../controllers/UserController");
-
-// Specific routes must come before parameter routes to avoid conflicts
-router.get("/", userController.getAllUsers);
-router.post("/", userController.addUsers);
-
-router.get("/me", protect, userController.getCurrentUser);
-router.put("/me", protect, userController.updateCurrentUser);
-router.delete("/me", protect, userController.deleteCurrentUser);
-
-router.post("/:id/identity/submit", userController.submitIdentityVerification);
-router.patch("/:id/identity-status", userController.updateIdentityStatus);
-
-router.get("/:id/notifications", userController.getUserNotifications);
-router.post("/:id/notifications", userController.createNotification);
-router.patch("/:id/notifications/:notificationId", userController.updateNotification);
-router.delete("/:id/notifications/:notificationId", userController.deleteNotification);
-
-router.get("/:id", userController.getById);
-router.put("/:id", userController.updateUser);
-router.delete("/:id", userController.deleteUser);
-
+const router = require('express').Router();
+const { protect, adminOnly, selfOrAdmin } = require('../middleware/auth');
+const ctrl = require('../controllers/UserController');
+router.use(protect);
+router.get('/', adminOnly, ctrl.getAllUsers);
+router.post('/', adminOnly, ctrl.addUsers);
+router.get('/me', ctrl.getCurrentUser);
+router.put('/me', ctrl.updateCurrentUser);
+router.delete('/me', ctrl.deleteCurrentUser);
+router.post('/:id/identity/submit', selfOrAdmin, ctrl.submitIdentityVerification);
+router.patch('/:id/identity-status', adminOnly, ctrl.updateIdentityStatus);
+router.get('/:id/notifications', selfOrAdmin, ctrl.getUserNotifications);
+router.post('/:id/notifications', adminOnly, ctrl.createNotification);
+router.patch('/:id/notifications/:notificationId', selfOrAdmin, ctrl.updateNotification);
+router.delete('/:id/notifications/:notificationId', selfOrAdmin, ctrl.deleteNotification);
+router.get('/:id', selfOrAdmin, ctrl.getById);
+router.put('/:id', adminOnly, ctrl.updateUser);
+router.delete('/:id', adminOnly, ctrl.deleteUser);
 module.exports = router;

@@ -1,498 +1,116 @@
-"use client"
+import { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
+import { apiUrl } from '../../config/api';
 
-import { useState, useEffect } from "react"
-import axios from "axios"
-import "./PaymentDetailsDisplay.css"
-import Footer from "../Footer/Footer"
-import NavBar from "../NavBar/navBar"
-import { useNavigate } from "react-router-dom"
 
-const PaymentDetailsDisplay = () => {
-  const navigate = useNavigate()
-  const [payments, setPayments] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [totalItems, setTotalItems] = useState(0)
-  const [statusFilter, setStatusFilter] = useState("")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedPayment, setSelectedPayment] = useState(null)
-  const [showModal, setShowModal] = useState(false)
+import './PaymentDetailsDisplay.css';
 
-  const itemsPerPage = 10
-
-  // Fetch payment details from backend
-  const fetchPayments = async (page = 1, status = "", search = "") => {
+const statusLabel = status => ({ pending: 'Cash due', processing: 'Collection in progress', completed: 'Cash received', cancelled: 'Cancelled' }[status] || status);
+const methodLabel = method => ({ cash_on_delivery: 'Cash on delivery', cash_on_collection: 'Cash on collection' }[method] || 'Legacy payment');
+const currency = value => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value || 0);
+const date = value => new Date(value).toLocaleString();
+export default function PaymentDetailsDisplay() {
+  const [payments, setPayments] = useState([]), [statistics, setStatistics] = useState(null);
+  const [page, setPage] = useState(1), [pagination, setPagination] = useState({});
+  const [status, setStatus] = useState(''), [search, setSearch] = useState(''), [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(true), [busy, setBusy] = useState(false), [error, setError] = useState('');
+  const [selected, setSelected] = useState(null), [revision, setRevision] = useState(0);
+  const load = useCallback(async signal => {
+    setLoading(true); setError('');
     try {
-      setLoading(true)
-      setError("")
-
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: itemsPerPage.toString()
-      })
-
-      if (status) params.append('status', status)
-
-      const response = await axios.get(`http://localhost:5001/payment?${params}`)
-
-      if (response.data.status === 'ok') {
-        setPayments(response.data.data)
-        setTotalPages(response.data.pagination.totalPages)
-        setTotalItems(response.data.pagination.totalItems)
-        setCurrentPage(response.data.pagination.currentPage)
-      } else {
-        setError(response.data.message || 'Failed to fetch payment details')
-      }
-    } catch (error) {
-      console.error('Error fetching payments:', error)
-      setError('Failed to fetch payment details: ' + (error.response?.data?.message || error.message))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Fetch payment statistics
-  const [statistics, setStatistics] = useState(null)
-  const fetchStatistics = async () => {
-    try {
-      const response = await axios.get('http://localhost:5001/payment/statistics')
-      if (response.data.status === 'ok') {
-        setStatistics(response.data.data)
-      }
-    } catch (error) {
-      console.error('Error fetching statistics:', error)
-    }
-  }
-
-  // Load data on component mount
+      const [list, stats] = await Promise.all([
+        axios.get(apiUrl('/payment'), { params: { page, limit: 10, status, search: query }, signal }),
+        axios.get(apiUrl('/payment/statistics'), { signal })
+      ]);
+      if (signal.aborted) return;
+      setPayments(list.data.data); setPagination(list.data.pagination); setStatistics(stats.data.data);
+    } catch (err) {
+      if (!signal.aborted) setError(err.response?.data?.message || 'Unable to load payments.');
+    } finally { if (!signal.aborted) setLoading(false); }
+  }, [page, status, query]);
   useEffect(() => {
-    fetchPayments()
-    fetchStatistics()
-  }, [])
-
-  // Handle filter changes
-  const handleFilterChange = (newStatus) => {
-    setStatusFilter(newStatus)
-    setCurrentPage(1)
-    fetchPayments(1, newStatus, searchTerm)
-  }
-
-  // Handle search
-  const handleSearch = (e) => {
-    e.preventDefault()
-    setCurrentPage(1)
-    fetchPayments(1, statusFilter, searchTerm)
-  }
-
-  // Handle page change
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage)
-    fetchPayments(newPage, statusFilter, searchTerm)
-  }
-
-  // View payment details
-  const viewPaymentDetails = (payment) => {
-    setSelectedPayment(payment)
-    setShowModal(true)
-  }
-
-  // Update payment status
-  const updatePaymentStatus = async (paymentId, newStatus) => {
+    const controller = new AbortController(); load(controller.signal);
+    return () => controller.abort();
+  }, [load, revision]);
+  async function update(payment, nextStatus) {
+    const prompt = nextStatus === 'completed'
+      ? 'Confirm that the full cash amount has been received?'
+      : nextStatus === 'cancelled'
+        ? 'Cancel this entire unpaid order? Reserved stock will be released and history retained. Orders already in production cannot be cancelled.'
+        : 'Mark this order as collection in progress?';
+    if (!window.confirm(prompt)) return;
+    setBusy(true); setError('');
     try {
-      const response = await axios.patch(`http://localhost:5001/payment/${paymentId}/status`, {
-        status: newStatus
-      })
-
-      if (response.data.status === 'ok') {
-        // Refresh the payments list
-        fetchPayments(currentPage, statusFilter, searchTerm)
-        setShowModal(false)
-        alert('Payment status updated successfully!')
-      } else {
-        alert('Failed to update payment status: ' + response.data.message)
-      }
-    } catch (error) {
-      console.error('Error updating payment status:', error)
-      alert('Error updating payment status: ' + (error.response?.data?.message || error.message))
-    }
+      await axios.patch(apiUrl('/payment/' + payment._id + '/status'), { status: nextStatus });
+      setSelected(null); setRevision(value => value + 1);
+    } catch (err) { setError(err.response?.data?.message || 'Unable to update payment.'); }
+    finally { setBusy(false); }
   }
-
-  // Delete payment
-  const deletePayment = async (paymentId) => {
-    if (!window.confirm('Are you sure you want to delete this payment record?')) {
-      return
-    }
-
-    try {
-      const response = await axios.delete(`http://localhost:5001/payment/${paymentId}`)
-
-      if (response.data.status === 'ok') {
-        // Refresh the payments list
-        fetchPayments(currentPage, statusFilter, searchTerm)
-        alert('Payment record deleted successfully!')
-      } else {
-        alert('Failed to delete payment: ' + response.data.message)
-      }
-    } catch (error) {
-      console.error('Error deleting payment:', error)
-      alert('Error deleting payment: ' + (error.response?.data?.message || error.message))
-    }
-  }
-
-  // Format date
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount)
-  }
-
-  // Get status badge class
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case 'completed': return 'status-completed'
-      case 'processing': return 'status-processing'
-      case 'pending': return 'status-pending'
-      case 'cancelled': return 'status-cancelled'
-      case 'failed': return 'status-failed'
-      default: return 'status-default'
-    }
-  }
-
-  return (
-    <div>
-      <NavBar />
-      <div className="payment-header">
-        <h1>Payment Details Management</h1>
-        <p>View and manage all payment records from the database</p>
-        
-        {/* Back Button */}
-        <div className="back-button-container" style={{ 
-          marginTop: '20px', 
-          marginBottom: '20px',
-          position: 'relative',
-          zIndex: 1000,
-          display: 'block',
-          width: 'fit-content'
-        }}>
-          <button 
-            className="back-button"
-            onClick={() => navigate(-1)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 20px',
-              background: '#ffffff',
-              border: '2px solid #333',
-              borderRadius: '8px',
-              color: '#333',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              position: 'relative',
-              zIndex: 1001
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.background = '#333';
-              e.target.style.color = '#fff';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = '#ffffff';
-              e.target.style.color = '#333';
-            }}
-          >
-            <span>←</span>
-            <span>Back</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="payment-details-container">
-
-
-
-        {/* Statistics Cards */}
-        {statistics && (
-          <div className="statistics-cards">
-            <div className="stat-card">
-              <h3>Total Payments</h3>
-              <p className="stat-number">{statistics.totalPayments}</p>
+  const canUpdate = payment => ['pending', 'processing'].includes(payment.status);
+  const actions = payment => canUpdate(payment) && <>
+    {payment.status === 'pending' && <button disabled={busy} onClick={() => update(payment, 'processing')}>Start collection</button>}
+    <button disabled={busy} onClick={() => update(payment, 'completed')}>Record cash received</button>
+    <button className="btn-delete" disabled={busy} onClick={() => update(payment, 'cancelled')}>Cancel order</button>
+  </>;
+  return <div>
+    <header className="payment-header"><h1>Cash Payment Management</h1>
+      <p>Track cash due, record received payments, and manage unpaid orders.</p></header>
+    <section className="payment-details-container">
+      {statistics && <div className="statistics-cards">
+        <div className="stat-card"><h3>Total orders</h3><p className="stat-number">{statistics.totalPayments}</p></div>
+        <div className="stat-card"><h3>Settled cash orders</h3><p className="stat-number">{currency(statistics.totalRevenue)}</p></div>
+        <div className="stat-card"><h3>Average settled order</h3><p className="stat-number">{currency(statistics.averageOrderValue)}</p></div>
+        <div className="stat-card"><h3>Status distribution</h3>{Object.entries(statistics.statusDistribution || {}).map(([key, count]) =>
+          <p key={key}>{statusLabel(key)}: {count}</p>)}</div>
+      </div>}
+      <div className="filters-section"><div className="filters-row">
+        <label>Status <select value={status} onChange={event => { setStatus(event.target.value); setPage(1); }}>
+          <option value="">All statuses</option>{['pending', 'processing', 'completed', 'cancelled', 'failed'].map(value =>
+            <option key={value} value={value}>{statusLabel(value)}</option>)}
+        </select></label>
+        <form className="search-form" onSubmit={event => { event.preventDefault(); setQuery(search.trim()); setPage(1); }}>
+          <input aria-label="Search customer" placeholder="Search by customer name or email" value={search} onChange={event => setSearch(event.target.value)} />
+          <button type="submit">Search</button>
+        </form>
+      </div></div>
+      {error && <p role="alert" className="error-message">{error}</p>}
+      {loading ? <p>Loading payments…</p> : <div className="payments-table-container"><div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table className="payments-table">
+        <thead><tr><th>Order</th><th>Customer</th><th>Total due</th><th>Method</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody>{payments.map(payment => <tr key={payment._id}>
+          <td>{payment._id.slice(-8)}</td><td>{payment.deliveryDetails.firstName} {payment.deliveryDetails.lastName}<br />{payment.deliveryDetails.email}</td>
+          <td>{currency(payment.orderDetails.total)}</td><td>{methodLabel(payment.paymentDetails.method)}</td>
+          <td><span className={'status-badge status-' + payment.status}>{statusLabel(payment.status)}</span></td>
+          <td>{date(payment.createdAt)}</td><td className="actions"><button className="btn-view" onClick={() => setSelected(payment)}>View</button>{actions(payment)}</td>
+        </tr>)}</tbody>
+      </table></div>{payments.length === 0 && <p className="no-data">No payment records found.</p>}</div>}
+      {pagination.totalPages > 1 && <div className="pagination">
+        <button disabled={page <= 1 || loading} onClick={() => setPage(value => value - 1)}>Previous</button>
+        <span>Page {page} of {pagination.totalPages} ({pagination.totalItems} orders)</span>
+        <button disabled={page >= pagination.totalPages || loading} onClick={() => setPage(value => value + 1)}>Next</button>
+      </div>}
+      {selected && <div className="modal-overlay" onClick={() => !busy && setSelected(null)}>
+        <section role="dialog" aria-modal="true" aria-labelledby="payment-title" className="modal-content" onClick={event => event.stopPropagation()}>
+          <div className="modal-header"><h2 id="payment-title">Order {selected._id.slice(-8)}</h2>
+            <button className="modal-close" aria-label="Close" disabled={busy} onClick={() => setSelected(null)}>×</button></div>
+          <div className="modal-body">
+            <div className="details-section"><h3>Customer</h3><p>{selected.deliveryDetails.firstName} {selected.deliveryDetails.lastName}</p>
+              <p>{selected.deliveryDetails.email} · {selected.deliveryDetails.phone}</p>
+              <p>{[selected.deliveryDetails.address, selected.deliveryDetails.city, selected.deliveryDetails.state, selected.deliveryDetails.zipCode, selected.deliveryDetails.country].filter(Boolean).join(', ')}</p>
             </div>
-            <div className="stat-card">
-              <h3>Total Revenue</h3>
-              <p className="stat-number">{formatCurrency(statistics.totalRevenue)}</p>
+            <div className="details-section"><h3>Order items</h3>{selected.orderDetails.cartItems?.map((item, index) =>
+              <p key={index}>{item.name || item.kind} × {item.quantity} — {currency(item.totalPrice)}</p>)}
+              <p>Subtotal: {currency(selected.orderDetails.subtotal)}</p><p>Tax: {currency(selected.orderDetails.tax)}</p>
+              <p>Delivery: {currency(selected.shippingDetails.cost)} ({selected.shippingDetails.method})</p>
+              {selected.orderDetails.giftWrap && <p>Gift wrapping: {currency(selected.orderDetails.giftWrapFee)}</p>}
+              <p><strong>Total: {currency(selected.orderDetails.total)}</strong></p>
             </div>
-            <div className="stat-card">
-              <h3>Average Order</h3>
-              <p className="stat-number">{formatCurrency(statistics.averageOrderValue)}</p>
+            <div className="details-section"><h3>Payment</h3><p>{methodLabel(selected.paymentDetails.method)} · {statusLabel(selected.status)}</p>
+              <p>Created: {date(selected.createdAt)}<br />Updated: {date(selected.updatedAt)}</p>
             </div>
-            <div className="stat-card">
-              <h3>Status Distribution</h3>
-              <div className="status-distribution">
-                {Object.entries(statistics.statusDistribution).map(([status, count]) => (
-                  <span key={status} className={`status-badge ${getStatusBadgeClass(status)}`}>
-                    {status}: {count}
-                  </span>
-                ))}
-              </div>
-            </div>
+            {error && <p role="alert" className="error-message">{error}</p>}
           </div>
-        )}
-
-        {/* Filters and Search */}
-        <div className="filters-section">
-          <div className="filters-row">
-            <div className="filter-group">
-              <label>Status Filter:</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => handleFilterChange(e.target.value)}
-              >
-                <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="failed">Failed</option>
-              </select>
-            </div>
-
-            <form onSubmit={handleSearch} className="search-form">
-              <input
-                type="text"
-                placeholder="Search by email or name..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <button type="submit">Search</button>
-            </form>
-          </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
-
-        {/* Loading State */}
-        {loading && (
-          <div className="loading-message">
-            Loading payment details...
-          </div>
-        )}
-
-        {/* Payments Table */}
-        {!loading && !error && (
-          <div className="payments-table-container">
-            <table className="payments-table">
-              <thead>
-                <tr>
-                  <th>Payment ID</th>
-                  <th>Customer</th>
-                  <th>Email</th>
-                  <th>Total Amount</th>
-                  <th>Payment Method</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payments.map((payment) => (
-                  <tr key={payment._id}>
-                    <td className="payment-id">{payment._id.slice(-8)}</td>
-                    <td>{payment.deliveryDetails.firstName} {payment.deliveryDetails.lastName}</td>
-                    <td>{payment.deliveryDetails.email}</td>
-                    <td className="amount">{formatCurrency(payment.orderDetails.total)}</td>
-                    <td className="payment-method">
-                      <span className={`method-badge method-${payment.paymentDetails.method}`}>
-                        {payment.paymentDetails.method.toUpperCase()}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`status-badge ${getStatusBadgeClass(payment.status)}`}>
-                        {payment.status}
-                      </span>
-                    </td>
-                    <td>{formatDate(payment.createdAt)}</td>
-                    <td className="actions">
-                      <button
-                        className="btn-view"
-                        onClick={() => viewPaymentDetails(payment)}
-                      >
-                        View
-                      </button>
-                      <button
-                        className="btn-delete"
-                        onClick={() => deletePayment(payment._id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {payments.length === 0 && (
-              <div className="no-data">
-                No payment records found.
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Pagination */}
-        {!loading && !error && totalPages > 1 && (
-          <div className="pagination">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </button>
-
-            <span className="page-info">
-              Page {currentPage} of {totalPages} ({totalItems} total records)
-            </span>
-
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
-          </div>
-        )}
-
-        {/* Payment Details Modal */}
-        {showModal && selectedPayment && (
-          <div className="modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h2>Payment Details</h2>
-                <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
-              </div>
-
-              <div className="modal-body">
-                <div className="details-section">
-                  <h3>Customer Information</h3>
-                  <div className="details-grid">
-                    <div><strong>Name:</strong> {selectedPayment.deliveryDetails.firstName} {selectedPayment.deliveryDetails.lastName}</div>
-                    <div><strong>Email:</strong> {selectedPayment.deliveryDetails.email}</div>
-                    <div><strong>Phone:</strong> {selectedPayment.deliveryDetails.phone}</div>
-                    <div><strong>Address:</strong> {selectedPayment.deliveryDetails.address}</div>
-                    <div><strong>City:</strong> {selectedPayment.deliveryDetails.city}</div>
-                    <div><strong>State:</strong> {selectedPayment.deliveryDetails.state}</div>
-                    <div><strong>ZIP Code:</strong> {selectedPayment.deliveryDetails.zipCode}</div>
-                    <div><strong>Country:</strong> {selectedPayment.deliveryDetails.country}</div>
-                  </div>
-                </div>
-
-                <div className="details-section">
-                  <h3>Order Information</h3>
-                  <div className="details-grid">
-                    <div><strong>Subtotal:</strong> {formatCurrency(selectedPayment.orderDetails.subtotal)}</div>
-                    <div><strong>Tax:</strong> {formatCurrency(selectedPayment.orderDetails.tax)}</div>
-                    <div><strong>Shipping:</strong> {formatCurrency(selectedPayment.shippingDetails.cost)}</div>
-                    {selectedPayment.orderDetails.giftWrap && (
-                      <div><strong>Gift Wrap:</strong> {formatCurrency(selectedPayment.orderDetails.giftWrapFee)}</div>
-                    )}
-                    <div><strong>Total:</strong> {formatCurrency(selectedPayment.orderDetails.total)}</div>
-                    <div><strong>Status:</strong>
-                      <span className={`status-badge ${getStatusBadgeClass(selectedPayment.status)}`}>
-                        {selectedPayment.status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="details-section">
-                  <h3>Payment Information</h3>
-                  <div className="details-grid">
-                    <div><strong>Method:</strong> {selectedPayment.paymentDetails.method.toUpperCase()}</div>
-                    {selectedPayment.paymentDetails.method === 'card' && selectedPayment.paymentDetails.cardDetails && (
-                      <>
-                        <div><strong>Card Number:</strong> {selectedPayment.paymentDetails.cardDetails.cardNumber}</div>
-                        <div><strong>Expiry:</strong> {selectedPayment.paymentDetails.cardDetails.expiryDate}</div>
-                        <div><strong>Name on Card:</strong> {selectedPayment.paymentDetails.cardDetails.cardName}</div>
-                        <div><strong>Save Card:</strong> {selectedPayment.paymentDetails.cardDetails.saveCard ? 'Yes' : 'No'}</div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="details-section">
-                  <h3>Shipping Information</h3>
-                  <div className="details-grid">
-                    <div><strong>Method:</strong> {selectedPayment.shippingDetails.method}</div>
-                    <div><strong>Cost:</strong> {formatCurrency(selectedPayment.shippingDetails.cost)}</div>
-                  </div>
-                </div>
-
-                {selectedPayment.giftMessage && (
-                  <div className="details-section">
-                    <h3>Gift Message</h3>
-                    <p>{selectedPayment.giftMessage}</p>
-                  </div>
-                )}
-
-                <div className="details-section">
-                  <h3>Timestamps</h3>
-                  <div className="details-grid">
-                    <div><strong>Created:</strong> {formatDate(selectedPayment.createdAt)}</div>
-                    <div><strong>Updated:</strong> {formatDate(selectedPayment.updatedAt)}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <div className="status-update">
-                  <label>Update Status:</label>
-                  <select
-                    value={selectedPayment.status}
-                    onChange={(e) => updatePaymentStatus(selectedPayment._id, e.target.value)}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                    <option value="failed">Failed</option>
-                  </select>
-                </div>
-                <button className="btn-close" onClick={() => setShowModal(false)}>
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-      </div>
-      <div>
-        <Footer></Footer>
-      </div>
-    </div>
-
-  )
+          <div className="modal-footer">{actions(selected)}<button className="btn-close" disabled={busy} onClick={() => setSelected(null)}>Close</button></div>
+        </section>
+      </div>}
+    </section></div>;
 }
-
-export default PaymentDetailsDisplay

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import NavBar from '../NavBar/navBar';
+
 import AdminApplicantManagement from '../AdminApplicantManagement/AdminApplicantManagement';
 import AdminJobManagement from '../AdminJobManagement/AdminJobManagement';
 import Reports from '../AdminPanel/Reports';
@@ -54,7 +54,7 @@ export default function AdminCareerManagement() {
 
   return (
     <div className="admin-career-page">
-      <NavBar />
+      
       <div className="admin-career-container">
         <header className="admin-career-header">
           <h1>Career Management</h1>

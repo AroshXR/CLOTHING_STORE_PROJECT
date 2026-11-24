@@ -1,12 +1,14 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../MediaImage';
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../../AuthGuard/AuthGuard";
-import NavBar from "../NavBar/navBar";
-import Footer from "../Footer/Footer";
+import { useAuth } from "../../AuthGuard/authGuard";
+
+
 import "./Outlet.css";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
+const API_BASE_URL = API_ORIGIN;
 
 const OutletDetail = () => {
     const { id } = useParams();
@@ -122,7 +124,9 @@ const OutletDetail = () => {
         navigate('/paymentManagement');
     };
 
-    if (loading) return <div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>;
+    if (loading) return <div style={{
+  textAlign: 'center'
+}}>Loading...</div>;
     if (error) return <div style={{ color: 'red' }}>{error}</div>;
     if (!item) return <div>Not found</div>;
 
@@ -130,16 +134,20 @@ const OutletDetail = () => {
 
     return (
         <div className="outlet-detail">
-            <NavBar />
+            
             <div style={{ display: 'grid', gap: 16, maxWidth: 1200, margin: '0 auto', padding: 16 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div style={{
+  display: 'grid',
+  gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+  gap: 16
+}}>
                 <div>
                     {gallery.length > 0 && (
-                        <img src={gallery[selectedImageIndex]} alt={item.name} style={{ width: '100%', maxHeight: 420, objectFit: 'cover', borderRadius: 8 }} />
+                        <MediaImage src={gallery[selectedImageIndex]} alt={item.name} style={{ width: '100%', maxHeight: 420, objectFit: 'cover', borderRadius: 8 }} />
                     )}
                     <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
                         {gallery.map((g, idx) => (
-                            <img 
+                            <MediaImage
                                 key={idx} 
                                 src={g} 
                                 alt={`g-${idx}`} 
@@ -158,7 +166,7 @@ const OutletDetail = () => {
                     </div>
                 </div>
                 <div>
-                    <h2 style={{ marginBottom: 4 }}>{item.name}</h2>
+                    <h1 style={{ marginBottom: 4 }}>{item.name}</h1>
                     <p style={{ color: '#6b7280', margin: 0 }}>{item.brand} {item.category}</p>
                     <p style={{ color: '#6b7280', marginTop: 8 }}>{item.material}</p>
                     {item.description && <p style={{ marginTop: 8 }}>{item.description}</p>}
@@ -198,8 +206,14 @@ const OutletDetail = () => {
                     {typeof item.rating === 'number' && <p><strong>Rating:</strong> {item.rating.toFixed(1)} ({item.numReviews || 0})</p>}
 
                     <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-                        <button onClick={handleAddToCart} disabled={item.stock === 0} style={{ padding: '10px 16px', borderRadius: 6, border: '1px solid #ddd', cursor: item.stock === 0 ? 'not-allowed' : 'pointer', background: item.stock === 0 ? '#f3f4f6' : '#fff', opacity: item.stock === 0 ? 0.6 : 1 }}>Add to Cart</button>
-                        <button onClick={handleBuyNow} disabled={item.stock === 0} style={{ padding: '10px 16px', borderRadius: 6, border: 'none', background: item.stock === 0 ? '#9ca3af' : '#2c5aa0', color: '#fff', cursor: item.stock === 0 ? 'not-allowed' : 'pointer', opacity: item.stock === 0 ? 0.8 : 1 }}>Buy Now</button>
+                        <button onClick={handleAddToCart} disabled={item.stock === 0} style={{
+  cursor: item.stock === 0 ? 'not-allowed' : 'pointer',
+  opacity: item.stock === 0 ? 0.6 : 1
+}}>Add to Cart</button>
+                        <button onClick={handleBuyNow} disabled={item.stock === 0} style={{
+  cursor: item.stock === 0 ? 'not-allowed' : 'pointer',
+  opacity: item.stock === 0 ? 0.8 : 1
+}}>Buy Now</button>
                     </div>
                 </div>
             </div>
@@ -228,7 +242,7 @@ const OutletDetail = () => {
                 </form>
             </div>
             </div>
-            <Footer />
+            
         </div>
     );
 };

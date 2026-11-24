@@ -1,3 +1,4 @@
+const { isAdmin } = require('../middleware/auth');
 const ClothingItem = require('../models/ClothingItemModel');
 const Order = require('../models/OrderModel');
 
@@ -5,7 +6,7 @@ exports.getAll = async (req, res) => {
   try {
     const { status = 'active', q, category, brand, material, color, size, minPrice, maxPrice } = req.query;
     const query = {};
-    if (status) query.status = status;
+    query.status = isAdmin(req.user) ? status : 'active';
     if (q) query.name = { $regex: q, $options: 'i' };
     if (category) query.category = category;
     if (brand) query.brand = brand;
@@ -183,7 +184,7 @@ exports.salesTimeSeries = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     const item = await ClothingItem.findById(req.params.id);
-    if (!item) {
+    if (!item || (item.status !== 'active' && !isAdmin(req.user))) {
       return res.status(404).json({ message: 'Item not found' });
     }
     return res.status(200).json(item);
@@ -219,11 +220,11 @@ exports.update = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
-    const deleted = await ClothingItem.findByIdAndDelete(req.params.id);
+    const deleted = await ClothingItem.findByIdAndUpdate(req.params.id, { $set: { status: 'archived' } }, { new: true, runValidators: true });
     if (!deleted) {
       return res.status(404).json({ message: 'Item not found' });
     }
-    return res.status(200).json({ message: 'Item deleted' });
+    return res.status(200).json({ message: 'Item archived; order and stock history retained' });
   } catch (err) {
     console.error('Error deleting clothing item:', err);
     return res.status(500).json({ message: 'Failed to delete clothing item' });
@@ -236,7 +237,7 @@ exports.addReview = async (req, res) => {
     if (!rating) return res.status(400).json({ message: 'Rating is required' });
     const item = await ClothingItem.findById(req.params.id);
     if (!item) return res.status(404).json({ message: 'Item not found' });
-    item.reviews.push({ rating, comment: comment || '', username: username || 'Anonymous', userId: userId || null });
+    item.reviews.push({ rating, comment: comment || '', username: req.user?.username || 'Anonymous', userId: req.user?._id || null });
     item.numReviews = item.reviews.length;
     item.rating = item.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / (item.numReviews || 1);
     await item.save();

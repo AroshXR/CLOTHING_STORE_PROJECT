@@ -1,12 +1,13 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import NavBar from '../../Components/NavBar/navBar';
-import Footer from '../../Components/Footer/Footer';
-import { useAuth } from '../../AuthGuard/AuthGuard';
+
+
+import { useAuth } from '../../AuthGuard/authGuard';
 import TailorSubNav from '../../Components/tailor-management/TailorSubNav';
 import { Link } from 'react-router-dom';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+const API_BASE_URL = API_ORIGIN;
 
 export default function AdminTailors() {
   const { getToken } = useAuth();
@@ -50,18 +51,18 @@ export default function AdminTailors() {
 
   return (
     <div className="admin-tailors">
-      <NavBar />
+      
       <TailorSubNav />
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: 16 }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto', padding: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <h1 style={{ margin: 0 }}>Tailor Management</h1>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <Link to="/admin/custom-orders">
-              <button style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #667eea', background: '#eef2ff', fontWeight: 600 }}>
+              <button >
                 Manage Orders
               </button>
             </Link>
-            <button onClick={handleSync} disabled={syncing} style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #ddd', fontWeight: 600 }}>
+            <button onClick={handleSync} disabled={syncing} >
               {syncing ? 'Syncing...' : 'Sync Tailors from Users'}
             </button>
           </div>
@@ -121,7 +122,7 @@ export default function AdminTailors() {
                     </div>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                       <Link to={`/admin/custom-orders?tailorId=${t._id}`}>
-                        <button style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid #ddd' }}>View Orders</button>
+                        <button >View Orders</button>
                       </Link>
                     </div>
                   </div>
@@ -131,8 +132,8 @@ export default function AdminTailors() {
             </section>
           </div>
         )}
-      </main>
-      <Footer />
+      </section>
+      
     </div>
   );
 }

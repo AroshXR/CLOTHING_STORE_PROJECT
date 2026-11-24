@@ -1,7 +1,8 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import NavBar from "../NavBar/navBar";
-import Footer from "../Footer/Footer";
+
+
 import OutletCard from "./outletCard";
 
 const Outlet = () => {
@@ -10,7 +11,7 @@ const Outlet = () => {
     const [error, setError] = useState("");
     const [filters, setFilters] = useState({ q: "", category: "", brand: "", material: "", color: "", size: "", minPrice: "", maxPrice: "" });
 
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
+    const API_BASE_URL = API_ORIGIN;
 
     // Predefined options (keep in sync with ClothingInventoryManagement)
     const CATEGORY_OPTIONS = [
@@ -71,7 +72,7 @@ const Outlet = () => {
         <div className="outlet-page">
             {/* <NavBar /> */}
             <div style={{ maxWidth: 1200, margin: '0 auto', padding: 16 }}>
-                <h2>Outlet clothing Items</h2>
+                <h1>Outlet clothing Items</h1>
                 <form onSubmit={applyFilters} style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', marginBottom: 16 }}>
                     <input name="q" placeholder="Search" value={filters.q} onChange={handleChange} />
                     <select name="category" value={filters.category} onChange={handleChange}>

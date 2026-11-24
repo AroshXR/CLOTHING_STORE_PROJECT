@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const { protect, adminOnly } = require('../middleware/auth');
+router.use(protect, adminOnly);
 const {
   getOverviewAnalytics,
   getStockAnalytics,

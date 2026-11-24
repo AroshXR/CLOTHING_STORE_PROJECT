@@ -1,4 +1,5 @@
-.pasindu-owner-dashboard-page {
+@layer app-legacy {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-owner-dashboard-page {
   flex: 1;
   width: 100%;
   min-height: 100vh;
@@ -6,14 +7,14 @@
   padding: 28px 20px 40px;
 }
  
-.pasindu-owner-dashboard {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-owner-dashboard {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
 }
  
 /* Hero Header */
-.pasindu-dashboard__header {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__header {
   background: linear-gradient(135deg, #000000 0%, #333333 100%);
   color: #fff;
   border-radius: 16px;
@@ -24,18 +25,18 @@
   text-align: center;
 }
  
-.pasindu-dashboard__header-content {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__header-content {
   max-width: 800px;
   margin: 0 auto;
 }
  
-.pasindu-dashboard__header-content h1 {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__header-content h1 {
   margin: 0;
   font-size: 2.5rem;
   font-weight: 700;
 }
  
-.pasindu-dashboard__header-content p {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__header-content p {
   margin: 8px auto 0;
   color: #e5e7eb;
   opacity: 0.9;
@@ -43,7 +44,7 @@
   max-width: 700px;
 }
  
-.pasindu-dashboard__refresh-btn {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__refresh-btn {
   position: absolute;
   top: 30px;
   right: 30px;
@@ -61,13 +62,13 @@
   gap: 8px;
 }
  
-.pasindu-dashboard__refresh-btn:hover {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__refresh-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
  
 /* Stats Grid */
-.pasindu-dashboard__stats-grid {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
@@ -75,18 +76,18 @@
 }
  
 @media (max-width: 1200px) {
-  .pasindu-dashboard__stats-grid {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
  
 @media (max-width: 640px) {
-  .pasindu-dashboard__stats-grid {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__stats-grid {
     grid-template-columns: 1fr;
   }
 }
  
-.pasindu-stat-card {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -100,7 +101,7 @@
   transition: 0.25s ease;
 }
  
-.pasindu-stat-card::before {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -108,18 +109,18 @@
   background: radial-gradient(600px 120px at -10% -10%, rgba(0, 0, 0, 0.06), transparent 60%);
 }
  
-.pasindu-stat-card:hover {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
 }
  
-.pasindu-stat-card__header {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
 }
  
-.pasindu-stat-card__info h3 {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card__info h3 {
   margin: 0;
   font-size: 0.875rem;
   color: #6b7280;
@@ -128,14 +129,14 @@
   letter-spacing: 0.5px;
 }
  
-.pasindu-stat-card__info p {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card__info p {
   margin: 8px 0 0;
   font-size: 2rem;
   font-weight: 700;
   color: #111;
 }
  
-.pasindu-stat-card__icon {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card__icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -146,26 +147,26 @@
   border: 1px solid #e5e7eb;
 }
  
-.pasindu-stat-card__icon img {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card__icon img {
   width: 24px;
   height: 24px;
 }
  
 /* Main Content Grid */
-.pasindu-dashboard__content-grid {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__content-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
 }
  
 @media (min-width: 1024px) {
-  .pasindu-dashboard__content-grid {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__content-grid {
     grid-template-columns: 1.5fr 1fr;
   }
 }
  
 /* Info Cards (Recent Bookings & Monthly Revenue) */
-.pasindu-info-card {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-info-card {
   padding: 28px;
   border: 1px solid #ececec;
   border-radius: 14px;
@@ -176,7 +177,7 @@
   transition: 0.25s ease;
 }
  
-.pasindu-info-card::before {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-info-card::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -184,29 +185,29 @@
   background: radial-gradient(600px 120px at -10% -10%, rgba(0, 0, 0, 0.06), transparent 60%);
 }
  
-.pasindu-info-card:hover {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-info-card:hover {
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
 }
  
-.pasindu-info-card__header {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-info-card__header {
   margin-bottom: 20px;
 }
  
-.pasindu-info-card__header h2 {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-info-card__header h2 {
   margin: 0;
   font-size: 1.5rem;
   color: #111;
   font-weight: 700;
 }
  
-.pasindu-info-card__header p {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-info-card__header p {
   margin: 4px 0 0;
   color: #6b7280;
   font-size: 0.95rem;
 }
  
 /* Recent Bookings List */
-.pasindu-booking-item {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -218,18 +219,18 @@
   transition: all 0.2s ease;
 }
  
-.pasindu-booking-item:hover {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item:hover {
   background: #f1f5f9;
   border-color: #e5e7eb;
 }
  
-.pasindu-booking-item__left {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item__left {
   display: flex;
   align-items: center;
   gap: 12px;
 }
  
-.pasindu-booking-item__icon {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item__icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -240,38 +241,38 @@
   border: 1px solid #e5e7eb;
 }
  
-.pasindu-booking-item__icon img {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item__icon img {
   width: 24px;
   height: 24px;
 }
  
-.pasindu-booking-item__details h4 {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item__details h4 {
   margin: 0;
   font-size: 1rem;
   color: #111;
   font-weight: 600;
 }
  
-.pasindu-booking-item__details p {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item__details p {
   margin: 4px 0 0;
   font-size: 0.875rem;
   color: #6b7280;
 }
  
-.pasindu-booking-item__right {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item__right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 6px;
 }
  
-.pasindu-booking-item__price {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item__price {
   font-size: 1rem;
   font-weight: 700;
   color: #111;
 }
  
-.pasindu-booking-item__status {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item__status {
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -283,11 +284,11 @@
 }
  
 /* Monthly Revenue Card */
-.pasindu-revenue-card {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-revenue-card {
   text-align: center;
 }
  
-.pasindu-revenue-card__amount {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-revenue-card__amount {
   margin-top: 24px;
   font-size: 3rem;
   font-weight: 700;
@@ -299,87 +300,88 @@
 }
  
 /* Empty State */
-.pasindu-empty-state {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-empty-state {
   text-align: center;
   padding: 40px 20px;
   color: #9ca3af;
 }
  
-.pasindu-empty-state i {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-empty-state i {
   font-size: 3rem;
   margin-bottom: 12px;
   opacity: 0.5;
 }
  
-.pasindu-empty-state p {
+:where(.ui-page[data-page="owner-dashboard"]) .pasindu-empty-state p {
   margin: 0;
   font-size: 1rem;
 }
  
 /* Responsive Design */
 @media (max-width: 768px) {
-  .pasindu-dashboard__header {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__header {
     padding: 60px 20px 30px;
   }
  
-  .pasindu-dashboard__header-content h1 {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__header-content h1 {
     font-size: 2rem;
   }
  
-  .pasindu-dashboard__refresh-btn {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__refresh-btn {
     top: 20px;
     right: 20px;
     padding: 10px 16px;
     font-size: 0.875rem;
   }
  
-  .pasindu-dashboard__stats-grid {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-dashboard__stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 16px;
   }
  
-  .pasindu-stat-card {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card {
     padding: 20px;
   }
  
-  .pasindu-stat-card__info p {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card__info p {
     font-size: 1.75rem;
   }
  
-  .pasindu-info-card {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-info-card {
     padding: 20px;
   }
  
-  .pasindu-booking-item {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
  
-  .pasindu-booking-item__right {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item__right {
     flex-direction: row;
     align-items: center;
     width: 100%;
     justify-content: space-between;
   }
  
-  .pasindu-revenue-card__amount {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-revenue-card__amount {
     font-size: 2.5rem;
   }
 }
  
 @media (max-width: 480px) {
-  .pasindu-booking-item__icon {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-booking-item__icon {
     display: none;
   }
  
-  .pasindu-stat-card__icon {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card__icon {
     width: 40px;
     height: 40px;
   }
  
-  .pasindu-stat-card__icon img {
+  :where(.ui-page[data-page="owner-dashboard"]) .pasindu-stat-card__icon img {
     width: 20px;
     height: 20px;
   }
+}
 }

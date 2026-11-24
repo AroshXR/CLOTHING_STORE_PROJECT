@@ -1,8 +1,10 @@
+import UIIcon from '../Layout/UIIcon';
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Career.css';
 import ApplicantForm from './ApplicantForm';
-import NavBar from '../NavBar/navBar';
+
 
 const Career = () => {
   const [showApplicationForm, setShowApplicationForm] = useState(false);
@@ -13,7 +15,7 @@ const Career = () => {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const API_BASE_URL = 'http://localhost:5001';
+  const API_BASE_URL = API_ORIGIN;
 
   // Load jobs from backend API when component mounts
   useEffect(() => {
@@ -136,7 +138,7 @@ const Career = () => {
 
   return (
     <div className='main'>
-      <NavBar />
+      
       <div className="career-header">
         <h1>Join Our Team</h1>
         <p>Be part of our mission to create amazing fashion experiences</p>
@@ -149,22 +151,22 @@ const Career = () => {
             <h2>Why Work With Us?</h2>
             <div className="benefits-grid">
               <div className="benefit-card">
-                <i className="bx bx-heart"></i>
+                <UIIcon className="bx bx-heart"></UIIcon>
                 <h3>Passion for Fashion</h3>
                 <p>Work in an environment where creativity and innovation are celebrated</p>
               </div>
               <div className="benefit-card">
-                <i className="bx bx-trending-up"></i>
+                <UIIcon className="bx bx-trending-up"></UIIcon>
                 <h3>Growth Opportunities</h3>
                 <p>Continuous learning and career development programs</p>
               </div>
               <div className="benefit-card">
-                <i className="bx bx-group"></i>
+                <UIIcon className="bx bx-group"></UIIcon>
                 <h3>Great Team</h3>
                 <p>Collaborate with talented professionals in a supportive environment</p>
               </div>
               <div className="benefit-card">
-                <i className="bx bx-gift"></i>
+                <UIIcon className="bx bx-gift"></UIIcon>
                 <h3>Benefits & Perks</h3>
                 <p>Competitive salary, health insurance, and flexible work arrangements</p>
               </div>
@@ -210,12 +212,12 @@ const Career = () => {
                       <span className="job-type">{job.type}</span>
                     </div>
                     <div className="job-details">
-                      <p><i className="bx bx-building"></i> {job.department}</p>
-                      <p><i className="bx bx-map"></i> {job.location}</p>
-                      <p><i className="bx bx-time"></i> {job.experience}</p>
+                      <p><UIIcon className="bx bx-building"></UIIcon> {job.department}</p>
+                      <p><UIIcon className="bx bx-map"></UIIcon> {job.location}</p>
+                      <p><UIIcon className="bx bx-time"></UIIcon> {job.experience}</p>
                       {job.salary && (job.salary.min !== undefined || job.salary.max !== undefined) && (
                         <p>
-                          <i className="bx bx-money"></i>{' '}
+                          <UIIcon className="bx bx-money"></UIIcon>{' '}
                           {job.salary.currency || 'LKR'}{' '}
                           {job.salary.min !== undefined ? job.salary.min : '-'}
                           {' - '}
@@ -224,7 +226,7 @@ const Career = () => {
                       )}
                       {job.deadline && (
                         <p>
-                          <i className="bx bx-calendar"></i>{' '}
+                          <UIIcon className="bx bx-calendar"></UIIcon>{' '}
                           Apply before: {new Date(job.deadline).toLocaleDateString()}
                         </p>
                       )}

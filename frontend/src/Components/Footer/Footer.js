@@ -1,62 +1,31 @@
-// Footer.js
 import React from 'react';
-import './Footer.css';
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
-
-function Footer() {
-    useEffect(() => {
-        const link = document.createElement("link");
-        link.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css";
-        link.rel = "stylesheet";
-        document.head.appendChild(link);
-      }, []);
-
-  return (
-    <footer className="footer">
-      <div className="footer-container">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <h3 className="footer-logo">Klassy T Shirts</h3>
-            <p className="footer-tagline">Custom clothing for every style</p>
-          </div>
-          
-          <div className="footer-social">
-            <h4 className="footer-section-title">Follow Us</h4>
-            <div className="footer-links">
-              <Link to="#" aria-label="Instagram">
-                <i className='fab fa-instagram'></i>
-              </Link>
-              <Link to="#" aria-label="Facebook">
-                <i className='fab fa-facebook-f'></i>
-              </Link>
-              <Link to="#" aria-label="X">
-                <i className='fab fa-x'></i>
-              </Link>
-              <a
-                href="https://wa.me/94705772010"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="WhatsApp"
-              >
-                <i className='fab fa-whatsapp'></i>
-              </a>
-            </div>
-          </div>
+import { useBranding } from '../../config/branding';
+import SiteBrand from '../SiteBrand';
+import './Footer.css';
+export default function Footer() {
+  const { branding } = useBranding();
+  const links = Object.entries(branding.socialLinks).filter(([, url]) => url);
+  return <footer className="site-footer">
+    <div className="site-footer__inner">
+      <div className="site-footer__top">
+        <div className="site-footer__identity">
+          <Link className="site-footer__brand" to="/"><SiteBrand /></Link>
+          {branding.tagline && <p>{branding.tagline}</p>}
+          {branding.address && <p className="site-footer__address">{branding.address}</p>}
+          {branding.contactEmail && <p><a href={'mailto:' + branding.contactEmail}>{branding.contactEmail}</a></p>}
+          {branding.contactPhone && <p><a href={'tel:' + branding.contactPhone.replace(/[^\d+]/g, '')}>{branding.contactPhone}</a></p>}
         </div>
-        
-        <div className="footer-bottom">
-          <p className="footer-text">
-            © {new Date().getFullYear()} Klassy T Shirts. All rights reserved.
-          </p>
-          <div className="footer-legal">
-            <Link to="/privacy">Privacy Policy</Link>
-            <Link to="/terms">Terms and Conditions</Link>
-          </div>
-        </div>
+        {links.length > 0 && <nav className="site-footer__social" aria-label="Social media">
+          {links.map(([key, url]) => <a key={key} href={url} target="_blank" rel="noopener noreferrer">{key === 'twitter' ? 'X / Twitter' : key[0].toUpperCase() + key.slice(1)}</a>)}
+        </nav>}
       </div>
-    </footer>
-  );
+      <div className="site-footer__bottom">
+        <p>© {new Date().getFullYear()} {branding.name}. All rights reserved.</p>
+        <nav className="site-footer__legal" aria-label="Footer navigation">
+          <Link to="/contact">Contact</Link><Link to="/privacy">Privacy policy</Link><Link to="/terms">Terms and conditions</Link>
+        </nav>
+      </div>
+    </div>
+  </footer>;
 }
-
-export default Footer;

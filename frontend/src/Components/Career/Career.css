@@ -1,10 +1,11 @@
-.career-page {
+@layer app-legacy {
+:where(.ui-page[data-page="careers"]) .career-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   padding: 20px;
 }
 
-.career-header {
+:where(.ui-page[data-page="careers"]) .career-header {
   text-align: center;
   padding: 60px 20px;
   background: linear-gradient(135deg, #000000 0%, #333333 100%);
@@ -13,43 +14,43 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.career-header h1 {
+:where(.ui-page[data-page="careers"]) .career-header h1 {
   font-size: 3rem;
   margin-bottom: 20px;
   font-weight: 700;
 }
 
-.career-header p {
+:where(.ui-page[data-page="careers"]) .career-header p {
   font-size: 1.2rem;
   opacity: 0.9;
   max-width: 600px;
   margin: 0 auto;
 }
 
-.career-content {
+:where(.ui-page[data-page="careers"]) .career-content {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.career-intro {
+:where(.ui-page[data-page="careers"]) .career-intro {
   margin-bottom: 60px;
 }
 
-.career-intro h2 {
+:where(.ui-page[data-page="careers"]) .career-intro h2 {
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 40px;
   color: #333;
 }
 
-.benefits-grid {
+:where(.ui-page[data-page="careers"]) .benefits-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 30px;
   margin-bottom: 40px;
 }
 
-.benefit-card {
+:where(.ui-page[data-page="careers"]) .benefit-card {
   background: white;
   padding: 30px;
   border-radius: 15px;
@@ -58,33 +59,33 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.benefit-card:hover {
+:where(.ui-page[data-page="careers"]) .benefit-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
-.benefit-card i {
+:where(.ui-page[data-page="careers"]) .benefit-card i {
   font-size: 3rem;
   color: #000000;
   margin-bottom: 20px;
 }
 
-.benefit-card h3 {
+:where(.ui-page[data-page="careers"]) .benefit-card h3 {
   font-size: 1.5rem;
   margin-bottom: 15px;
   color: #333;
 }
 
-.benefit-card p {
+:where(.ui-page[data-page="careers"]) .benefit-card p {
   color: #666;
   line-height: 1.6;
 }
 
-.job-openings {
+:where(.ui-page[data-page="careers"]) .job-openings {
   margin-bottom: 60px;
 }
 
-.job-openings h2 {
+:where(.ui-page[data-page="careers"]) .job-openings h2 {
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 40px;
@@ -92,7 +93,7 @@
 }
 
 /* Job search bar */
-.job-search {
+:where(.ui-page[data-page="careers"]) .job-search {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -101,7 +102,7 @@
   max-width: 680px;
 }
 
-.job-search-input {
+:where(.ui-page[data-page="careers"]) .job-search-input {
   flex: 1;
   padding: 12px 16px;
   border: 1px solid #e5e5e5;
@@ -110,13 +111,13 @@
   font-size: 1rem;
 }
 
-.job-search-input:focus {
+:where(.ui-page[data-page="careers"]) .job-search-input:focus {
   outline: none;
   border-color: #000;
   box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
 }
 
-.job-search-btn {
+:where(.ui-page[data-page="careers"]) .job-search-btn {
   padding: 12px 22px;
   border-radius: 999px;
   border: 2px solid #000;
@@ -127,18 +128,18 @@
   transition: transform .2s ease, box-shadow .2s ease;
 }
 
-.job-search-btn:hover {
+:where(.ui-page[data-page="careers"]) .job-search-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 20px rgba(0,0,0,.25);
 }
 
-.jobs-grid {
+:where(.ui-page[data-page="careers"]) .jobs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 30px;
 }
 
-.job-card {
+:where(.ui-page[data-page="careers"]) .job-card {
   background: white;
   border-radius: 15px;
   padding: 30px;
@@ -147,25 +148,25 @@
   border: 1px solid #f0f0f0;
 }
 
-.job-card:hover {
+:where(.ui-page[data-page="careers"]) .job-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
 }
 
-.job-header {
+:where(.ui-page[data-page="careers"]) .job-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.job-header h3 {
+:where(.ui-page[data-page="careers"]) .job-header h3 {
   font-size: 1.5rem;
   color: #333;
   margin: 0;
 }
 
-.job-type {
+:where(.ui-page[data-page="careers"]) .job-type {
   background: #000000;
   color: white;
   padding: 5px 15px;
@@ -174,49 +175,49 @@
   font-weight: 500;
 }
 
-.job-details {
+:where(.ui-page[data-page="careers"]) .job-details {
   margin-bottom: 20px;
 }
 
-.job-details p {
+:where(.ui-page[data-page="careers"]) .job-details p {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
   color: #666;
 }
 
-.job-details i {
+:where(.ui-page[data-page="careers"]) .job-details i {
   margin-right: 10px;
   color: #000000;
   font-size: 1.1rem;
 }
 
-.job-description {
+:where(.ui-page[data-page="careers"]) .job-description {
   color: #555;
   line-height: 1.6;
   margin-bottom: 20px;
 }
 
-.job-requirements h4 {
+:where(.ui-page[data-page="careers"]) .job-requirements h4 {
   color: #333;
   margin-bottom: 10px;
   font-size: 1.1rem;
 }
 
-.job-requirements ul {
+:where(.ui-page[data-page="careers"]) .job-requirements ul {
   list-style: none;
   padding: 0;
   margin-bottom: 25px;
 }
 
-.job-requirements li {
+:where(.ui-page[data-page="careers"]) .job-requirements li {
   color: #666;
   margin-bottom: 5px;
   padding-left: 20px;
   position: relative;
 }
 
-.job-requirements li:before {
+:where(.ui-page[data-page="careers"]) .job-requirements li:before {
   content: "•";
   color: #000000;
   font-weight: bold;
@@ -224,7 +225,7 @@
   left: 0;
 }
 
-.apply-btn {
+:where(.ui-page[data-page="careers"]) .apply-btn {
   background: linear-gradient(135deg, #000000 0%, #333333 100%);
   color: white;
   border: none;
@@ -237,12 +238,12 @@
   width: 100%;
 }
 
-.apply-btn:hover {
+:where(.ui-page[data-page="careers"]) .apply-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
-.career-cta {
+:where(.ui-page[data-page="careers"]) .career-cta {
   text-align: center;
   background: white;
   padding: 50px;
@@ -250,13 +251,13 @@
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
 }
 
-.career-cta h2 {
+:where(.ui-page[data-page="careers"]) .career-cta h2 {
   font-size: 2rem;
   margin-bottom: 20px;
   color: #333;
 }
 
-.career-cta p {
+:where(.ui-page[data-page="careers"]) .career-cta p {
   color: #666;
   margin-bottom: 30px;
   max-width: 600px;
@@ -265,7 +266,7 @@
   line-height: 1.6;
 }
 
-.general-apply-btn {
+:where(.ui-page[data-page="careers"]) .general-apply-btn {
   background: linear-gradient(135deg, #333333 0%, #000000 100%);
   color: white;
   border: none;
@@ -277,13 +278,13 @@
   transition: all 0.3s ease;
 }
 
-.general-apply-btn:hover {
+:where(.ui-page[data-page="careers"]) .general-apply-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 
 /* No Jobs Message Styling */
-.no-jobs-message {
+:where(.ui-page[data-page="careers"]) .no-jobs-message {
   text-align: center;
   padding: 60px 20px;
   background: white;
@@ -292,18 +293,18 @@
   margin: 20px 0;
 }
 
-.no-jobs-icon {
+:where(.ui-page[data-page="careers"]) .no-jobs-icon {
   font-size: 4rem;
   margin-bottom: 20px;
 }
 
-.no-jobs-message h3 {
+:where(.ui-page[data-page="careers"]) .no-jobs-message h3 {
   font-size: 1.8rem;
   color: #333;
   margin-bottom: 15px;
 }
 
-.no-jobs-message p {
+:where(.ui-page[data-page="careers"]) .no-jobs-message p {
   color: #666;
   margin-bottom: 15px;
   line-height: 1.6;
@@ -312,14 +313,14 @@
   margin-right: auto;
 }
 
-.no-jobs-message p:last-child {
+:where(.ui-page[data-page="careers"]) .no-jobs-message p:last-child {
   font-size: 0.9rem;
   color: #888;
   font-style: italic;
 }
 
 /* Loading and Error Message Styling */
-.loading-message {
+:where(.ui-page[data-page="careers"]) .loading-message {
   text-align: center;
   padding: 40px 20px;
   background: white;
@@ -328,13 +329,13 @@
   margin: 20px 0;
 }
 
-.loading-message p {
+:where(.ui-page[data-page="careers"]) .loading-message p {
   color: #666;
   font-size: 1.1rem;
   margin: 0;
 }
 
-.error-message {
+:where(.ui-page[data-page="careers"]) .error-message {
   text-align: center;
   padding: 40px 20px;
   background: #fff5f5;
@@ -344,7 +345,7 @@
   margin: 20px 0;
 }
 
-.error-message p {
+:where(.ui-page[data-page="careers"]) .error-message p {
   color: #c53030;
   font-size: 1.1rem;
   margin: 0;
@@ -352,48 +353,49 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .career-header {
+  :where(.ui-page[data-page="careers"]) .career-header {
     padding: 40px 20px;
   }
   
-  .career-header h1 {
+  :where(.ui-page[data-page="careers"]) .career-header h1 {
     font-size: 2.5rem;
   }
   
-  .career-header p {
+  :where(.ui-page[data-page="careers"]) .career-header p {
     font-size: 1rem;
   }
   
-  .benefits-grid {
+  :where(.ui-page[data-page="careers"]) .benefits-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
   
-  .jobs-grid {
+  :where(.ui-page[data-page="careers"]) .jobs-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
   
-  .job-card {
+  :where(.ui-page[data-page="careers"]) .job-card {
     padding: 20px;
   }
   
-  .career-cta {
+  :where(.ui-page[data-page="careers"]) .career-cta {
     padding: 30px 20px;
   }
 }
 
 @media (max-width: 480px) {
-  .career-page {
+  :where(.ui-page[data-page="careers"]) .career-page {
     padding: 10px;
   }
   
-  .career-header h1 {
+  :where(.ui-page[data-page="careers"]) .career-header h1 {
     font-size: 2rem;
   }
   
-  .benefit-card,
-  .job-card {
+  :where(.ui-page[data-page="careers"]) .benefit-card,
+:where(.ui-page[data-page="careers"]) .job-card {
     padding: 20px;
   }
+}
 }

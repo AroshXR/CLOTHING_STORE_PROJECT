@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from './AuthGuard';
+import { useAuth } from './authGuard';
 
 const normalizeTypes = (types) => {
     if (!types) {
@@ -35,7 +35,8 @@ const ProtectedRoute = ({ children, requiredUserType = null, allowedUserTypes = 
 
     const allowedTypes = normalizeTypes(allowedUserTypes || requiredUserType);
 
-    if (allowedTypes && (!currentUser?.type || !allowedTypes.includes(currentUser.type.toLowerCase()))) {
+    const accountRoles = [currentUser?.type, ...(['owner', 'admin'].includes(currentUser?.role) ? [currentUser.role] : [])].filter(Boolean).map(value => value.toLowerCase());
+    if (allowedTypes && !allowedTypes.some(type => accountRoles.includes(type))) {
         return <Navigate to="/unauthorized" replace />;
     }
 

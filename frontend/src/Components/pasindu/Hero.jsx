@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { assets, cityList } from '../../assets/assets';
-import { useAuth } from '../../AuthGuard/AuthGuard';
+import { useAuth } from '../../AuthGuard/authGuard';
 import { useNavigate } from 'react-router-dom';
 import "./hero.css"
 

@@ -1,13 +1,17 @@
+import UIIcon from '../Layout/UIIcon';
+import { useBranding } from '../../config/branding';
+import { API_BASE_URL as API_ORIGIN, apiFetch as fetch } from '../../config/api';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ApplicantDashboard.css';
 import EditApplicationForm from './EditApplicationForm';
-import NavBar from '../NavBar/navBar';
-import { useAuth } from '../../AuthGuard/AuthGuard';
 
-const API_BASE_URL = 'http://localhost:5001';
+import { useAuth } from '../../AuthGuard/authGuard';
+
+const API_BASE_URL = API_ORIGIN;
 
 const ApplicantDashboard = () => {
+  const { branding } = useBranding();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [applications, setApplications] = useState([]);
@@ -47,7 +51,7 @@ const ApplicantDashboard = () => {
       // Header: Brand title and timestamp
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(20);
-      doc.text('Klassy Shirts - My Application', pageWidth / 2, y, { align: 'center' });
+      doc.text(`${branding.name} - My Application`, pageWidth / 2, y, { align: 'center' });
       y += 20;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(11);
@@ -417,7 +421,7 @@ const ApplicantDashboard = () => {
 
   return (
     <div className="main">
-      <NavBar />
+      
       <div className="dashboard-header">
         <h1>My Applications Dashboard</h1>
         <p>View and manage your job applications</p>
@@ -427,7 +431,7 @@ const ApplicantDashboard = () => {
             className="header-nav-btn secondary"
             onClick={() => navigate(-1)}
           >
-            <i className="bx bx-arrow-back"></i> Back
+            <UIIcon className="bx bx-arrow-back"></UIIcon> Back
           </button>
           <button
             type="button"
@@ -441,7 +445,7 @@ const ApplicantDashboard = () => {
             className="header-nav-btn primary"
             onClick={() => navigate('/career')}
           >
-            Next Opportunities <i className="bx bx-arrow-forward"></i>
+            Next Opportunities <UIIcon className="bx bx-arrow-forward"></UIIcon>
           </button>
         </div>
       </div>
@@ -474,7 +478,7 @@ const ApplicantDashboard = () => {
 
         {applications.length === 0 ? (
           <div className="no-applications">
-            <i className="bx bx-file-blank"></i>
+            <UIIcon className="bx bx-file-blank"></UIIcon>
             <h3>No Applications Found</h3>
             <p>Enter your email address above to search for your applications, or apply for a job first.</p>
           </div>
@@ -525,16 +529,16 @@ const ApplicantDashboard = () => {
 
                     <div className="application-meta">
                       <span className="meta-chip">
-                        <i className="bx bx-calendar"></i>
+                        <UIIcon className="bx bx-calendar"></UIIcon>
                         {appliedDate}
                       </span>
                       <span className="meta-chip">
-                        <i className="bx bx-buildings"></i>
+                        <UIIcon className="bx bx-buildings"></UIIcon>
                         {application.department}
                       </span>
                       {application.gmail && (
                         <span className="meta-chip">
-                          <i className="bx bx-envelope"></i>
+                          <UIIcon className="bx bx-envelope"></UIIcon>
                           {application.gmail}
                         </span>
                       )}
@@ -564,7 +568,7 @@ const ApplicantDashboard = () => {
                         disabled={isApproved}
                         title={isApproved ? 'Editing is disabled after approval' : 'Edit this application'}
                       >
-                        <i className="bx bx-edit"></i> Edit
+                        <UIIcon className="bx bx-edit"></UIIcon> Edit
                       </button>
                       <button
                         onClick={() => handleDelete(application._id || application.id)}
@@ -572,14 +576,14 @@ const ApplicantDashboard = () => {
                         disabled={isApproved}
                         title={isApproved ? 'Deletion is disabled after approval' : 'Delete this application'}
                       >
-                        <i className="bx bx-trash"></i> Delete
+                        <UIIcon className="bx bx-trash"></UIIcon> Delete
                       </button>
                       <button
                         onClick={() => downloadApplicationPDF(application)}
                         className="download-btn"
                         title="Download a PDF copy of this application"
                       >
-                        <i className="bx bxs-file-pdf"></i> Download PDF
+                        <UIIcon className="bx bxs-file-pdf"></UIIcon> Download PDF
                       </button>
                     </div>
                   </div>

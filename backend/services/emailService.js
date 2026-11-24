@@ -1,7 +1,9 @@
 const nodemailer = require('nodemailer');
+const { getEmailBranding } = require('./siteSettingsService');
 
 // Email configuration - Try multiple approaches for compatibility
 const getEmailConfig = () => {
+  if (process.env.SMTP_HOST) return { host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT) || 587, secure: process.env.SMTP_SECURE === 'true', auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } };
   // First try: Gmail with App Password (most secure)
   if (process.env.EMAIL_PASS && process.env.EMAIL_PASS.length === 16 && !process.env.EMAIL_PASS.includes(' ')) {
     return {
@@ -44,13 +46,14 @@ const testEmailConnection = async () => {
 };
 
 // Send low stock alert email - AUTOMATIC ONLY
-const sendLowStockAlert = async (item, recipientEmail = 'kadavishkakanakasekara@gmail.com') => {
+const sendLowStockAlert = async (item, recipientEmail = process.env.STOCK_ALERT_EMAIL || process.env.EMAIL_USER || process.env.SMTP_USER) => {
   console.log(`AUTOMATIC LOW STOCK ALERT: ${item.itemName} (${item.quantity}/${item.minimumStock} ${item.unit})`);
   
   try {
+    const brand = await getEmailBranding();
     // Try to send real email
     const emailResult = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: process.env.SMTP_FROM || process.env.EMAIL_USER || process.env.SMTP_USER,
       to: recipientEmail,
       subject: `LOW STOCK ALERT - ${item.itemName}`,
       html: `
@@ -80,7 +83,7 @@ const sendLowStockAlert = async (item, recipientEmail = 'kadavishkakanakasekara@
           <div class="container">
             <div class="header">
               <h1>INVENTORY ALERT</h1>
-              <p>Klassy T Shirts - Stock Management System</p>
+              <p>${brand.name} - Stock Management System</p>
             </div>
             
             <div class="content">
@@ -152,15 +155,15 @@ const sendLowStockAlert = async (item, recipientEmail = 'kadavishkakanakasekara@
               </div>
               
               <div style="text-align: center; margin: 30px 0;">
-                <p style="color: #6b7280;">This is an automated alert from the Klassy T Shirts Inventory Management System</p>
+                <p style="color: #6b7280;">This is an automated alert from the ${brand.name} Inventory Management System</p>
                 <p style="color: #6b7280; font-size: 12px;">Alert generated on: ${new Date().toLocaleString()}</p>
               </div>
             </div>
             
             <div class="footer">
-              <p><strong>Klassy T Shirts</strong> - Inventory Management System</p>
-              <p>For support, contact: admin@klassytshirts.com</p>
-              <p>© 2025 Klassy T Shirts - All Rights Reserved</p>
+              <p><strong>${brand.name}</strong> - Inventory Management System</p>
+              <p>For support, contact: ${brand.contactEmail}</p>
+              <p>© ${new Date().getFullYear()} ${brand.name} - All Rights Reserved</p>
             </div>
           </div>
         </body>
@@ -177,8 +180,9 @@ const sendLowStockAlert = async (item, recipientEmail = 'kadavishkakanakasekara@
 };
 
 // Send bulk low stock alerts
-const sendBulkLowStockAlerts = async (items, recipientEmail = 'kadavishkakanakasekara@gmail.com') => {
+const sendBulkLowStockAlerts = async (items, recipientEmail = process.env.STOCK_ALERT_EMAIL || process.env.EMAIL_USER || process.env.SMTP_USER) => {
   try {
+    const brand = await getEmailBranding();
     const lowStockItems = items.filter(item => item.status === 'low_stock');
     const outOfStockItems = items.filter(item => item.status === 'out_of_stock');
     
@@ -187,7 +191,7 @@ const sendBulkLowStockAlerts = async (items, recipientEmail = 'kadavishkakanakas
     }
 
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'noreply@klassytshirts.com',
+      from: process.env.SMTP_FROM || process.env.EMAIL_USER || process.env.SMTP_USER,
       to: recipientEmail,
       subject: `INVENTORY SUMMARY - ${lowStockItems.length + outOfStockItems.length} Items Need Attention`,
       html: `
@@ -212,7 +216,7 @@ const sendBulkLowStockAlerts = async (items, recipientEmail = 'kadavishkakanakas
           <div class="container">
             <div class="header">
               <h1>INVENTORY SUMMARY ALERT</h1>
-              <p>Klassy T Shirts - Daily Stock Report</p>
+              <p>${brand.name} - Daily Stock Report</p>
             </div>
             
             <div class="content">
@@ -277,7 +281,7 @@ const sendBulkLowStockAlerts = async (items, recipientEmail = 'kadavishkakanakas
             </div>
             
             <div class="footer">
-              <p><strong>Klassy T Shirts</strong> - Inventory Management System</p>
+              <p><strong>${brand.name}</strong> - Inventory Management System</p>
               <p>Report generated on: ${new Date().toLocaleString()}</p>
             </div>
           </div>
@@ -300,8 +304,9 @@ const sendPayOnReturnEmail = async (booking, recipientEmail) => {
   console.log(`Sending Pay on Return confirmation to: ${recipientEmail}`);
   
   try {
+    const brand = await getEmailBranding();
     const emailResult = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: process.env.SMTP_FROM || process.env.EMAIL_USER || process.env.SMTP_USER,
       to: recipientEmail,
       subject: `Payment on Return Confirmed - Booking #${booking._id.toString().slice(-6)}`,
       html: `
@@ -519,7 +524,7 @@ const sendPayOnReturnEmail = async (booking, recipientEmail) => {
             </div>
             
             <div class="footer">
-              <p style="margin: 0;"><strong>Outfit Rental Management System</strong></p>
+              <p style="margin: 0;"><strong>${brand.name} - Rentals</strong></p>
               <p style="margin: 10px 0;">For any queries, please contact us at the outlet</p>
               <p style="margin: 10px 0; font-size: 12px;">© ${new Date().getFullYear()} - All Rights Reserved</p>
             </div>
@@ -542,6 +547,7 @@ const sendReturnReminderEmail = async (booking, recipientEmail) => {
   console.log(`Sending return reminder to: ${recipientEmail}`);
   
   try {
+    const brand = await getEmailBranding();
     const returnDate = new Date(booking.returnDate);
     const today = new Date();
     const daysUntilReturn = Math.ceil((returnDate - today) / (1000 * 60 * 60 * 24));
@@ -569,7 +575,7 @@ const sendReturnReminderEmail = async (booking, recipientEmail) => {
     }
 
     const emailResult = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: process.env.SMTP_FROM || process.env.EMAIL_USER || process.env.SMTP_USER,
       to: recipientEmail,
       subject: `${reminderType} - Booking #${booking._id.toString().slice(-6)}`,
       html: `
@@ -793,7 +799,7 @@ const sendReturnReminderEmail = async (booking, recipientEmail) => {
             </div>
             
             <div class="footer">
-              <p style="margin: 0;"><strong>Outfit Rental Management System</strong></p>
+              <p style="margin: 0;"><strong>${brand.name} - Rentals</strong></p>
               <p style="margin: 10px 0;">Thank you for choosing our rental service</p>
               <p style="margin: 10px 0; font-size: 12px;">© ${new Date().getFullYear()} - All Rights Reserved</p>
             </div>

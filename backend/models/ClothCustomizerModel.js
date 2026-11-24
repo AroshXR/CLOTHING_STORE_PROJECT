@@ -62,11 +62,14 @@ const clothCustomizerSchema = new Schema({
         type: Number,
         required: true,
     },
+    inCart: { type: Boolean, default: true, index: true },
+    designVersion: { type: Number, default: 1 },
+    revision: { type: Number, default: 1 },
     createdAt: {
         type: Date,
         default: Date.now,
     }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model(
     "ClothCustomizer",   // collection name

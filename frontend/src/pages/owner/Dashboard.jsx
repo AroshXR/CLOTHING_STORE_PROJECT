@@ -1,3 +1,6 @@
+import UIIcon from '../../Components/Layout/UIIcon';
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../../Components/MediaImage';
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { assets } from '../../assets/assets'
@@ -27,7 +30,7 @@ const Dashboard = () => {
 
   const fetchDashboard = async ()=>{
     try{
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+      const BASE_URL = API_ORIGIN
       const { data: resp } = await axios.get(`${BASE_URL}/api/owner/dashboard`)
       if(resp?.success && resp.dashboardData){
         const { totalOutfits, totalBookings, pendingBookings, confirmedBookings, cancelledBookings, monthlyRevenue } = resp.dashboardData
@@ -61,7 +64,7 @@ const Dashboard = () => {
             onClick={fetchDashboard}
             className='pasindu-dashboard__refresh-btn'
           >
-            <i className='bx bx-refresh'></i> Refresh Data
+            <UIIcon className='bx bx-refresh'></UIIcon> Refresh Data
           </button>
         </header>
 
@@ -75,7 +78,7 @@ const Dashboard = () => {
                   <p>{card.value}</p>
                 </div>
                 <div className='pasindu-stat-card__icon'>
-                  <img src={card.icon} alt={card.title} />
+                  <MediaImage src={card.icon} alt={card.title} />
                 </div>
               </div>
             </div>
@@ -95,7 +98,7 @@ const Dashboard = () => {
                 <div key={index} className='pasindu-booking-item'>
                   <div className='pasindu-booking-item__left'>
                     <div className='pasindu-booking-item__icon'>
-                      <img src={assets.listIconColored} alt="Booking" />
+                      <MediaImage src={assets.listIconColored} alt="Booking" />
                     </div>
                     <div className='pasindu-booking-item__details'>
                       <h4>{booking.outfit.brand} {booking.outfit.model}</h4>
@@ -114,7 +117,7 @@ const Dashboard = () => {
               ))
             ) : (
               <div className='pasindu-empty-state'>
-                <i className='bx bx-calendar-x'></i>
+                <UIIcon className='bx bx-calendar-x'></UIIcon>
                 <p>No recent bookings available</p>
               </div>
             )}

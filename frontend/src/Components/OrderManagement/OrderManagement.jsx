@@ -1,12 +1,12 @@
-"use client";
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+
+
 import { useState, useEffect, useMemo } from "react";
 import { Minus, Plus, Trash2, ShoppingBag, Loader2, Edit3 } from "lucide-react";
 import "./OrderManagement.css";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../../AuthGuard/AuthGuard';
+import { useAuth } from '../../AuthGuard/authGuard';
 
 export default function OrderManagement() {
     const history = useNavigate();
@@ -73,7 +73,7 @@ export default function OrderManagement() {
         setError(null);
 
         try {
-            const response = await axios.get('http://localhost:5001/cloth-customizer', {
+            const response = await axios.get(`${API_ORIGIN}/cloth-customizer`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`
                 }
@@ -187,7 +187,7 @@ export default function OrderManagement() {
                 return;
             }
 
-            await axios.put(`http://localhost:5001/cloth-customizer/${id}`, {
+            await axios.put(`${API_ORIGIN}/cloth-customizer/${id}`, {
                 quantity: newQuantity,
                 totalPrice: newTotalPrice
             }, {
@@ -252,7 +252,7 @@ export default function OrderManagement() {
                 return;
             }
 
-            await axios.delete(`http://localhost:5001/cloth-customizer/${id}`, {
+            await axios.delete(`${API_ORIGIN}/cloth-customizer/${id}`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`
                 }
@@ -291,7 +291,7 @@ export default function OrderManagement() {
                 return;
             }
 
-            const response = await axios.get(`http://localhost:5001/cloth-customizer/${id}`, {
+            const response = await axios.get(`${API_ORIGIN}/cloth-customizer/${id}`, {
                 headers: {
                     Authorization: `Bearer ${authToken}`
                 }
@@ -342,7 +342,7 @@ export default function OrderManagement() {
     if (error) {
         return (
             <div className="order-management-container">
-                <NavBar />
+                
                 <div className="order-content">
                     <div className="error-container">
                         <p className="error-message">{error}</p>
@@ -357,7 +357,7 @@ export default function OrderManagement() {
 
     return (
         <div>
-            <NavBar />
+            
             <div className="order-management-container">
 
                 {/* Notification */}
@@ -548,7 +548,7 @@ export default function OrderManagement() {
                     </div>
                 </div>
             </div>
-            <Footer />
+            
         </div>
 
     );

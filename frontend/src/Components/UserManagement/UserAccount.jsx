@@ -1,9 +1,12 @@
+import UIIcon from '../Layout/UIIcon';
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../MediaImage';
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../AuthGuard/AuthGuard';
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
+import { useAuth } from '../../AuthGuard/authGuard';
+
+
 import './UserAccount.css';
 
 const UserAccount = () => {
@@ -65,7 +68,7 @@ const UserAccount = () => {
         setOrdersError('');
         try {
             const token = typeof getToken === 'function' ? getToken() : null;
-            const response = await axios.get('http://localhost:5001/orders/my', {
+            const response = await axios.get(`${API_ORIGIN}/orders/my`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : undefined
             });
             // Controller returns { status:'ok', data:[...] }
@@ -81,7 +84,7 @@ const UserAccount = () => {
             // If empty, try fallback via AdminID query
             if (!list.length) {
                 try {
-                    const fallback = await axios.get(`http://localhost:5001/orders`, {
+                    const fallback = await axios.get(`${API_ORIGIN}/orders`, {
                         params: { AdminID: userId },
                         headers: token ? { Authorization: `Bearer ${token}` } : undefined
                     });
@@ -107,7 +110,7 @@ const UserAccount = () => {
             if (error.response && (error.response.status === 401 || error.response.status === 403)) {
                 try {
                     const token = typeof getToken === 'function' ? getToken() : null;
-                    const fallback = await axios.get(`http://localhost:5001/orders`, {
+                    const fallback = await axios.get(`${API_ORIGIN}/orders`, {
                         params: { AdminID: userId },
                         headers: token ? { Authorization: `Bearer ${token}` } : undefined
                     });
@@ -140,7 +143,7 @@ const UserAccount = () => {
         setBookingsError('');
         try {
             const token = typeof getToken === 'function' ? getToken() : null;
-            const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+            const BASE_URL = API_ORIGIN;
             
             const response = await axios.get(`${BASE_URL}/api/booking/user`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : undefined
@@ -169,7 +172,7 @@ const UserAccount = () => {
         setNotificationsLoading(true);
         setNotificationsError('');
         try {
-            const response = await axios.get(`http://localhost:5001/users/${userId}/notifications`);
+            const response = await axios.get(`${API_ORIGIN}/users/${userId}/notifications`);
             if (response.data?.status === 'ok') {
                 const list = Array.isArray(response.data.notifications) ? response.data.notifications : [];
                 // Sort newest first for clarity
@@ -196,7 +199,7 @@ const UserAccount = () => {
             setProfileError('');
 
             try {
-                const response = await axios.get('http://localhost:5001/users/me');
+                const response = await axios.get(`${API_ORIGIN}/users/me`);
                 if (response.data?.status === 'ok') {
                     applyProfile(response.data.user);
                     updateStoredUser(response.data.user);
@@ -261,7 +264,7 @@ const UserAccount = () => {
         setProfileMessage('');
 
         try {
-            const response = await axios.put('http://localhost:5001/users/me', {
+            const response = await axios.put(`${API_ORIGIN}/users/me`, {
                 username: formState.username,
                 email: formState.email,
                 address: formState.address,
@@ -299,7 +302,7 @@ const UserAccount = () => {
 
         setDeleteInProgress(true);
         try {
-            const response = await axios.delete('http://localhost:5001/users/me');
+            const response = await axios.delete(`${API_ORIGIN}/users/me`);
             if (response.data?.status === 'ok') {
                 logout();
                 navigate('/');
@@ -322,7 +325,7 @@ const UserAccount = () => {
         }
 
         try {
-            await axios.patch(`http://localhost:5001/users/${userId}/notifications/${notificationId}`, { read });
+            await axios.patch(`${API_ORIGIN}/users/${userId}/notifications/${notificationId}`, { read });
             await fetchNotifications();
         } catch (error) {
             console.error('Failed to update notification:', error);
@@ -335,7 +338,7 @@ const UserAccount = () => {
         }
 
         try {
-            await axios.delete(`http://localhost:5001/users/${userId}/notifications/${notificationId}`);
+            await axios.delete(`${API_ORIGIN}/users/${userId}/notifications/${notificationId}`);
             await fetchNotifications();
         } catch (error) {
             console.error('Failed to delete notification:', error);
@@ -360,15 +363,15 @@ const UserAccount = () => {
 
     return (
         <div className="user-account-page">
-            <NavBar />
-            <main className="user-account-content">
+            
+            <section className="user-account-content">
                 <header className="user-account-header">
                     <div>
                         <h1>
-                            <i className="bx bx-user-circle"></i> Your Account
+                            <UIIcon className="bx bx-user-circle"></UIIcon> Your Account
                             {unreadCount > 0 && (
                                 <span className="header-notification-indicator">
-                                    <i className="bx bx-bell"></i> {unreadCount} new notification{unreadCount > 1 ? 's' : ''}
+                                    <UIIcon className="bx bx-bell"></UIIcon> {unreadCount} new notification{unreadCount > 1 ? 's' : ''}
                                 </span>
                             )}
                         </h1>
@@ -379,14 +382,14 @@ const UserAccount = () => {
                             className="header-nav-btn secondary"
                             onClick={() => navigate(-1)}
                         >
-                            <i className="bx bx-arrow-back"></i> Back
+                            <UIIcon className="bx bx-arrow-back"></UIIcon> Back
                         </button>
                         <button
                             type="button"
                             className="header-nav-btn primary"
                             onClick={() => navigate('/userHome')}
                         >
-                            Next <i className="bx bx-arrow-forward"></i>
+                            Next <UIIcon className="bx bx-arrow-forward"></UIIcon>
                         </button>
                     </div>
                     {/* identity status badge removed */}
@@ -475,7 +478,7 @@ const UserAccount = () => {
                 <section className="panel">
                     <div className="panel-header">
                         <h2>
-                            <i className="bx bx-bell"></i> Notifications
+                            <UIIcon className="bx bx-bell"></UIIcon> Notifications
                             {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
                         </h2>
                         <div className="panel-header__right">
@@ -488,7 +491,7 @@ const UserAccount = () => {
                                 onClick={fetchNotifications}
                                 disabled={notificationsLoading}
                             >
-                                <i className="bx bx-refresh"></i>
+                                <UIIcon className="bx bx-refresh"></UIIcon>
                                 {notificationsLoading ? 'Refreshing...' : 'Refresh'}
                             </button>
                         </div>
@@ -505,9 +508,9 @@ const UserAccount = () => {
                                 <li key={notification._id} className={`notification ${notification.read ? 'read' : 'unread'} ${notification.level || 'info'}`}>
                                     <div className="notification-content">
                                         <div className="notification-icon">
-                                            {notification.level === 'success' && <i className="bx bx-check-circle"></i>}
-                                            {notification.level === 'error' && <i className="bx bx-error-circle"></i>}
-                                            {(!notification.level || notification.level === 'info') && <i className="bx bx-info-circle"></i>}
+                                            {notification.level === 'success' && <UIIcon className="bx bx-check-circle"></UIIcon>}
+                                            {notification.level === 'error' && <UIIcon className="bx bx-error-circle"></UIIcon>}
+                                            {(!notification.level || notification.level === 'info') && <UIIcon className="bx bx-info-circle"></UIIcon>}
                                         </div>
                                         <div className="notification-text">
                                             <div className="notification-message">
@@ -533,7 +536,7 @@ const UserAccount = () => {
                                                                     className="notification-expand-btn"
                                                                     onClick={() => toggleNotificationExpansion(notification._id)}
                                                                 >
-                                                                    <i className={`bx ${isExpanded ? 'bx-chevron-up' : 'bx-chevron-down'}`}></i>
+                                                                    <UIIcon className={`bx ${isExpanded ? 'bx-chevron-up' : 'bx-chevron-down'}`}></UIIcon>
                                                                     {isExpanded ? 'Show Less' : 'Show More'}
                                                                 </button>
                                                             )}
@@ -543,12 +546,12 @@ const UserAccount = () => {
                                             </div>
                                             <div className="notification-meta">
                                                 <small>
-                                                    <i className="bx bx-time"></i>
+                                                    <UIIcon className="bx bx-time"></UIIcon>
                                                     {new Date(notification.createdAt).toLocaleString()}
                                                 </small>
                                                 {notification.metadata && (
                                                     <small className="notification-type">
-                                                        <i className="bx bx-tag"></i>
+                                                        <UIIcon className="bx bx-tag"></UIIcon>
                                                         {notification.metadata.type === 'application_status_update' && 'Application Update'}
                                                         {notification.metadata.type === 'interview_scheduled' && 'Interview Scheduled'}
                                                         {notification.metadata.type === 'identity_verification_update' && 'Identity Verification'}
@@ -565,7 +568,7 @@ const UserAccount = () => {
                                             onClick={() => handleNotificationToggle(notification._id, !notification.read)}
                                             title={notification.read ? 'Mark as unread' : 'Mark as read'}
                                         >
-                                            <i className={notification.read ? 'bx bx-envelope' : 'bx bx-envelope-open'}></i>
+                                            <UIIcon className={notification.read ? 'bx bx-envelope' : 'bx bx-envelope-open'}></UIIcon>
                                         </button>
                                         <button
                                             type="button"
@@ -573,7 +576,7 @@ const UserAccount = () => {
                                             onClick={() => handleNotificationDelete(notification._id)}
                                             title="Delete notification"
                                         >
-                                            <i className="bx bx-trash"></i>
+                                            <UIIcon className="bx bx-trash"></UIIcon>
                                         </button>
                                     </div>
                                 </li>
@@ -587,7 +590,7 @@ const UserAccount = () => {
                 <section className="panel">
                     <div className="panel-header">
                         <h2>
-                            <i className="bx bx-receipt"></i> Your Orders
+                            <UIIcon className="bx bx-receipt"></UIIcon> Your Orders
                         </h2>
                         <div className="panel-header__right">
                             <button
@@ -596,7 +599,7 @@ const UserAccount = () => {
                                 onClick={fetchMyOrders}
                                 disabled={ordersLoading}
                             >
-                                <i className="bx bx-refresh"></i>
+                                <UIIcon className="bx bx-refresh"></UIIcon>
                                 {ordersLoading ? 'Refreshing...' : 'Refresh'}
                             </button>
                         </div>
@@ -609,11 +612,11 @@ const UserAccount = () => {
                         <p className="empty-state">You have not placed any orders yet.</p>
                     ) : (
                         <div className="tableWrapper">
-                            <table className="orderTable">
+                            <div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table className="orderTable">
                                 <thead>
                                     <tr>
                                         <th>Order ID</th>
-                                        <th>Status</th>
+                                        <th>Item</th><th>Status</th><th>Payment</th>
                                         <th>Total</th>
                                         <th>Date</th>
                                     </tr>
@@ -622,23 +625,23 @@ const UserAccount = () => {
                                     {orders.map((o) => (
                                         <tr key={o._id || o.OrderID}>
                                             <td>{o.OrderID || o._id}</td>
-                                            <td className={`orderStatus ${String(o.status || '').toLowerCase()}`}>{o.status || '-'}</td>
+                                            <td>{o.itemSnapshot?.name || o.DesignID?.clothingType || 'Clothing order'}</td><td className={`orderStatus ${String(o.status || '').toLowerCase()}`}>{o.fulfillmentStatus || o.status || '-'}</td><td>{o.paymentStatus || 'pending'}</td>
                                             <td>{Number(o.Price ?? o.price ?? 0).toFixed(2)}</td>
                                             <td>{o.CreatedAt || o.createdAt}</td>
                                         </tr>
                                     ))}
                                 </tbody>
-                            </table>
+                            </table></div>
                         </div>
                     )}
-                    <p className="panel-description">Orders placed via the customizer will appear here.</p>
+                    <p className="panel-description">Your clothing purchases, custom designs and rental payment arrangements appear here.</p>
                 </section>
 
                 {/* Bookings Panel */}
                 <section className="panel">
                     <div className="panel-header">
                         <h2>
-                            <i className="bx bx-calendar-check"></i> Your Bookings
+                            <UIIcon className="bx bx-calendar-check"></UIIcon> Your Bookings
                         </h2>
                         <div className="panel-header__right">
                             <button
@@ -647,7 +650,7 @@ const UserAccount = () => {
                                 onClick={fetchMyBookings}
                                 disabled={bookingsLoading}
                             >
-                                <i className="bx bx-refresh"></i>
+                                <UIIcon className="bx bx-refresh"></UIIcon>
                                 {bookingsLoading ? 'Refreshing...' : 'Refresh'}
                             </button>
                         </div>
@@ -663,7 +666,7 @@ const UserAccount = () => {
                             {bookings.map((booking, index) => (
                                 <div key={booking._id} className="booking-card">
                                     <div className="booking-image">
-                                        <img src={booking.outfit.image} alt={`${booking.outfit.brand} ${booking.outfit.model}`} />
+                                        <MediaImage src={booking.outfit.image} alt={`${booking.outfit.brand} ${booking.outfit.model}`} />
                                     </div>
                                     <div className="booking-details">
                                         <div className="booking-header">
@@ -672,21 +675,21 @@ const UserAccount = () => {
                                         </div>
                                         <div className="booking-info">
                                             <div className="booking-info-item">
-                                                <i className="bx bx-calendar"></i>
+                                                <UIIcon className="bx bx-calendar"></UIIcon>
                                                 <span>{booking.reservationDate.split('T')[0]} to {booking.returnDate.split('T')[0]}</span>
                                             </div>
                                             <div className="booking-info-item">
-                                                <i className="bx bx-map"></i>
+                                                <UIIcon className="bx bx-map"></UIIcon>
                                                 <span>{booking.outfit.location}</span>
                                             </div>
                                             <div className="booking-info-item">
-                                                <i className="bx bx-dollar"></i>
+                                                <UIIcon className="bx bx-dollar"></UIIcon>
                                                 <span>${booking.price}</span>
                                             </div>
                                         </div>
                                         <div className="booking-meta">
                                             <small>
-                                                <i className="bx bx-time"></i>
+                                                <UIIcon className="bx bx-time"></UIIcon>
                                                 Booked on {new Date(booking.createdAt).toLocaleDateString()}
                                             </small>
                                         </div>
@@ -706,8 +709,8 @@ const UserAccount = () => {
                     )}
                     <p className="panel-description">Your confirmed rental bookings appear here. Visit My Bookings for full details and payment options.</p>
                 </section>
-            </main>
-            <Footer />
+            </section>
+            
         </div>
     );
 };

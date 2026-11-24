@@ -1,94 +1,24 @@
-const express = require("express");
-const router = express.Router();
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-
-// Configure multer for image uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadDir = path.join(__dirname, '../uploads');
-        // Create uploads directory if it doesn't exist
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        // Generate unique filename with timestamp
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-// File filter to only allow images
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb(new Error('Only image files are allowed!'), false);
-    }
-};
-
+const router = require('express').Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const Upload = require('../models/Upload');
+const { protect, optionalAuth } = require('../middleware/auth');
+const directory = path.join(__dirname, '..', 'uploads');
+const imageTypes = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/gif': '.gif', 'image/webp': '.webp' };
 const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
-    },
-    fileFilter: fileFilter
+  storage: multer.diskStorage({
+    destination: (_req, _file, done) => fs.mkdir(directory, { recursive: true }, error => done(error, directory)),
+    filename: (_req, file, done) => done(null, 'image-' + require('crypto').randomUUID() + imageTypes[file.mimetype])
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, done) => done(imageTypes[file.mimetype] ? null : new Error('Only PNG, JPEG, GIF and WebP images are accepted'), Boolean(imageTypes[file.mimetype]))
 });
-
-// Route to upload a single image
-router.post("/image", upload.single('image'), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({
-                status: "error",
-                message: "No image file provided"
-            });
-        }
-
-        // Create the image URL
-        const imageUrl = `/uploads/${req.file.filename}`;
-        
-        res.status(200).json({
-            status: "ok",
-            message: "Image uploaded successfully",
-            data: {
-                filename: req.file.filename,
-                originalName: req.file.originalname,
-                size: req.file.size,
-                url: imageUrl
-            }
-        });
-    } catch (error) {
-        console.error('Upload error:', error);
-        res.status(500).json({
-            status: "error",
-            message: "Error uploading image",
-            error: error.message
-        });
-    }
+router.post('/image', protect, upload.single('image'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ status: 'error', message: 'Select an image' });
+  try { await Upload.create({ filename: req.file.filename, userId: req.user._id, originalName: req.file.originalname, mimeType: req.file.mimetype, size: req.file.size }); }
+  catch (error) { fs.unlink(req.file.path, () => {}); throw error; }
+  res.json({ status: 'ok', data: { filename: req.file.filename, url: '/uploads/' + req.file.filename } });
 });
-
-// Route to serve uploaded images
-router.get("/uploads/:filename", (req, res) => {
-    const filename = req.params.filename;
-    const filePath = path.join(__dirname, '../uploads', filename);
-    
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-        return res.status(404).json({
-            status: "error",
-            message: "Image not found"
-        });
-    }
-    
-    res.sendFile(filePath);
-});
-
-module.exports = router; 
+router.get('/uploads/:filename', optionalAuth, require('../controllers/ImageAccessController').serve);
+module.exports = router;

@@ -1,116 +1,45 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-import Title from '../../Components/pasindu/owner/Title'
-import { useAuth } from '../../AuthGuard/AuthGuard'
-
-const ManageBookings = () => {
-  const currency = process.env.REACT_APP_CURRENCY
-  const { getToken } = useAuth()
-
-  const [bookings, setBookings] = useState([]) 
-
-  const fetchOwnerBookings = async( )=>{
-    try{
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
-      const token = getToken()
-      const { data } = await axios.get(`${BASE_URL}/api/booking/owner`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      if(data?.success){
-        setBookings(data.bookings)
-      }
-    }catch(err){ console.error(err) }
+import React, { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
+import Title from '../../Components/pasindu/owner/Title';
+import MediaImage from '../../Components/MediaImage';
+import { apiUrl, downloadFile } from '../../config/api';
+export default function ManageBookings() {
+  const [bookings, setBookings] = useState([]), [error, setError] = useState(''), [busy, setBusy] = useState('');
+  const currency = process.env.REACT_APP_CURRENCY || '$';
+  const load = useCallback(async () => {
+    try { const { data } = await axios.get(apiUrl('/api/booking/owner')); setBookings(data.bookings || []); }
+    catch (err) { setError(err.response?.data?.message || 'Unable to load bookings.'); }
+  }, []);
+  useEffect(() => { load(); }, [load]);
+  async function action(booking, type) {
+    if (type === 'cash' && !window.confirm('Confirm that you have received ' + currency + Number(booking.collectionAmount || booking.price).toFixed(2) + ' in cash.')) return;
+    setBusy(booking._id); setError('');
+    try {
+      if (type === 'cash') await axios.post(apiUrl('/api/booking/' + booking._id + '/record-payment'));
+      else await axios.post(apiUrl('/api/booking/change-status'), { bookingId: booking._id, status: type });
+      await load();
+    } catch (err) { setError(err.response?.data?.message || 'Unable to update this booking.'); }
+    finally { setBusy(''); }
   }
-
-  useEffect(()=>{
-    fetchOwnerBookings()
-  },[])
-
-
-  return (
-    <div className='px-4 pt-10 md:px-10 w-full'>
-
-      <Title title="Manage Bookings"  subTitle="Track all customer bookings,approve or cancel requests and manage booking statuses." />
-
-      <div className='max-w-3xl w-full rounded-md overflow-hidden border-t border-b border-[0.3px] border-solid border-borderColor mt-6 bg-white'>
-
-        <table className='w-full border-collapse text-left text-sm text-gray-600'>
-          <thead className='text-gray-500'>
-            <tr>
-              <th className="p-3 font-medium">Outfit</th>
-              <th className="p-3 font-medium max-md:hidden">Customer</th>
-              <th className="p-3 font-medium max-md:hidden">Date Range</th>
-              <th className="p-3 font-medium'">Total</th>
-              <th className="p-3 font-medium max-md:hidden">Payment</th>
-              <th className="p-3 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.map((booking,index)=>(
-              <tr key={index} className='border-t border-b border-[0.3px] border-solid border-borderColor text-gray-500'>
-
-                <td className='p-3 flex items-center gap-3'>
-                  <img src={booking.outfit.image} alt="" className='h-24 w-16 aspect-square rounded-md object cover' />
-                  <p className='font-medium max-md:hidden'>{booking.outfit.brand} {booking.outfit.model} </p>
-                </td>
-
-                <td className='p-3 max-md:hidden'>
-                  {booking.user ? booking.user.username : 'N/A'}
-                </td>
-
-                <td className='p-3 max-md:hidden'>
-                  {new Date(booking.reservationDate).toLocaleDateString()} to {new Date(booking.returnDate).toLocaleDateString()}
-                </td>
-
-                <td className='p-3 '> {currency } {booking.price}  </td>
-
-                <td className='p-3 max-md:hidden'>
-                  <span className='bg-gray-100 px-3 py-1 rounded-full text-xs'>Offline</span>
-                </td>
-
-                <td className='p-3 '> 
-                  {booking.status === 'confirmed' ? (
-                    <span className='bg-green-400/15 text-green-600 px-3 py-1 text-xs rounded-full'>
-                      Confirmed
-                    </span>
-                  ) : booking.status === 'cancelled' ? (
-                    <span className='bg-red-400/15 text-red-600 px-3 py-1 text-xs rounded-full'>
-                      Cancelled
-                    </span>
-                  ) : (
-                    <select value={booking.status} className='px-2 py-1.5 mt-1 text-gray-500 border border-borderColor rounded-md outline-none' onChange={async (e)=>{
-                      try{
-                        const status = e.target.value
-                        const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
-                        const token = getToken()
-                        const { data } = await axios.post(`${BASE_URL}/api/booking/change-status`, { bookingId: booking._id, status }, {
-                          headers: { Authorization: `Bearer ${token}` }
-                        })
-                        if(data?.success){
-                          fetchOwnerBookings()
-                        }
-                      }catch(err){ console.error(err) }
-                    }}>
-                      <option value="pending">Pending</option>
-                      <option value="cancelled">Cancelled</option>
-                      <option value="confirmed">Confirmed</option>
-                    </select>
-                  )}
-                </td>
-
-                
-
-                
-              </tr>
-            ))}
-
-          </tbody>
-        </table>
-
-      </div>
-        
-    </div>
-  )
+  return <div className="w-full">
+    <Title title="Manage Bookings" subTitle="Review bookings and record cash received at collection." />
+    {error && <p role="alert" className="text-red-700">{error}</p>}
+    <div className="overflow-x-auto"><div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table className="w-full text-left text-sm bg-white">
+      <thead><tr>{['Outfit', 'Customer', 'Dates', 'Amount', 'Payment', 'Actions'].map(name => <th key={name} className="p-3">{name}</th>)}</tr></thead>
+      <tbody>{bookings.map(booking => <tr key={booking._id} className="border-t">
+        <td className="p-3"><MediaImage src={booking.outfit?.image} alt="" style={{ width: 64, height: 64, objectFit: 'cover' }} />{booking.outfit?.brand} {booking.outfit?.model}</td>
+        <td className="p-3">{booking.user?.username}</td>
+        <td className="p-3">{booking.reservationDate.slice(0, 10)} – {booking.returnDate.slice(0, 10)}</td>
+        <td className="p-3">{currency}{Number(booking.collectionAmount || booking.price).toFixed(2)}</td>
+        <td className="p-3">{booking.paymentStatus === 'paid' ? 'Cash received' : booking.paymentStatus === 'pending' ? 'Cash due on collection' : 'Not arranged'}</td>
+        <td className="p-3"><p>{booking.status}</p>
+          {booking.status === 'pending' && <><button disabled={busy === booking._id} onClick={() => action(booking, 'confirmed')}>Confirm</button>{' '}
+            <button disabled={busy === booking._id} onClick={() => action(booking, 'cancelled')}>Decline</button></>}
+          {booking.status === 'confirmed' && booking.paymentStatus === 'pending' &&
+            <button disabled={busy === booking._id} onClick={() => action(booking, 'cash')}>Record cash received</button>}
+          <button onClick={() => downloadFile(apiUrl('/api/booking/' + booking._id + '/document'), 'booking-document').catch(() => setError('Document is not available.'))}>Download document</button>
+        </td>
+      </tr>)}</tbody>
+    </table></div>{!bookings.length && <p className="p-4">No bookings yet.</p>}</div>
+  </div>;
 }
-
-export default ManageBookings

@@ -1,7 +1,9 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../MediaImage';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../../AuthGuard/AuthGuard';
+import { useAuth } from '../../AuthGuard/authGuard';
 import './AdminOutlet.css';
 
 const AdminOutlet = () => {
@@ -36,7 +38,7 @@ const AdminOutlet = () => {
 
   const fetchClothingItems = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/clothing');
+      const response = await axios.get(`${API_ORIGIN}/clothing`);
       setClothingItems(response.data);
     } catch (error) {
       console.error('Error fetching clothing items:', error);
@@ -64,9 +66,9 @@ const AdminOutlet = () => {
       };
 
       if (editingItem) {
-        await axios.put(`http://localhost:5001/clothing/${editingItem._id}`, itemData);
+        await axios.put(`${API_ORIGIN}/clothing/${editingItem._id}`, itemData);
       } else {
-        await axios.post('http://localhost:5001/clothing', itemData);
+        await axios.post(`${API_ORIGIN}/clothing`, itemData);
       }
 
       setShowAddForm(false);
@@ -113,7 +115,7 @@ const AdminOutlet = () => {
   const handleDelete = async (itemId) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
-        await axios.delete(`http://localhost:5001/clothing/${itemId}`);
+        await axios.delete(`${API_ORIGIN}/clothing/${itemId}`);
         fetchClothingItems();
       } catch (error) {
         console.error('Error deleting clothing item:', error);
@@ -316,7 +318,7 @@ const AdminOutlet = () => {
         {clothingItems.map((item) => (
           <div key={item._id} className="admin-outlet-item">
             <div className="item-image">
-              <img src={item.imageUrl} alt={item.name} />
+              <MediaImage src={item.imageUrl} alt={item.name} />
             </div>
             <div className="item-details">
               <h3>{item.name}</h3>

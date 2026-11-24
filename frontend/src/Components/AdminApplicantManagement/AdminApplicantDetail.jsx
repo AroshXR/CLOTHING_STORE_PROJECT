@@ -1,11 +1,16 @@
+import UIIcon from '../Layout/UIIcon';
+import { useBranding } from '../../config/branding';
+import { downloadFile } from '../../config/api';
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import './AdminApplicantManagement.css';
 
-const API_BASE_URL = 'http://localhost:5001';
+const API_BASE_URL = API_ORIGIN;
 
 export default function AdminApplicantDetail() {
+  const { branding } = useBranding();
   const { id } = useParams();
   const navigate = useNavigate();
   const [applicant, setApplicant] = useState(null);
@@ -61,7 +66,7 @@ export default function AdminApplicantDetail() {
       // Header: Brand title and timestamp
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(20);
-      doc.text('Klassy Shirts - Applicant Details', pageWidth / 2, y, { align: 'center' });
+      doc.text(`${branding.name} - Applicant Details`, pageWidth / 2, y, { align: 'center' });
       y += 20;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(11);
@@ -169,7 +174,7 @@ export default function AdminApplicantDetail() {
         const mod = await import('socket.io-client');
         const io = mod.io || mod.default;
         if (!io) throw new Error('socket.io-client not available');
-        const socket = io(API_BASE_URL, { transports: ['websocket'], reconnection: true });
+        const socket = io(API_BASE_URL, { transports: ['websocket'], reconnection: true, auth: { token: localStorage.getItem('token') } });
 
         const onChange = (payload) => {
           if (!payload || !payload.id || payload.id === id) {
@@ -281,7 +286,7 @@ export default function AdminApplicantDetail() {
   return (
     <div className="admin-applicants detail">
       <div className="admin-applicants__header">
-        <h2>Klassy Shirts - Applicant Details</h2>
+        <h1>{branding.name} - Applicant Details</h1>
         {applicant && (
           <p className="admin-applicants__subtitle">
             {applicant.name || 'Applicant'}
@@ -294,14 +299,14 @@ export default function AdminApplicantDetail() {
             className="header-nav-btn secondary"
             onClick={() => navigate(-1)}
           >
-            <i className="bx bx-arrow-back"></i> Back
+            <UIIcon className="bx bx-arrow-back"></UIIcon> Back
           </button>
           <button
             type="button"
             className="header-nav-btn primary"
             onClick={() => navigate('/admin-jobs')}
           >
-            Next <i className="bx bx-arrow-forward"></i>
+            Next <UIIcon className="bx bx-arrow-forward"></UIIcon>
           </button>
         </div>
       </div>
@@ -315,7 +320,7 @@ export default function AdminApplicantDetail() {
             onClick={() => setFeedback(null)}
             aria-label="Dismiss message"
           >
-            <i className="bx bx-x"></i>
+            <UIIcon className="bx bx-x"></UIIcon>
           </button>
         </div>
       )}
@@ -343,7 +348,7 @@ export default function AdminApplicantDetail() {
             <div className="detail__row"><span>Education</span><b>{applicant.education}</b></div>
             <div className="detail__row"><span>Skills</span><b>{applicant.skills}</b></div>
             <div className="detail__row column"><span>Cover Letter</span><p>{applicant.coverLetter}</p></div>
-            <div className="detail__row"><span>Resume</span>{resumeUrl ? <a href={resumeUrl} target="_blank" rel="noreferrer" className="btn">Download</a> : <b>-</b>}</div>
+            <div className="detail__row"><span>Resume</span>{resumeUrl ? <button type="button" className="btn" onClick={() => downloadFile(resumeUrl, applicant.resume.originalName).catch(() => alert('Unable to download this resume'))}>Download</button> : <b>-</b>}</div>
             <div className="detail__row"><span>Full Details</span>
               <div className="actions">
                 <button className="btn btn--download" onClick={downloadApplicantDetails}>Download CSV</button>

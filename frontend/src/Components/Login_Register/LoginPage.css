@@ -1,5 +1,6 @@
-﻿/* Form Container */
-.login-container {
+@layer app-legacy {
+/* Form Container */
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .login-container {
   flex: 1;
   max-width: 400px;
   min-width: 280px;
@@ -11,7 +12,7 @@
 }
 
 /* Heading style */
-.login-container h2 {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .login-container h2 {
   text-align: center;
   margin-bottom: 25px;
   font-size: 28px;
@@ -20,21 +21,21 @@
 }
 
 /* Form input group */
-.form-group {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .form-group {
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
 }
 
 /* Labels */
-.form-group label {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .form-group label {
   margin-bottom: 8px;
   font-weight: 600;
   color: #000000;
 }
 
 /* Inputs */
-.form-group input {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .form-group input {
   padding: 12px 14px;
   border-radius: 8px;
   border: 1px solid #ccc;
@@ -45,13 +46,13 @@
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.form-group input:focus {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .form-group input:focus {
   border-color: #000000;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
 }
 
 /* Submit button */
-button[type="submit"] {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) button[type="submit"] {
   width: 100%;
   padding: 14px;
   background: linear-gradient(to right, #000000, #444444);
@@ -64,13 +65,12 @@ button[type="submit"] {
   transition: all 0.3s ease;
 }
 
-button[type="submit"]:hover {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) button[type="submit"]:hover {
   background: #666666;
   transform: scale(1.03);
 }
 
-.loginPage-container {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .loginPage-container {
   background: linear-gradient(135deg, #f5f5f5, #e6e6e6); /* Soft gray background */
   min-height: 100vh;
   display: flex;
@@ -83,7 +83,7 @@ button[type="submit"]:hover {
 }
 
 /* Login Header */
-.login-header {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .login-header {
   text-align: center;
   padding: 40px 20px;
   width: 500px;
@@ -97,19 +97,19 @@ button[type="submit"]:hover {
   transition: transform 0.3s ease;
 }
 
-.login-header h1 {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .login-header h1 {
   margin-bottom: 10px;
   font-size: 36px;
   color: #000000;
 }
 
-.login-header p {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .login-header p {
   font-size: 16px;
   margin-bottom: 20px;
   color: #252525;
 }
 
-.loginImage {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .loginImage {
   width: 180px;
   margin-top: 20px;
   border-radius: 16px;
@@ -124,7 +124,7 @@ button[type="submit"]:hover {
 }
 
 /* Register link */
-.register-link {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .register-link {
   display: block;
   margin-top: 18px;
   text-align: center;
@@ -133,26 +133,26 @@ button[type="submit"]:hover {
   font-weight: 500;
 }
 
-.register-link a {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .register-link a {
   color: #000000;
   text-decoration: none;
   font-weight: bold;
   transition: color 0.3s ease;
 }
 
-.register-link a:hover {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .register-link a:hover {
   color: #555555;
   text-decoration: underline;
 }
 
 /* Error Message */
-.error-message {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .error-message {
   color: #ff4d4d;
   font-size: 13px;
   margin-top: 5px;
 }
 
-.error-message-container {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .error-message-container {
   background-color: #ffe6e6;
   border: 1px solid #ffcccc;
   border-radius: 8px;
@@ -161,14 +161,14 @@ button[type="submit"]:hover {
   text-align: center;
 }
 
-.error-message-container .error-message {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .error-message-container .error-message {
   color: #d32f2f;
   font-size: 14px;
   font-weight: 500;
   margin: 0;
 }
 
-.form-group select {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .form-group select {
   padding: 12px 14px;
   border-radius: 8px;
   border: 1px solid #ccc;
@@ -179,19 +179,19 @@ button[type="submit"]:hover {
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-.form-group select:focus {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .form-group select:focus {
   border-color: #000000;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
 }
 
-.register-mode-toggle {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .register-mode-toggle {
   display: flex;
   gap: 12px;
   justify-content: center;
   margin-bottom: 20px;
 }
 
-.mode-button {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .mode-button {
   flex: 1;
   padding: 10px 14px;
   border-radius: 10px;
@@ -203,20 +203,20 @@ button[type="submit"]:hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.mode-button:hover {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .mode-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   border-color: rgba(0, 0, 0, 0.25);
 }
 
-.mode-button.active {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .mode-button.active {
   background: linear-gradient(135deg, #111111, #4b5563);
   color: #ffffff;
   border-color: transparent;
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
 }
 
-.admin-register-note {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .admin-register-note {
   background: rgba(17, 24, 39, 0.08);
   border-radius: 10px;
   padding: 14px;
@@ -225,13 +225,14 @@ button[type="submit"]:hover {
   color: #111827;
 }
 
-.admin-register-note strong {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .admin-register-note strong {
   display: block;
   margin-bottom: 4px;
 }
 
-.admin-register-note p {
+:where(.ui-page[data-page="login"],.ui-page[data-page="register"]) .admin-register-note p {
   margin: 0;
   font-size: 14px;
   color: #1f2937;
+}
 }

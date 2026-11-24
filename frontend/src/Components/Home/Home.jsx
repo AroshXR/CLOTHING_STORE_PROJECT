@@ -1,19 +1,21 @@
 // src/Components/Home/Home.js
 import React from 'react';
-import NavBar from '../NavBar/navBar'; // Make sure navBar.js uses capital 'N'
+ // Make sure navBar.js uses capital 'N'
 import './Home.css'; // Import CSS
 import { Link, Outlet } from 'react-router-dom';
-import Footer from '../Footer/Footer'; // Import Footer component
+ // Import Footer component
 import ContactUs from './ContactUs';
 import AboutUs from './AboutUs';
+import { useBranding } from '../../config/branding';
 
 function Home() {
+  const { branding } = useBranding();
   return (
-    <div className="home-container" style={{ background: "linear-gradient(135deg, #eeeded 0%, #333333 100%)" }}>
-      <NavBar />
+    <div className="home-container" >
+      
       
       {/* Hero Section */}
-      <section className="hero-section ">
+      <section className="hero-section">
         <div className="hero-background fade-in">
           <div className="floating-shapes">
             <div className="shape shape-1"></div>
@@ -26,13 +28,10 @@ function Home() {
         <div className="hero-content fade-in">
           <div className="hero-text">
             <h1 className="hero-title">
-              Create Your
-              <span className="gradient-text"> Perfect </span>
-              T-Shirt
+              {branding.heroTitle}
             </h1>
             <p className="hero-description">
-              Express your unique style with our premium custom t-shirts. 
-              Design, customize, and wear your creativity with confidence.
+              {branding.heroDescription}
             </p>
             
             <div className="startButtons">
@@ -67,7 +66,7 @@ function Home() {
       <section className="features-section fade-in">
         <div className="container">
           <div className="section-header">
-            <h2>Why Choose Klassy T-Shirts?</h2>
+            <h2>Why Choose {branding.name}?</h2>
             <p>Experience the perfect blend of quality, creativity, and style</p>
           </div>
           
@@ -99,7 +98,7 @@ function Home() {
       </section>
 
       <Outlet />
-      <Footer />
+      
     </div>
   );
 }

@@ -1,4 +1,5 @@
-﻿import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
+import { API_BASE_URL as API_ORIGIN } from '../config/api';
+import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext();
@@ -51,7 +52,7 @@ export const AuthProvider = ({ children }) => {
 
         try {
             const authHeader = `Bearer ${effectiveToken}`;
-            const response = await axios.get('http://localhost:5001/users/me', {
+            const response = await axios.get(`${API_ORIGIN}/users/me`, {
                 headers: {
                     Authorization: authHeader
                 }

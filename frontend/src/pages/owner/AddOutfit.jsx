@@ -1,9 +1,11 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../../Components/MediaImage';
 import React, { useState } from 'react'
 import axios from 'axios'
 import Title from '../../Components/pasindu/owner/Title'
 import { assets } from '../../assets/assets'
 import "./RainbowButton.css";
-import { useAuth } from '../../AuthGuard/AuthGuard'
+import { useAuth } from '../../AuthGuard/authGuard'
 
 const AddOutfit = () => {
 
@@ -40,7 +42,7 @@ const AddOutfit = () => {
         return
       }
 
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+      const BASE_URL = API_ORIGIN
       const form = new FormData()
       
       // Add main image
@@ -81,9 +83,9 @@ const AddOutfit = () => {
   }
 
   return (
-    <div className='px-4 py-10 md:px-10 flex-1 '>
+    <div className="flex-1">
 
-      <div className="w-[800px] h-full bg-gradient-to-br from-[#e6e5e5] to-[#858585] rounded-[50px] p-10 ml-40 shadow-lg shadow-gray-400/30 relative overflow-hidden">
+      <div className="w-[800px] h-full bg-gradient-to-br from-[#e6e5e5] to-[#858585] rounded-[50px] shadow-lg shadow-gray-400/30 relative overflow-hidden">
 
         <div className="text-center mt-26">
       <Title title="Add new Outfit" subTitle= "Fill in the details to list a new outfit for booking, including pricing, availability, and outfit specifications." />
@@ -96,7 +98,7 @@ const AddOutfit = () => {
         {/* Main Outfit Image (Required) */}
         <div className='flex items-center gap-2 w-full '>
           <label htmlFor="main-outfit-image">
-            <img src={mainImage ? URL.createObjectURL(mainImage) : assets.upload_icon} alt=""  className='h-14 rounded cursor-pointer'/>
+            <MediaImage src={mainImage ? URL.createObjectURL(mainImage) : assets.upload_icon} alt=""  className='h-14 rounded cursor-pointer'/>
             <input type="file"  id="main-outfit-image" accept="image/*" hidden onChange={e=>setMainImage(e.target.files[0])} />
           </label>
           <p className='text-sm text-gray-500'>Upload main picture of your Outfit (Required)</p>
@@ -109,7 +111,7 @@ const AddOutfit = () => {
             {[0, 1, 2].map((index) => (
               <div key={index} className='flex items-center gap-2'>
                 <label htmlFor={`additional-image-${index}`}>
-                  <img 
+                  <MediaImage
                     src={additionalImages[index] ? URL.createObjectURL(additionalImages[index]) : assets.upload_icon} 
                     alt=""  
                     className='h-12 rounded cursor-pointer'

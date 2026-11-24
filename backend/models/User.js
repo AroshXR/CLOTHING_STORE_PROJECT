@@ -43,6 +43,7 @@ const userSchema = new Schema({
         type: String,
         trim: true
     },
+    image: { type: String, trim: true },
     notifications: {
         type: [notificationSchema],
         default: []

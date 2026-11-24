@@ -17,6 +17,8 @@ const outfitSchema = new mongoose.Schema({
     location: { type: String, required: true },
     description: { type: String, required: true },
     isAvailable: { type: Boolean, default: true },
+    archivedAt: { type: Date, default: null },
+    bookingVersion: { type: Number, default: 0 },
 }, { timestamps: true });
 
 const Outfit = mongoose.model('Outfit', outfitSchema);

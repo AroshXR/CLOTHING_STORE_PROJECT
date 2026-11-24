@@ -1,5 +1,9 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './AuthGuard/AuthGuard';
+import { Routes, Route } from 'react-router-dom';
+import AppShell from './Components/Layout/AppShell';
+import NotFound from './Components/Layout/NotFound';
+import { AuthProvider } from './AuthGuard/authGuard';
+import { BrandingProvider } from './config/branding';
+import SiteSettings from './pages/admin/SiteSettings';
 import ProtectedRoute from './AuthGuard/ProtectedRoute';
 import Home from './Components/Home/Home';
 import LoginPage from './Components/Login_Register/Login';
@@ -55,7 +59,6 @@ import AdminTailors from './pages/admin/Tailors';
 import AdminClothCustomizer from './Components/clothing-customizer/admin-cloth-customizer';
 
 // Gate that redirects logged-in customers to UserHome on outlet routes only
-import { useAuth } from './AuthGuard/AuthGuard';
 const OutletGate = ({ id = null }) => {
   // Always allow access to Outlet and OutletDetail for all roles
   // Render Outlet or OutletDetail based on whether an id is provided via route match
@@ -65,10 +68,11 @@ const OutletGate = ({ id = null }) => {
 
 function App() {
   return (
-    <AuthProvider>
+    <BrandingProvider><AuthProvider><AppShell>
       
       <Routes>
-       // {/* Public routes */}
+        <Route path="/admin/site-settings" element={<ProtectedRoute allowedUserTypes="Admin"><SiteSettings /></ProtectedRoute>} />
+        {/* Public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/learn-more" element={<LearnMore />} />
         <Route path="/login" element={<LoginPage />} />
@@ -304,8 +308,9 @@ function App() {
 
 
 
+        <Route path="*" element={<NotFound />} />
       </Routes>
-    </AuthProvider>
+    </AppShell></AuthProvider></BrandingProvider>
   );
 }
 

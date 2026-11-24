@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-admin": "node create-admin.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js",
     "start": "nodemon app.js"
   },
   "author": "",
@@ -23,7 +24,10 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^7.0.6",
     "nodemon": "^3.1.10",
-    "puppeteer": "^24.23.0",
+    "puppeteer": "^24.23.1",
     "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.4.0"
   }
 }

@@ -1,5 +1,5 @@
 const express = require("express");  // Replaced import with require
-const { protect } = require("../middleware/auth");  // Replaced import with require
+const { protect, ownerOnly } = require("../middleware/auth");  // Replaced import with require
 const ownerController = require("../controllers/ownerController");  // Replaced import with require
 const upload = require("../middleware/multer");
 
@@ -16,21 +16,21 @@ const h = (fnName) => {
 };
 
 ownerRouter.post("/change-role", protect, h('changeRoleToOwner'));
-ownerRouter.post("/add-outfit", protect, upload.fields([
+ownerRouter.post("/add-outfit", protect, ownerOnly, upload.fields([
     { name: 'mainImage', maxCount: 1 },
     { name: 'additionalImages', maxCount: 3 }
 ]), h('addOutfit'));
-ownerRouter.get("/outfits", protect, h('getOwnerOutfits'));
+ownerRouter.get("/outfits", protect, ownerOnly, h('getOwnerOutfits'));
 ownerRouter.get("/all-outfits", h('getAllOutfits')); // Public endpoint for browsing
-ownerRouter.post("/toggle-outfit", protect, h('toggleOutfitAvailability'));
-ownerRouter.post("/delete-outfit", protect, h('deleteOutfit'));
+ownerRouter.post("/toggle-outfit", protect, ownerOnly, h('toggleOutfitAvailability'));
+ownerRouter.post("/delete-outfit", protect, ownerOnly, h('deleteOutfit'));
 
-ownerRouter.get("/dashboard", protect, h('getDashboardData'));
+ownerRouter.get("/dashboard", protect, ownerOnly, h('getDashboardData'));
 ownerRouter.post("/update-image", protect, upload.single("image"), h('updateUserImage'));
 
 // Routes for editing outfits
-ownerRouter.get("/outfit/:outfitId", protect, h('getOutfitById'));
-ownerRouter.put("/outfit/:outfitId", protect, upload.fields([
+ownerRouter.get("/outfit/:outfitId", protect, ownerOnly, h('getOutfitById'));
+ownerRouter.put("/outfit/:outfitId", protect, ownerOnly, upload.fields([
     { name: 'mainImage', maxCount: 1 },
     { name: 'additionalImages', maxCount: 3 }
 ]), h('updateOutfit'));

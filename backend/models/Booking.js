@@ -9,7 +9,11 @@ const bookingSchema = new mongoose.Schema({
     reservationDate: {type: Date,required:true},
     returnDate: {type: Date, required: true},
     status : {type: String, enum: ["pending", "confirmed" , "cancelled"], default:"pending"},
-    price: {type: Number, required: true},
+    price: {type: Number, required: true, min: 0},
+    paymentStatus: { type: String, enum: ['unpaid', 'pending', 'paid'], default: 'unpaid' },
+    paymentId: { type: ObjectId, ref: 'PaymentDetails' },
+    paymentMethod: { type: String, enum: ['cash_on_collection'] },
+    collectionAmount: { type: Number, min: 0 },
     phone: {type: String, required: true},
     email: {type: String, required: true},
     document: {type: String, required: true} // Path to uploaded document  (from multer)

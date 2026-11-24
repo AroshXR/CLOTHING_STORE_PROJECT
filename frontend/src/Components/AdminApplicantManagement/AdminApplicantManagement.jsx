@@ -1,9 +1,11 @@
+import UIIcon from '../Layout/UIIcon';
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './AdminApplicantManagement.css';
 
-const API_BASE_URL = 'http://localhost:5001';
+const API_BASE_URL = API_ORIGIN;
 
 export default function AdminApplicantManagement() {
   const navigate = useNavigate();
@@ -59,7 +61,7 @@ export default function AdminApplicantManagement() {
         const mod = await import('socket.io-client');
         const io = mod.io || mod.default;
         if (!io) throw new Error('socket.io-client not available');
-        const socket = io(API_BASE_URL, { transports: ['websocket'], reconnection: true });
+        const socket = io(API_BASE_URL, { transports: ['websocket'], reconnection: true, auth: { token: localStorage.getItem('token') } });
 
         const onChange = () => {
           // Re-fetch while keeping current filter
@@ -165,21 +167,21 @@ export default function AdminApplicantManagement() {
   return (
     <div className="admin-applicants">
       <div className="admin-applicants__header">
-        <h2>Applicant Management</h2>
+        <h1>Applicant Management</h1>
         <div className="header-nav-actions">
           <button
             type="button"
             className="header-nav-btn secondary"
             onClick={() => navigate(-1)}
           >
-            <i className="bx bx-arrow-back"></i> Back
+            <UIIcon className="bx bx-arrow-back"></UIIcon> Back
           </button>
           <button
             type="button"
             className="header-nav-btn primary"
             onClick={() => navigate('/admin-jobs')}
           >
-            Next <i className="bx bx-arrow-forward"></i>
+            Next <UIIcon className="bx bx-arrow-forward"></UIIcon>
           </button>
         </div>
         <div className="admin-applicants__filters">
@@ -203,7 +205,7 @@ export default function AdminApplicantManagement() {
             onClick={() => setFeedback(null)}
             aria-label="Dismiss message"
           >
-            <i className="bx bx-x"></i>
+            <UIIcon className="bx bx-x"></UIIcon>
           </button>
         </div>
       )}

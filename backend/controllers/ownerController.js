@@ -1,3 +1,4 @@
+const { isAdmin } = require('../middleware/auth');
 const User = require("../models/User");
 const fs = require("fs");  // Replaced import with require
 const imagekit = require("../configs/imageKit");  // Replaced import with require
@@ -93,7 +94,7 @@ const addOutfit = async (req, res) => {
 const getOwnerOutfits = async (req, res) => {
     try {
         const { _id } = req.user;
-        const outfits = await Outfit.find({ owner: _id });
+        const outfits = await Outfit.find({ owner: _id, archivedAt: null });
         res.json({ success: true, outfits });
     } catch (error) {
         console.log(error.message);
@@ -106,7 +107,7 @@ const getAllOutfits = async (req, res) => {
     try {
         const { location, category, search, minPrice, maxPrice } = req.query;
         
-        let query = { isAvailable: true };
+        let query = { isAvailable: true, archivedAt: null };
         
         if (location) query.location = location;
         if (category) query.category = category;
@@ -171,35 +172,10 @@ const toggleOutfitAvailability = async (req, res) => {
 
 //API to delete an Outfit (hard delete with related bookings)
 const deleteOutfit = async (req, res) => {
-    try {
-        const { _id } = req.user;
-        const { outfitId } = req.body;
-        const outfit = await Outfit.findById(outfitId);
-
-        if (!outfit) {
-            return res.json({ success: false, message: "Outfit not found" });
-        }
-
-        // Checking if the outfit belongs to the user
-        if (outfit.owner.toString() !== _id.toString()) {
-            return res.json({ success: false, message: "Unauthorized" });
-        }
-
-        // Delete all related bookings first
-        const bookingDeleteResult = await Booking.deleteMany({ outfit: outfitId });
-        
-        // Delete the outfit from database
-        await Outfit.findByIdAndDelete(outfitId);
-
-        res.json({ 
-            success: true, 
-            message: "Outfit deleted successfully", 
-            deletedBookings: bookingDeleteResult.deletedCount || 0 
-        });
-    } catch (error) {
-        console.log(error.message);
-        res.json({ success: false, message: error.message });
-    }
+    const outfit = await Outfit.findById(req.body.outfitId);
+    if (!outfit || (!isAdmin(req.user) && String(outfit.owner) !== String(req.user._id))) return res.status(404).json({ success: false, message: 'Outfit not found' });
+    outfit.isAvailable = false; outfit.archivedAt = new Date(); await outfit.save();
+    res.json({ success: true, message: 'Outfit archived; booking history has been retained' });
 };
 
 //API to get Dashboard data
@@ -225,9 +201,9 @@ const getDashboardData = async (req, res) => {
         }
         
         const outfits = await Outfit.find(outfitQuery)
-        const bookings = await Booking.find(bookingQuery).populate('outfit user').sort({createdAt: -1}) ;
+        const bookings = await Booking.find(bookingQuery).populate('outfit').populate('user', 'username email').sort({createdAt: -1}) ;
 
-        const pendingBookings = await Booking.find({ ...bookingQuery, status: "pending" }).populate('outfit user').sort({ createdAt: -1 });
+        const pendingBookings = await Booking.find({ ...bookingQuery, status: "pending" }).populate('outfit').populate('user', 'username email').sort({ createdAt: -1 });
         const confirmedBookings = await Booking.find({ ...bookingQuery, status: "confirmed" }).sort({ createdAt: -1 });
         const cancelledBookings = await Booking.find({ ...bookingQuery, status: "cancelled" }).sort({ createdAt: -1 });
 
@@ -314,7 +290,11 @@ const updateOutfit = async (req, res) => {
         const { _id } = req.user;
         
         // Parse outfit data from request body
-        let outfitData = JSON.parse(req.body.outfitData);
+        const submitted = JSON.parse(req.body.outfitData);
+        const outfitData = {};
+        for (const field of ['brand', 'model', 'condition', 'category', 'material', 'color', 'size', 'pricePerDay', 'location', 'description']) {
+            if (submitted[field] !== undefined) outfitData[field] = submitted[field];
+        }
         const files = req.files;
 
         // Verify outfit belongs to the user
@@ -325,7 +305,7 @@ const updateOutfit = async (req, res) => {
 
         // Handle image updates
         let imageUrl = existingOutfit.image; // Keep existing image by default
-        let additionalImages = existingOutfit.additionalImages || []; // Keep existing additional images
+        let additionalImages = existingOutfit.images || []; // Keep existing additional images
 
         // Update main image if provided
         if (files && files.mainImage) {
@@ -360,7 +340,7 @@ const updateOutfit = async (req, res) => {
             {
                 ...outfitData,
                 image: imageUrl,
-                additionalImages: additionalImages
+                images: additionalImages
             },
             { new: true }
         );

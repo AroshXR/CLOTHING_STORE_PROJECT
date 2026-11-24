@@ -1,13 +1,14 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
-import NavBar from '../../Components/NavBar/navBar';
-import Footer from '../../Components/Footer/Footer';
-import { useAuth } from '../../AuthGuard/AuthGuard';
+
+
+import { useAuth } from '../../AuthGuard/authGuard';
 import TailorSubNav from '../../Components/tailor-management/TailorSubNav';
 import { Link } from 'react-router-dom';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+const API_BASE_URL = API_ORIGIN;
 
 export default function AdminCustomOrders() {
   const { getToken } = useAuth();
@@ -158,9 +159,9 @@ export default function AdminCustomOrders() {
 
   return (
     <div className="admin-custom-orders">
-      <NavBar />
+      
       <TailorSubNav />
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: 16 }}>
+      <section style={{ maxWidth: 1200, margin: '0 auto', padding: 16 }}>
         <h1>Custom Orders</h1>
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', margin: '12px 0' }}>
@@ -239,7 +240,7 @@ export default function AdminCustomOrders() {
                       </button>
                       <select defaultValue="" onChange={(e) => updateStatus(order._id, e.target.value)} disabled={updatingStatusId === order._id}>
                         <option value="" disabled>Update status...</option>
-                        {['accepted','in_progress','completed','delivered','cancelled'].map(s => (
+                        {({ assigned: ['accepted'], accepted: ['in_progress'], in_progress: ['completed'], completed: ['delivered'] }[order.status] || []).map(s => (
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </select>
@@ -255,8 +256,8 @@ export default function AdminCustomOrders() {
             {/* Recent assignments section removed as order carries assignedTailor */}
           </div>
         )}
-      </main>
-      <Footer />
+      </section>
+      
     </div>
   );
 }

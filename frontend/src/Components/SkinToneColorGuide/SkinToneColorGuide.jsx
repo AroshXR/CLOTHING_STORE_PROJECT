@@ -1,6 +1,6 @@
 import React from 'react';
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
+
+
 import './SkinToneColorGuide.css';
 
 const toneGuides = [
@@ -90,7 +90,7 @@ const undertoneTips = [
 const SkinToneColorGuide = () => {
   return (
     <div className="color-guide-page">
-      <NavBar />
+      
       <section className="color-guide-hero">
         <div className="color-guide-hero__content">
           <h1>Find Your Perfect Palette</h1>
@@ -196,7 +196,7 @@ const SkinToneColorGuide = () => {
         </p>
         <a className="cta-button" href="/customizer">Open the customizer</a>
       </section>
-      <Footer />
+      
     </div>
   );
 };

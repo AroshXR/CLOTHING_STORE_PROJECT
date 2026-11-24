@@ -1,11 +1,13 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../../Components/MediaImage';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
-import NavBar from '../../Components/NavBar/navBar';
-import Footer from '../../Components/Footer/Footer';
-import { useAuth } from '../../AuthGuard/AuthGuard';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+
+import { useAuth } from '../../AuthGuard/authGuard';
+
+const API_BASE_URL = API_ORIGIN;
 
 export default function AdminCustomOrderDetail() {
   const { id } = useParams();
@@ -85,8 +87,8 @@ export default function AdminCustomOrderDetail() {
 
   return (
     <div className="admin-custom-order-detail">
-      <NavBar />
-      <main style={{ maxWidth: 1000, margin: '0 auto', padding: 16 }}>
+      
+      <section style={{ maxWidth: 1000, margin: '0 auto', padding: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h1>Order Detail</h1>
           <Link to="/admin/custom-orders">Back to List</Link>
@@ -117,7 +119,7 @@ export default function AdminCustomOrderDetail() {
             {order.design?.designImageUrl && (
               <section style={{ border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
                 <h3>Design</h3>
-                <img alt="design" src={order.design.designImageUrl} style={{ maxWidth: 240, borderRadius: 8, border: '1px solid #ddd' }} />
+                <MediaImage alt="design" src={order.design.designImageUrl} style={{ maxWidth: 240, borderRadius: 8, border: '1px solid #ddd' }} />
               </section>
             )}
 
@@ -135,17 +137,17 @@ export default function AdminCustomOrderDetail() {
             </section>
 
             <section style={{ border: '1px solid #eee', borderRadius: 8, padding: 12, display: 'grid', gap: 8 }}>
-              <h3>Admin Status Override</h3>
+              <h3>Update Production Status</h3>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {['pending','assigned','accepted','in_progress','completed','delivered','cancelled'].map(s => (
+                {({ assigned: ['accepted'], accepted: ['in_progress'], in_progress: ['completed'], completed: ['delivered'] }[order.status] || []).map(s => (
                   <button key={s} disabled={updating} onClick={() => onOverrideStatus(s)}>{s}</button>
                 ))}
               </div>
             </section>
           </div>
         )}
-      </main>
-      <Footer />
+      </section>
+      
     </div>
   );
 }

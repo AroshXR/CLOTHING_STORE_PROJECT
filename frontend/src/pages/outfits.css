@@ -1,4 +1,5 @@
-.outfit-filters-container {
+@layer app-legacy {
+:where(.ui-page[data-page="rental-catalog"]) .outfit-filters-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -9,7 +10,7 @@
 }
 
 /* Search Bar Styles */
-.search-bar {
+:where(.ui-page[data-page="rental-catalog"]) .search-bar {
   display: flex;
   align-items: center;
   background: linear-gradient(145deg, #ffffff, #f8f9fa);
@@ -26,7 +27,7 @@
   overflow: hidden;
 }
 
-.search-bar::before {
+:where(.ui-page[data-page="rental-catalog"]) .search-bar::before {
   content: "";
   position: absolute;
   top: 0;
@@ -37,23 +38,23 @@
   transition: left 0.5s;
 }
 
-.search-bar:hover::before {
+:where(.ui-page[data-page="rental-catalog"]) .search-bar:hover::before {
   left: 100%;
 }
 
-.search-bar:hover {
+:where(.ui-page[data-page="rental-catalog"]) .search-bar:hover {
   border-color: #374151;
   box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.15);
   transform: translateY(-1px);
 }
 
-.search-bar:focus-within {
+:where(.ui-page[data-page="rental-catalog"]) .search-bar:focus-within {
   border-color: #111827;
   box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
 }
 
-.search-icon,
-.filter-icon {
+:where(.ui-page[data-page="rental-catalog"]) .search-icon,
+:where(.ui-page[data-page="rental-catalog"]) .filter-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,12 +63,12 @@
   z-index: 1;
 }
 
-.search-bar:hover .search-icon,
-.search-bar:hover .filter-icon {
+:where(.ui-page[data-page="rental-catalog"]) .search-bar:hover .search-icon,
+:where(.ui-page[data-page="rental-catalog"]) .search-bar:hover .filter-icon {
   color: #374151;
 }
 
-.search-input {
+:where(.ui-page[data-page="rental-catalog"]) .search-input {
   flex: 1;
   height: 100%;
   border: none;
@@ -80,13 +81,13 @@
   z-index: 1;
 }
 
-.search-input::placeholder {
+:where(.ui-page[data-page="rental-catalog"]) .search-input::placeholder {
   color: #9ca3af;
   font-weight: 400;
 }
 
 /* Filters Grid */
-.filters-grid {
+:where(.ui-page[data-page="rental-catalog"]) .filters-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -97,7 +98,7 @@
 }
 
 /* Filter Select Styles */
-.filter-select {
+:where(.ui-page[data-page="rental-catalog"]) .filter-select {
   padding: 0.75rem 1rem;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
@@ -113,26 +114,26 @@
   position: relative;
 }
 
-.filter-select:hover {
+:where(.ui-page[data-page="rental-catalog"]) .filter-select:hover {
   border-color: #374151;
   background: linear-gradient(145deg, #f8f9fa, #ffffff);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
 
-.filter-select:focus {
+:where(.ui-page[data-page="rental-catalog"]) .filter-select:focus {
   border-color: #111827;
   box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
 }
 
-.filter-select option {
+:where(.ui-page[data-page="rental-catalog"]) .filter-select option {
   background: #ffffff;
   color: #374151;
   padding: 0.5rem;
 }
 
 /* Price Input Styles */
-.price-input {
+:where(.ui-page[data-page="rental-catalog"]) .price-input {
   padding: 0.75rem 1rem;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
@@ -146,43 +147,43 @@
   box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.price-input:hover {
+:where(.ui-page[data-page="rental-catalog"]) .price-input:hover {
   border-color: #374151;
   background: linear-gradient(145deg, #f8f9fa, #ffffff);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
 
-.price-input:focus {
+:where(.ui-page[data-page="rental-catalog"]) .price-input:focus {
   border-color: #111827;
   box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
 }
 
-.price-input::placeholder {
+:where(.ui-page[data-page="rental-catalog"]) .price-input::placeholder {
   color: #9ca3af;
   font-weight: 400;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .search-bar {
+  :where(.ui-page[data-page="rental-catalog"]) .search-bar {
     height: 3rem;
     padding: 0 1rem;
     margin-top: 1rem;
   }
 
-  .filters-grid {
+  :where(.ui-page[data-page="rental-catalog"]) .filters-grid {
     gap: 0.75rem;
     margin-top: 1rem;
   }
 
-  .filter-select {
+  :where(.ui-page[data-page="rental-catalog"]) .filter-select {
     min-width: 140px;
     padding: 0.625rem 0.75rem;
     font-size: 0.9rem;
   }
 
-  .price-input {
+  :where(.ui-page[data-page="rental-catalog"]) .price-input {
     width: 100px;
     padding: 0.625rem 0.75rem;
     font-size: 0.9rem;
@@ -190,14 +191,15 @@
 }
 
 @media (max-width: 480px) {
-  .filters-grid {
+  :where(.ui-page[data-page="rental-catalog"]) .filters-grid {
     flex-direction: column;
     align-items: center;
   }
 
-  .filter-select,
-  .price-input {
+  :where(.ui-page[data-page="rental-catalog"]) .filter-select,
+:where(.ui-page[data-page="rental-catalog"]) .price-input {
     width: 100%;
     max-width: 280px;
   }
+}
 }

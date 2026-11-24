@@ -1,185 +1,46 @@
-const mongoose = require("mongoose");
-const ClothCustomizer = require("../models/ClothCustomizerModel");
-
-const isValidObjectId = (id) => Boolean(id && mongoose.Types.ObjectId.isValid(id));
-
-// Get all cloth customizers for the authenticated user
-const getAllClothCustomizers = async (req, res) => {
-    try {
-        const customizers = await ClothCustomizer.find({ userId: req.user._id }).sort({ createdAt: -1 });
-        res.status(200).json({
-            status: "ok",
-            data: customizers
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: "error",
-            message: "Error fetching cloth customizers",
-            error: error.message
-        });
-    }
+const mongoose = require('mongoose');
+const Design = require('../models/ClothCustomizerModel');
+const pricing = require('../services/pricingService');
+const HttpError = require('../utils/HttpError');
+const authorizeArtwork = require('../services/artworkService');
+const owned = (req) => {
+  if (!mongoose.isValidObjectId(req.params.id)) throw new HttpError(400, 'Invalid design ID');
+  return { _id: req.params.id, userId: req.user._id };
 };
-
-// Add new cloth customizer scoped to the authenticated user
-const addClothCustomizer = async (req, res) => {
-    try {
-        const {
-            clothingType,
-            nickname,
-            color,
-            selectedDesign,
-            placedDesigns,
-            size,
-            quantity,
-            totalPrice
-        } = req.body;
-
-        const newCustomizer = new ClothCustomizer({
-            userId: req.user._id,
-            clothingType: clothingType || "tshirt",
-            nickname,
-            color,
-            selectedDesign,
-            placedDesigns: placedDesigns || [],
-            size,
-            quantity,
-            totalPrice
-        });
-
-        const savedCustomizer = await newCustomizer.save();
-
-        res.status(201).json({
-            status: "ok",
-            message: "Cloth customizer created successfully",
-            data: savedCustomizer
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: "error",
-            message: "Error creating cloth customizer",
-            error: error.message
-        });
-    }
+exports.getAllClothCustomizers = async (req, res) => {
+  const query = { userId: req.user._id };
+  if (req.query.scope === 'saved') query.inCart = false;
+  else if (req.query.scope !== 'all') query.inCart = { $ne: false };
+  res.json({ status: 'ok', data: await Design.find(query).sort({ createdAt: -1 }) });
 };
-
-//chetha added this part
-// Get cloth customizer by ID for the authenticated user
-const getClothCustomizerById = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        if (!isValidObjectId(id)) {
-            return res.status(400).json({
-                status: "error",
-                message: "Invalid item ID format"
-            });
-        }
-
-        const customizer = await ClothCustomizer.findOne({ _id: id, userId: req.user._id });
-
-        if (!customizer) {
-            return res.status(404).json({
-                status: "error",
-                message: "Cloth customizer not found"
-            });
-        }
-
-        res.status(200).json({
-            status: "ok",
-            data: customizer
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: "error",
-            message: "Error fetching cloth customizer",
-            error: error.message
-        });
-    }
+exports.addClothCustomizer = async (req, res) => {
+  await authorizeArtwork(req.user._id, req.body.selectedDesign);
+  const { design } = pricing.priceCustomization(req.body, await pricing.getPrices());
+  const saved = await Design.create({ ...design, userId: req.user._id, inCart: true });
+  res.status(201).json({ status: 'ok', message: 'Design saved to cart', data: saved });
 };
-
-// Update cloth customizer owned by the authenticated user
-const updateClothCustomizer = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const updateData = { ...req.body };
-
-        if (!isValidObjectId(id)) {
-            return res.status(400).json({
-                status: "error",
-                message: "Invalid item ID format"
-            });
-        }
-
-        delete updateData.userId;
-
-        const updatedCustomizer = await ClothCustomizer.findOneAndUpdate(
-            { _id: id, userId: req.user._id },
-            updateData,
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedCustomizer) {
-            return res.status(404).json({
-                status: "error",
-                message: "Cloth customizer not found or access denied"
-            });
-        }
-
-        res.status(200).json({
-            status: "ok",
-            message: "Cloth customizer updated successfully",
-            data: updatedCustomizer
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: "error",
-            message: "Error updating cloth customizer",
-            error: error.message
-        });
-    }
+exports.getClothCustomizerById = async (req, res) => {
+  const design = await Design.findOne(owned(req));
+  if (!design) throw new HttpError(404, 'Design not found');
+  res.json({ status: 'ok', data: design });
 };
-
-// Delete cloth customizer owned by the authenticated user
-const deleteClothCustomizer = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        if (!isValidObjectId(id)) {
-            return res.status(400).json({
-                status: "error",
-                message: "Invalid item ID format"
-            });
-        }
-
-        const deletedCustomizer = await ClothCustomizer.findOneAndDelete({
-            _id: id,
-            userId: req.user._id
-        });
-
-        if (!deletedCustomizer) {
-            return res.status(404).json({
-                status: "error",
-                message: "Cloth customizer not found or access denied"
-            });
-        }
-
-        res.status(200).json({
-            status: "ok",
-            message: "Cloth customizer deleted successfully"
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: "error",
-            message: "Error deleting cloth customizer",
-            error: error.message
-        });
-    }
+exports.updateClothCustomizer = async (req, res) => {
+  const filter = owned(req), existing = await Design.findOne(filter);
+  if (!existing) throw new HttpError(404, 'Design not found');
+  const input = existing.toObject();
+  for (const field of ['clothingType', 'nickname', 'color', 'selectedDesign', 'size', 'quantity']) {
+    if (Object.prototype.hasOwnProperty.call(req.body, field)) input[field] = req.body[field];
+  }
+  const { design } = pricing.priceCustomization(input, await pricing.getPrices());
+  await authorizeArtwork(req.user._id, design.selectedDesign);
+  const updates = { ...design };
+  if (req.body.inCart === true) updates.inCart = true;
+  const saved = await Design.findOneAndUpdate(filter, { $set: updates, $inc: { revision: 1 } }, { new: true, runValidators: true });
+  res.json({ status: 'ok', message: 'Design updated', data: saved });
 };
-
-module.exports = {
-    getAllClothCustomizers,
-    addClothCustomizer,
-    getClothCustomizerById,
-    updateClothCustomizer,
-    deleteClothCustomizer
+exports.deleteClothCustomizer = async (req, res) => {
+  // A purchased order owns an immutable snapshot, independent of this saved design.
+  const deleted = await Design.findOneAndDelete(owned(req));
+  if (!deleted) throw new HttpError(404, 'Design not found');
+  res.json({ status: 'ok', message: 'Design removed' });
 };

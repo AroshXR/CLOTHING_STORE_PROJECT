@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useMemo } from 'react'
 import { useGLTF, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
+import { useMediaUrl } from '../../MediaImage';
 
 export function TShirtModel({ selectedColor, presetDesign, chestDesignUrl, scale, position, ...props }) {
   const group = useRef();
   const { nodes, materials } = useGLTF('/models/t_shirt.glb');
 
-  const activeDesignUrl = presetDesign?.imageUrl || chestDesignUrl
+  const activeDesignUrl = useMediaUrl(presetDesign?.imageUrl || chestDesignUrl)
 
   const designTexture = useTexture(activeDesignUrl || "/logo192.png")
 
@@ -56,7 +57,7 @@ export function TShirtModel({ selectedColor, presetDesign, chestDesignUrl, scale
         materials.DesignArea.name = 'DesignArea';
       }
 
-      if (chestDesignUrl) {
+      if (activeDesignUrl) {
         materials.DesignArea.map = designTexture;
         materials.DesignArea.map.flipY = false;
         materials.DesignArea.needsUpdate = true;
@@ -66,7 +67,7 @@ export function TShirtModel({ selectedColor, presetDesign, chestDesignUrl, scale
       }
       materials.DesignArea.needsUpdate = true;
     }
-  }, [nodes, materials, selectedColor, chestDesignUrl, designTexture]);
+  }, [nodes, materials, selectedColor, activeDesignUrl, designTexture]);
 
 
   return (

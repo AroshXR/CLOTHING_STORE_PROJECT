@@ -1,456 +1,54 @@
-const PaymentDetails = require("../models/PaymentDetailsModel");
-const Order = require("../models/OrderModel");
+const mongoose = require('mongoose');
+const PaymentDetails = require('../models/PaymentDetailsModel');
+const checkout = require('../services/checkoutService');
+const HttpError = require('../utils/HttpError');
+const { isAdmin } = require('../middleware/auth');
+const pageNumber = (value, fallback, max) => Math.min(max, Math.max(1, Number.parseInt(value, 10) || fallback));
+const safeProjection = '-paymentDetails.cardDetails -requestFingerprint';
 
-// Generate unique order ID
-const generateOrderId = () => {
-  const timestamp = Date.now().toString();
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `ORD-${timestamp}-${random}`;
+exports.quote = async (req, res) => res.json({ status: 'ok', data: await checkout.quote(req.user._id, req.body) });
+exports.createPaymentDetails = async (req, res) => {
+  const data = await checkout.checkout(req.user._id, req.body, req.get('Idempotency-Key'));
+  res.status(data.replayed ? 200 : 201).json({ status: 'ok', message: 'Order placed. Cash payment is due on delivery or collection.', data });
 };
-
-// Create new payment details
-const createPaymentDetails = async (req, res) => {
-  try {
-    console.log("Creating payment details:", req.body);
-
-    // Validate required fields
-    const {
-      deliveryDetails,
-      shippingDetails,
-      paymentDetails,
-      orderDetails,
-      giftMessage,
-      userId
-    } = req.body;
-
-    // Check if all required sections are provided
-    if (!deliveryDetails || !shippingDetails || !paymentDetails || !orderDetails) {
-      return res.status(400).json({
-        status: "error",
-        message: "Missing required payment information. Please provide delivery, shipping, payment, and order details."
-      });
-    }
-
-    // Validate delivery details
-    const requiredDeliveryFields = ["firstName", "lastName", "email", "phone", "address", "city", "state", "zipCode", "country"];
-    for (const field of requiredDeliveryFields) {
-      if (!deliveryDetails[field]) {
-        return res.status(400).json({
-          status: "error",
-          message: `Missing required delivery field: ${field}`
-        });
-      }
-    }
-
-    // Validate shipping details
-    if (!shippingDetails.method || shippingDetails.cost === undefined) {
-      return res.status(400).json({
-        status: "error",
-        message: "Missing required shipping information"
-      });
-    }
-
-    // Validate payment details
-    if (!paymentDetails.method) {
-      return res.status(400).json({
-        status: "error",
-        message: "Payment method is required"
-      });
-    }
-
-    // Validate order details
-    const requiredOrderFields = ["subtotal", "tax", "total"];
-    for (const field of requiredOrderFields) {
-      if (orderDetails[field] === undefined) {
-        return res.status(400).json({
-          status: "error",
-          message: `Missing required order field: ${field}`
-        });
-      }
-    }
-
-    // Create payment details object
-    const paymentData = {
-      deliveryDetails,
-      shippingDetails,
-      paymentDetails,
-      orderDetails,
-      giftMessage: giftMessage || "",
-      userId: userId || null
-    };
-
-    // Create new payment details
-    const newPaymentDetails = new PaymentDetails(paymentData);
-    const savedPaymentDetails = await newPaymentDetails.save();
-
-    console.log("Payment details saved successfully:", savedPaymentDetails._id);
-
-    // Create orders for each cart item
-    const createdOrders = [];
-    console.log("Processing cart items for order creation:", orderDetails.cartItems?.length || 0);
-    
-    if (orderDetails.cartItems && orderDetails.cartItems.length > 0) {
-      for (const item of orderDetails.cartItems) {
-        console.log(`Processing cart item:`, {
-          id: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          totalPrice: item.totalPrice
-        });
-        
-        try {
-          // Validate that the item ID is a valid ObjectId for DesignID
-          if (!item.id || !item.id.match(/^[0-9a-fA-F]{24}$/)) {
-            console.warn(`Skipping item with invalid ID: ${item.id} (not a valid ObjectId)`);
-            continue;
-          }
-          
-          console.log(`Valid ObjectId found for item: ${item.id}`);
-
-          // Use the userId directly (it's already extracted from JWT in frontend)
-          let userObjectId = userId;
-
-          const orderData = {
-            OrderID: generateOrderId(),
-            quantity: item.quantity || 1,
-            PaymentID: savedPaymentDetails._id.toString(),
-            DesignID: item.id, // This should be a valid ObjectId from ClothCustomizer
-            Price: item.totalPrice || item.price || 0,
-            AdminID: userObjectId, // User who placed the order
-            ItemID: item.id,
-            CustomerName: `${deliveryDetails.firstName || ''} ${deliveryDetails.lastName || ''}`.trim(),
-            CreatedAt: new Date(),
-            status: "pending" // Initial status matches payment status
-          };
-
-          console.log("Creating order with data:", orderData);
-          
-          const newOrder = new Order(orderData);
-          const savedOrder = await newOrder.save();
-          
-          console.log("Order saved to database:", {
-            _id: savedOrder._id,
-            OrderID: savedOrder.OrderID,
-            collection: 'orders'
-          });
-          createdOrders.push({
-            orderId: savedOrder.OrderID,
-            _id: savedOrder._id,
-            itemName: item.name,
-            quantity: savedOrder.quantity,
-            price: savedOrder.Price
-          });
-
-          console.log("Order created successfully:", savedOrder.OrderID);
-        } catch (orderError) {
-          console.error("Error creating order for item:", item.id, orderError.message);
-          // Continue with other items even if one fails
-        }
-      }
-    }
-
-    res.status(201).json({
-      status: "ok",
-      message: "Payment details and orders saved successfully",
-      data: {
-        paymentId: savedPaymentDetails._id,
-        status: savedPaymentDetails.status,
-        total: savedPaymentDetails.orderDetails.total,
-        createdAt: savedPaymentDetails.createdAt,
-        orders: createdOrders,
-        totalOrders: createdOrders.length
-      }
-    });
-
-  } catch (error) {
-    console.error("Error creating payment details:", error);
-    
-    // Handle validation errors
-    if (error.name === "ValidationError") {
-      const validationErrors = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        status: "error",
-        message: "Validation failed",
-        errors: validationErrors
-      });
-    }
-
-    // Handle duplicate key errors
-    if (error.code === 11000) {
-      return res.status(400).json({
-        status: "error",
-        message: "Payment details with this information already exists"
-      });
-    }
-
-    res.status(500).json({
-      status: "error",
-      message: "Internal server error while saving payment details"
-    });
+exports.getAllPaymentDetails = async (req, res) => {
+  const page = pageNumber(req.query.page, 1, 100000), limit = pageNumber(req.query.limit, 10, 100);
+  const query = {};
+  if (req.query.status) query.status = req.query.status;
+  if (typeof req.query.search === 'string' && req.query.search.trim()) {
+    const search = req.query.search.trim().slice(0, 200).replace(/[.*+?^{}()|[\]\\$]/g, '\\$&');
+    query.$or = ['email', 'firstName', 'lastName'].map(field => ({ ['deliveryDetails.' + field]: { $regex: search, $options: 'i' } }));
   }
-};
-
-// Get all payment details
-const getAllPaymentDetails = async (req, res) => {
-  try {
-    console.log("Fetching all payment details");
-
-    const { page = 1, limit = 10, status, userId } = req.query;
-    const skip = (page - 1) * limit;
-
-    // Build query
-    const query = {};
-    if (status) query.status = status;
-    if (userId) query.userId = userId;
-
-    // Get payment details with pagination
-    const paymentDetails = await PaymentDetails.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit))
-      .populate("userId", "firstName lastName email")
-      .lean();
-
-    // Get total count
-    const total = await PaymentDetails.countDocuments(query);
-
-    console.log(`Found ${paymentDetails.length} payment details`);
-
-    res.status(200).json({
-      status: "ok",
-      message: "Payment details retrieved successfully",
-      data: paymentDetails,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(total / limit),
-        totalItems: total,
-        itemsPerPage: parseInt(limit)
-      }
-    });
-
-  } catch (error) {
-    console.error("Error fetching payment details:", error);
-    res.status(500).json({
-      status: "error",
-      message: "Internal server error while fetching payment details"
-    });
+  if (req.query.userId) {
+    if (!mongoose.isValidObjectId(req.query.userId)) throw new HttpError(400, 'Invalid user ID');
+    query.userId = req.query.userId;
   }
+  const [data, total] = await Promise.all([
+    PaymentDetails.find(query).select(safeProjection).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).populate('userId', 'username email').lean(),
+    PaymentDetails.countDocuments(query)
+  ]);
+  res.json({ status: 'ok', data, pagination: { currentPage: page, totalPages: Math.ceil(total / limit), totalItems: total, itemsPerPage: limit } });
 };
-
-// Get payment details by ID
-const getPaymentDetailsById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    console.log("Fetching payment details for ID:", id);
-
-    // Validate MongoDB ObjectId
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({
-        status: "error",
-        message: "Invalid payment ID format"
-      });
-    }
-
-    const paymentDetails = await PaymentDetails.findById(id)
-      .populate("userId", "firstName lastName email")
-      .lean();
-
-    if (!paymentDetails) {
-      return res.status(404).json({
-        status: "error",
-        message: "Payment details not found"
-      });
-    }
-
-    console.log("Payment details found:", paymentDetails._id);
-
-    res.status(200).json({
-      status: "ok",
-      message: "Payment details retrieved successfully",
-      data: paymentDetails
-    });
-
-  } catch (error) {
-    console.error("Error fetching payment details by ID:", error);
-    res.status(500).json({
-      status: "error",
-      message: "Internal server error while fetching payment details"
-    });
-  }
+exports.getPaymentDetailsById = async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) throw new HttpError(400, 'Invalid payment ID');
+  const query = { _id: req.params.id };
+  if (!isAdmin(req.user)) query.userId = req.user._id;
+  const data = await PaymentDetails.findOne(query).select(safeProjection).lean();
+  if (!data) throw new HttpError(404, 'Payment not found');
+  res.json({ status: 'ok', data });
 };
-
-// Update payment status
-const updatePaymentStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    console.log("Updating payment status for ID:", id, "to:", status);
-
-    // Validate MongoDB ObjectId
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({
-        status: "error",
-        message: "Invalid payment ID format"
-      });
-    }
-
-    // Validate status
-    const validStatuses = ["pending", "processing", "completed", "cancelled", "failed"];
-    if (!status || !validStatuses.includes(status)) {
-      return res.status(400).json({
-        status: "error",
-        message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`
-      });
-    }
-
-    const updatedPayment = await PaymentDetails.findByIdAndUpdate(
-      id,
-      { status: status },
-      { new: true, runValidators: true }
-    ).populate("userId", "firstName lastName email");
-
-    if (!updatedPayment) {
-      return res.status(404).json({
-        status: "error",
-        message: "Payment details not found"
-      });
-    }
-
-    console.log("Payment status updated successfully:", updatedPayment._id);
-
-    // Update all related orders with the same status
-    const updatedOrders = await Order.updateMany(
-      { PaymentID: id },
-      { status: status }
-    );
-
-    console.log(`Updated ${updatedOrders.modifiedCount} related orders with status: ${status}`);
-
-    res.status(200).json({
-      status: "ok",
-      message: "Payment and order statuses updated successfully",
-      data: {
-        paymentId: updatedPayment._id,
-        status: updatedPayment.status,
-        updatedAt: updatedPayment.updatedAt,
-        ordersUpdated: updatedOrders.modifiedCount
-      }
-    });
-
-  } catch (error) {
-    console.error("Error updating payment status:", error);
-    res.status(500).json({
-      status: "error",
-      message: "Internal server error while updating payment status"
-    });
-  }
+exports.updatePaymentStatus = async (req, res) => {
+  const data = await checkout.updatePaymentStatus(req.params.id, req.body.status, req.user._id);
+  res.json({ status: 'ok', message: 'Cash payment status updated', data });
 };
-
-// Delete payment details
-const deletePaymentDetails = async (req, res) => {
-  try {
-    const { id } = req.params;
-    console.log("Deleting payment details for ID:", id);
-
-    // Validate MongoDB ObjectId
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({
-        status: "error",
-        message: "Invalid payment ID format"
-      });
-    }
-
-    const deletedPayment = await PaymentDetails.findByIdAndDelete(id);
-
-    if (!deletedPayment) {
-      return res.status(404).json({
-        status: "error",
-        message: "Payment details not found"
-      });
-    }
-
-    console.log("Payment details deleted successfully:", deletedPayment._id);
-
-    res.status(200).json({
-      status: "ok",
-      message: "Payment details deleted successfully",
-      data: {
-        paymentId: deletedPayment._id,
-        deletedAt: new Date()
-      }
-    });
-
-  } catch (error) {
-    console.error("Error deleting payment details:", error);
-    res.status(500).json({
-      status: "error",
-      message: "Internal server error while deleting payment details"
-    });
-  }
+exports.deletePaymentDetails = async (req, res) => {
+  await checkout.updatePaymentStatus(req.params.id, 'cancelled', req.user._id);
+  res.json({ status: 'ok', message: 'Payment arrangement cancelled; order history has been retained' });
 };
-
-// Get payment statistics
-const getPaymentStatistics = async (req, res) => {
-  try {
-    console.log("Fetching payment statistics");
-
-    const stats = await PaymentDetails.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalPayments: { $sum: 1 },
-          totalRevenue: { $sum: "$orderDetails.total" },
-          averageOrderValue: { $avg: "$orderDetails.total" },
-          statusCounts: {
-            $push: "$status"
-          }
-        }
-      }
-    ]);
-
-    // Calculate status distribution
-    const statusDistribution = {};
-    if (stats.length > 0 && stats[0].statusCounts) {
-      stats[0].statusCounts.forEach(status => {
-        statusDistribution[status] = (statusDistribution[status] || 0) + 1;
-      });
-    }
-
-    const result = stats.length > 0 ? {
-      totalPayments: stats[0].totalPayments || 0,
-      totalRevenue: stats[0].totalRevenue || 0,
-      averageOrderValue: Math.round((stats[0].averageOrderValue || 0) * 100) / 100,
-      statusDistribution
-    } : {
-      totalPayments: 0,
-      totalRevenue: 0,
-      averageOrderValue: 0,
-      statusDistribution: {}
-    };
-
-    console.log("Payment statistics calculated:", result);
-
-    res.status(200).json({
-      status: "ok",
-      message: "Payment statistics retrieved successfully",
-      data: result
-    });
-
-  } catch (error) {
-    console.error("Error fetching payment statistics:", error);
-    res.status(500).json({
-      status: "error",
-    });
-  }
-};
-
-
-module.exports = {
-  createPaymentDetails,
-  getAllPaymentDetails,
-  getPaymentDetailsById,
-  deletePaymentDetails,
-  updatePaymentStatus,
-  getPaymentStatistics
+exports.getPaymentStatistics = async (_req, res) => {
+  const rows = await PaymentDetails.aggregate([{ $group: { _id: '$status', count: { $sum: 1 }, total: { $sum: '$orderDetails.total' } } }]);
+  const totalPayments = rows.reduce((sum, row) => sum + row.count, 0);
+  const totalRevenue = rows.filter(row => row._id === 'completed').reduce((sum, row) => sum + row.total, 0);
+  const completedCount = rows.filter(row => row._id === 'completed').reduce((sum, row) => sum + row.count, 0);
+  res.json({ status: 'ok', data: { totalPayments, totalRevenue, averageOrderValue: completedCount ? totalRevenue / completedCount : 0, statusDistribution: Object.fromEntries(rows.map(row => [row._id, row.count])), statusBreakdown: rows } });
 };

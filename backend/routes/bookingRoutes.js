@@ -1,125 +1,55 @@
-const express = require("express");  
-const { 
-    changeBookingStatus, 
-    checkAvailabilityOfOutfit, 
-    createBooking, 
-    getOwnerBooking, 
-    getUserBooking,
-    deleteBooking,
-    getBookingById,
-    updateBooking,
-    generateBookingReport,
-    generateBookingReportPDF,
-    sendPayOnReturnConfirmation
-} = require("../controllers/bookingController");  // Replaced import with require
-const { protect } = require("../middleware/auth");  // Replaced import with require
-const upload = require("../middleware/multer");
+const router = require('express').Router();
+const path = require('path');
+const fs = require('fs');
+const os = require('os');
+const { protect, adminOnly, ownerOnly, isAdmin } = require('../middleware/auth');
+const ctrl = require('../controllers/bookingController');
+const service = require('../services/bookingService');
+const Booking = require('../models/Booking');
+const upload = require('../middleware/multer');
+const HttpError = require('../utils/HttpError');
 
-const bookingRouter = express.Router();
-
-bookingRouter.post('/check-availability', checkAvailabilityOfOutfit);
-bookingRouter.post('/create', protect, upload.single('document'), createBooking);
-bookingRouter.get('/user', protect, getUserBooking);
-bookingRouter.get('/owner', protect, getOwnerBooking);
-bookingRouter.post('/change-status', protect, changeBookingStatus);
-bookingRouter.delete('/:bookingId', protect, deleteBooking);
-
-// Admin route for booking reports
-bookingRouter.get('/admin/report', protect, generateBookingReport);
-bookingRouter.get('/admin/report/pdf', protect, generateBookingReportPDF);
-
-// Routes for editing bookings
-bookingRouter.get('/:bookingId', protect, getBookingById);
-bookingRouter.put('/:bookingId', protect, upload.single('document'), updateBooking);
-
-// Route for sending Pay on Return email
-bookingRouter.post('/send-pay-on-return-email', protect, sendPayOnReturnConfirmation); // Route handles the request
-
-// Return reminder routes
-bookingRouter.post('/send-return-reminder/:bookingId', protect, async (req, res) => {
-  try {
-    const { sendManualReminder } = require('../services/reminderScheduler');
-    const result = await sendManualReminder(req.params.bookingId);
-    
-    if (result.success) {
-      res.json({
-        status: 'ok',
-        message: 'Return reminder sent successfully',
-        messageId: result.messageId
-      });
-    } else {
-      res.status(400).json({
-        status: 'error',
-        message: result.error
-      });
-    }
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to send return reminder: ' + error.message
-    });
-  }
+router.post('/check-availability', (req, _res, next) => { service.dates(req.body.reservationDate, req.body.returnDate); next(); }, ctrl.checkAvailabilityOfOutfit);
+router.use(protect);
+router.post('/create', upload.single('document'), ctrl.createBooking);
+router.get('/user', ctrl.getUserBooking);
+router.get('/owner', ownerOnly, ctrl.getOwnerBooking);
+router.get('/owner/report', ownerOnly, ctrl.generateBookingReport);
+router.get('/owner/report/pdf', ownerOnly, ctrl.generateBookingReportPDF);
+router.post('/change-status', ownerOnly, ctrl.changeBookingStatus);
+router.get('/admin/report', adminOnly, ctrl.generateBookingReport);
+router.get('/admin/report/pdf', adminOnly, ctrl.generateBookingReportPDF);
+router.get('/upcoming-returns', ownerOnly, async (req, res) => {
+  const end = new Date(); end.setDate(end.getDate() + 2);
+  const query = { returnDate: { $gte: new Date(), $lte: end }, status: 'confirmed' };
+  if (!isAdmin(req.user)) query.owner = req.user._id;
+  const data = await Booking.find(query).populate('user', 'username email').populate('outfit');
+  res.json({ status: 'ok', count: data.length, data });
 });
-
-// Check upcoming returns that need reminders
-bookingRouter.get('/upcoming-returns', protect, async (req, res) => {
-  try {
-    const Booking = require('../models/Booking');
-    
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    today.setHours(0, 0, 0, 0);
-    tomorrow.setHours(23, 59, 59, 999);
-    
-    const upcomingReturns = await Booking.find({
-      returnDate: {
-        $gte: today,
-        $lte: tomorrow
-      },
-      status: 'confirmed'
-    }).populate('user').populate('outfit');
-    
-    res.json({
-      status: 'ok',
-      message: 'Upcoming returns retrieved successfully',
-      count: upcomingReturns.length,
-      data: upcomingReturns.map(booking => ({
-        id: booking._id,
-        bookingId: booking._id.toString().slice(-6),
-        customerName: booking.user?.username || 'N/A',
-        customerEmail: booking.email,
-        outfitBrand: booking.outfit?.brand || 'N/A',
-        outfitModel: booking.outfit?.model || 'N/A',
-        returnDate: booking.returnDate,
-        daysUntilReturn: Math.ceil((new Date(booking.returnDate) - new Date()) / (1000 * 60 * 60 * 24))
-      }))
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to get upcoming returns: ' + error.message
-    });
-  }
+router.post('/check-reminders', adminOnly, async (_req, res) => {
+  await require('../services/reminderScheduler').checkReturnReminders();
+  res.json({ status: 'ok', message: 'Reminder check completed' });
 });
-
-// Trigger manual reminder check
-bookingRouter.post('/check-reminders', protect, async (req, res) => {
-  try {
-    const { checkReturnReminders } = require('../services/reminderScheduler');
-    await checkReturnReminders();
-    
-    res.json({
-      status: 'ok',
-      message: 'Return reminder check completed successfully'
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to check reminders: ' + error.message
-    });
-  }
+router.post('/send-return-reminder/:bookingId', ownerOnly, async (req, res) => {
+  const booking = await Booking.findById(req.params.bookingId);
+  if (!booking || (!isAdmin(req.user) && String(booking.owner) !== String(req.user._id))) throw new HttpError(404, 'Booking not found');
+  const result = await require('../services/reminderScheduler').sendManualReminder(req.params.bookingId);
+  res.status(result.success ? 200 : 400).json({ status: result.success ? 'ok' : 'error', message: result.success ? 'Reminder sent' : result.error });
 });
-
-module.exports = bookingRouter;  
+router.post('/:bookingId/record-payment', ownerOnly, async (req, res) => {
+  const booking = await service.recordCollection(req.user, req.params.bookingId);
+  res.json({ success: true, message: 'Cash payment recorded', booking });
+});
+router.get('/:bookingId/document', async (req, res) => {
+  const booking = await Booking.findById(req.params.bookingId);
+  if (!booking || (!isAdmin(req.user) && ![booking.user, booking.owner].some(id => String(id) === String(req.user._id)))) throw new HttpError(404, 'Booking not found');
+  const file = path.resolve(booking.document);
+  const roots = [path.resolve(__dirname, '..', 'private-uploads'), path.resolve(os.tmpdir())];
+  if (!roots.some(root => file.toLowerCase().startsWith(root.toLowerCase() + path.sep)) || !fs.existsSync(file)) throw new HttpError(404, 'Document not found');
+  res.set('Cache-Control', 'private, no-store');
+  res.download(file);
+});
+router.get('/:bookingId', ctrl.getBookingById);
+router.put('/:bookingId', upload.single('document'), ctrl.updateBooking);
+router.delete('/:bookingId', ctrl.deleteBooking);
+module.exports = router;

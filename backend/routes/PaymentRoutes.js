@@ -1,31 +1,12 @@
-const express = require("express");
-const router = express.Router();
-
-// Import payment controller
-const paymentController = require("../controllers/PaymentController");
-
-// Import validation middleware (if needed in the future)
-// const { validatePaymentDetails } = require("../middleware/validation");
-
-// Payment routes
-
-// POST /payment - Create new payment details
-router.post("/", paymentController.createPaymentDetails);
-
-// GET /payment - Get all payment details (with optional query parameters)
-// Query parameters: page, limit, status, userId
-router.get("/", paymentController.getAllPaymentDetails);
-
-// GET /payment/statistics - Get payment statistics
-router.get("/statistics", paymentController.getPaymentStatistics);
-
-// GET /payment/:id - Get payment details by ID
-router.get("/:id", paymentController.getPaymentDetailsById);
-
-// PATCH /payment/:id/status - Update payment status
-router.patch("/:id/status", paymentController.updatePaymentStatus);
-
-// DELETE /payment/:id - Delete payment details
-router.delete("/:id", paymentController.deletePaymentDetails);
-
+const router = require('express').Router();
+const { protect, adminOnly } = require('../middleware/auth');
+const controller = require('../controllers/PaymentController');
+router.use(protect);
+router.post('/quote', controller.quote);
+router.post('/', controller.createPaymentDetails);
+router.get('/', adminOnly, controller.getAllPaymentDetails);
+router.get('/statistics', adminOnly, controller.getPaymentStatistics);
+router.get('/:id', controller.getPaymentDetailsById);
+router.patch('/:id/status', adminOnly, controller.updatePaymentStatus);
+router.delete('/:id', adminOnly, controller.deletePaymentDetails);
 module.exports = router;

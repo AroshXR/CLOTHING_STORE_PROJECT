@@ -1,8 +1,10 @@
+import UIIcon from '../Layout/UIIcon';
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
-import { useAuth } from '../../AuthGuard/AuthGuard';
+
+
+import { useAuth } from '../../AuthGuard/authGuard';
 import { useNavigate } from 'react-router-dom';
 import './AdminUserManagement.css';
 
@@ -53,7 +55,7 @@ const AdminUserManagement = () => {
         setError('');
 
         try {
-            const response = await axios.get('http://localhost:5001/users');
+            const response = await axios.get(`${API_ORIGIN}/users`);
             if (response.data?.status === 'ok') {
                 setUsers(response.data.users || []);
             } else {
@@ -96,7 +98,7 @@ const AdminUserManagement = () => {
         setManagementError('');
 
         try {
-            const response = await axios.post('http://localhost:5001/users', createForm);
+            const response = await axios.post(`${API_ORIGIN}/users`, createForm);
             if (response.data?.status === 'ok') {
                 setCreateForm({ username: '', email: '', address: '', password: '', type: 'Customer', phoneNumber: '' });
                 setManagementMessage('User created successfully.');
@@ -140,7 +142,7 @@ const AdminUserManagement = () => {
 
         setActionLoading(true);
         try {
-            const response = await axios.delete(`http://localhost:5001/users/${userId}`);
+            const response = await axios.delete(`${API_ORIGIN}/users/${userId}`);
             if (response.data?.status === 'ok') {
                 setManagementMessage('User deleted successfully.');
                 setSelectedUserId((prev) => (prev === userId ? '' : prev));
@@ -174,7 +176,7 @@ const AdminUserManagement = () => {
         setManagementError('');
 
         try {
-            const response = await axios.post(`http://localhost:5001/users/${selectedUser._id}/notifications`, {
+            const response = await axios.post(`${API_ORIGIN}/users/${selectedUser._id}/notifications`, {
                 message: notificationForm.message,
                 level: notificationForm.level
             });
@@ -203,7 +205,7 @@ const AdminUserManagement = () => {
         setManagementError('');
 
         try {
-            const response = await axios.put(`http://localhost:5001/users/${userId}`, { type: nextType });
+            const response = await axios.put(`${API_ORIGIN}/users/${userId}`, { type: nextType });
             if (response.data?.status === 'ok') {
                 setManagementMessage('User role updated.');
                 fetchUsers();
@@ -220,8 +222,8 @@ const AdminUserManagement = () => {
 
     return (
         <div className="admin-management-page">
-            <NavBar />
-            <main className="admin-management-content">
+            
+            <section className="admin-management-content">
                 <header className="admin-header">
                     <div>
                         <h1>User & Identity Management</h1>
@@ -236,7 +238,7 @@ const AdminUserManagement = () => {
                             className="header-nav-btn secondary"
                             onClick={() => navigate(-1)}
                         >
-                            <i className="bx bx-arrow-back"></i> Back
+                            <UIIcon className="bx bx-arrow-back"></UIIcon> Back
                         </button>
                     </div>
                 </header>
@@ -287,7 +289,7 @@ const AdminUserManagement = () => {
                             Registered Users ({filteredUsers.length}{searchQuery ? ` / ${users.length}` : ''})
                         </h2>
                         <div className="users-toolbar">
-                            <i className="bx bx-search user-search-icon" aria-hidden="true"></i>
+                            <UIIcon className="bx bx-search user-search-icon" aria-hidden="true"></UIIcon>
                             <input
                                 type="text"
                                 className="user-search-input"
@@ -297,7 +299,7 @@ const AdminUserManagement = () => {
                                 aria-label="Search users"
                             />
                             <button type="button" onClick={fetchUsers} disabled={loading}>
-                                <i className="bx bx-refresh"></i> Refresh
+                                <UIIcon className="bx bx-refresh"></UIIcon> Refresh
                             </button>
                         </div>
                     </div>
@@ -307,7 +309,7 @@ const AdminUserManagement = () => {
                         <p className="error-text">{error}</p>
                     ) : (
                         <div className="user-table">
-                            <table>
+                            <div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table>
                                 <thead>
                                     <tr>
                                         <th>Name</th>
@@ -343,7 +345,7 @@ const AdminUserManagement = () => {
                                         </tr>
                                     ))}
                                 </tbody>
-                            </table>
+                            </table></div>
                         </div>
                     )}
                 </section>
@@ -387,8 +389,8 @@ const AdminUserManagement = () => {
 
                 {managementMessage && <p className="feedback success">{managementMessage}</p>}
                 {managementError && <p className="feedback error">{managementError}</p>}
-            </main>
-            <Footer />
+            </section>
+            
         </div>
     );
 };

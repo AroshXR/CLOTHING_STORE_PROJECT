@@ -1,0 +1,10 @@
+:root{--brand-primary:#111827;--brand-accent:#2563eb;--brand-on-primary:#fff;--brand-on-accent:#fff}
+:root .navbar{background:var(--brand-primary);color:var(--brand-on-primary)}
+:root .navbar .logo,:root .navbar .nav-links a,:root .navbar .nav-links span.logout{color:var(--brand-on-primary)}
+.site-brand{display:inline-flex;align-items:center;gap:10px;line-height:1.2}
+.site-brand img{max-height:44px;max-width:170px;object-fit:contain}
+.site-brand__name{overflow-wrap:anywhere}
+:root .cash-checkout .cash-button,:root .contact-form-button,:root .startButtonsprimary{background:var(--brand-accent);border-color:var(--brand-accent);color:var(--brand-on-accent)}
+:root .cash-steps [aria-current=step]{color:var(--brand-accent)}
+:root .footer{border-top:3px solid var(--brand-accent)}
+@media(max-width:900px){:root .navbar .nav-links{background:var(--brand-primary)}.site-brand img{max-width:120px;max-height:36px}}

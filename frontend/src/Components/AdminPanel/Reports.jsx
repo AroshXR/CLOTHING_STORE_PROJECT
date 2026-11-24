@@ -1,10 +1,14 @@
+import UIIcon from '../Layout/UIIcon';
+import { useBranding, escapeHtml } from '../../config/branding';
+import { API_BASE_URL as API_ORIGIN, downloadFile } from '../../config/api';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './Reports.css';
 
-const API_BASE_URL = 'http://localhost:5001';
+const API_BASE_URL = API_ORIGIN;
 
 export default function Reports() {
+  const { branding } = useBranding();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -60,7 +64,7 @@ export default function Reports() {
     
     try {
       const reportData = {
-        title: 'Klassy T Shirts',
+        title: `${branding.name}`,
         generatedAt: new Date().toISOString(),
         summary: analytics.summary,
         applicantsByPosition: analytics.applicantsByPosition,
@@ -91,7 +95,7 @@ export default function Reports() {
     }
     
     try {
-      const headerTitle = ['Klassy T Shirts'];
+      const headerTitle = [`${branding.name}`];
       const section = ['Pending Applicants'];
       const blank = [''];
       const csvData = [
@@ -146,7 +150,7 @@ export default function Reports() {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Klassy T Shirts - Recruitment Analytics Report</title>
+            <title>${escapeHtml(branding.name)} - Recruitment Analytics Report</title>
             <style>
                 body { 
                     font-family: Arial, sans-serif; 
@@ -230,7 +234,7 @@ export default function Reports() {
         </head>
         <body>
             <div class="header">
-                <h1>KLASSY T SHIRTS</h1>
+                <h1>${escapeHtml(branding.name)}</h1>
                 <h2>Career Management System</h2>
                 <h3>RECRUITMENT ANALYTICS REPORT</h3>
             </div>
@@ -356,7 +360,7 @@ export default function Reports() {
                 <p><strong>Report Summary:</strong></p>
                 <p>Total Data Points Analyzed: ${analytics.summary.totalApplicants} | Generated: ${new Date().toISOString()}</p>
                 <p><strong>Disclaimer:</strong> This report contains confidential business information.</p>
-                <p>© 2025 Klassy T Shirts - All Rights Reserved</p>
+                <p>© ${new Date().getFullYear()} ${escapeHtml(branding.name)} - All Rights Reserved</p>
             </div>
         </body>
         </html>
@@ -399,7 +403,7 @@ export default function Reports() {
 
       if (format === 'json') {
         const payload = {
-          title: 'Klassy T Shirts',
+          title: `${branding.name}`,
           section: sectionLabel,
           generatedAt: new Date().toISOString(),
           status: reportStatus,
@@ -435,7 +439,7 @@ export default function Reports() {
       ]);
 
       const csvRows = [
-        ['Klassy T Shirts'],
+        [`${branding.name}`],
         [sectionLabel],
         [''],
         header,
@@ -491,7 +495,7 @@ export default function Reports() {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Klassy T Shirts - ${sectionLabel} Report</title>
+            <title>${escapeHtml(branding.name)} - ${sectionLabel} Report</title>
             <style>
                 body { 
                     font-family: Arial, sans-serif; 
@@ -573,7 +577,7 @@ export default function Reports() {
         </head>
         <body>
             <div class="header">
-                <h1>KLASSY T SHIRTS</h1>
+                <h1>${escapeHtml(branding.name)}</h1>
                 <h2>Career Management System</h2>
                 <h3>${sectionLabel.toUpperCase()} REPORT</h3>
             </div>
@@ -648,7 +652,7 @@ export default function Reports() {
                 <p><strong>Report Summary:</strong></p>
                 <p>Total Data Points Analyzed: ${applicants.length} | Generated: ${new Date().toISOString()}</p>
                 <p><strong>Disclaimer:</strong> This report contains confidential business information.</p>
-                <p>© 2025 Klassy T Shirts - All Rights Reserved</p>
+                <p>© ${new Date().getFullYear()} ${escapeHtml(branding.name)} - All Rights Reserved</p>
             </div>
         </body>
         </html>
@@ -675,7 +679,7 @@ export default function Reports() {
   return (
     <div className="reports">
       <div className="reports__header">
-        <h2>Recruitment Reports</h2>
+        <h1>Recruitment Reports</h1>
         <p className="reports__subtitle">Insights and exports for your hiring pipeline</p>
         <div className="reports__actions">
           <button onClick={downloadReport} className="btn btn--primary">Download JSON Report</button>
@@ -688,22 +692,22 @@ export default function Reports() {
       {/* Summary Cards */}
       <div className="reports__summary">
         <div className="summary-card">
-          <div className="summary-card__icon total"><i className="bx bx-user-pin"></i></div>
+          <div className="summary-card__icon total"><UIIcon className="bx bx-user-pin"></UIIcon></div>
           <h3>Total Applicants</h3>
           <div className="summary-number">{analytics.summary.totalApplicants}</div>
         </div>
         <div className="summary-card">
-          <div className="summary-card__icon pending"><i className="bx bx-time-five"></i></div>
+          <div className="summary-card__icon pending"><UIIcon className="bx bx-time-five"></UIIcon></div>
           <h3>Pending</h3>
           <div className="summary-number">{analytics.summary.pending}</div>
         </div>
         <div className="summary-card">
-          <div className="summary-card__icon approved"><i className="bx bx-check-circle"></i></div>
+          <div className="summary-card__icon approved"><UIIcon className="bx bx-check-circle"></UIIcon></div>
           <h3>Approved</h3>
           <div className="summary-number">{analytics.summary.approved}</div>
         </div>
         <div className="summary-card">
-          <div className="summary-card__icon rejected"><i className="bx bx-block"></i></div>
+          <div className="summary-card__icon rejected"><UIIcon className="bx bx-block"></UIIcon></div>
           <h3>Rejected</h3>
           <div className="summary-number">{analytics.summary.rejected}</div>
         </div>
@@ -860,13 +864,11 @@ export default function Reports() {
                 <div>{new Date(app.appliedAt).toLocaleDateString()}</div>
                 <div>
                   {app.resume?.filename ? (
-                    <a 
-                      href={`${API_BASE_URL}/uploads/resumes/${app.resume.filename}`} 
-                      target="_blank" 
-                      rel="noreferrer"
+                    <button type="button"
+                      onClick={() => downloadFile(API_BASE_URL + '/uploads/resumes/' + app.resume.filename, app.resume.originalName || 'resume').catch(() => setError('Unable to download this resume.'))}
                     >
                       Download
-                    </a>
+                    </button>
                   ) : (
                     'N/A'
                   )}

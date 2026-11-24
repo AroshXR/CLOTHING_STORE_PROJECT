@@ -1,3 +1,5 @@
+const bookingService = require('../services/bookingService');
+const { isAdmin } = require('../middleware/auth');
 const Booking = require("../models/Booking");
 const Outfit = require("../models/Outfit");
 const { sendPayOnReturnEmail } = require("../services/emailService");
@@ -40,62 +42,8 @@ const checkAvailabilityOfOutfit = async (req, res) => {
 
 // API to create booking
 const createBooking = async (req, res) => {
-    try {
-        const { _id } = req.user;
-        const { outfit, reservationDate, returnDate, phone, email } = req.body;
-        const documentFile = req.file;
-
-        // Validate required fields
-        if (!phone || !email || !documentFile) {
-            return res.json({ success: false, message: "Phone, email, and document are required" });
-        }
-
-        // Basic email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.json({ success: false, message: "Invalid email format" });
-        }
-
-        // Basic phone validation (should contain only digits and be at least 10 characters)
-        const phoneRegex = /^[0-9]{10,}$/;
-        if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
-            return res.json({ success: false, message: "Invalid phone number format" });
-        }
-
-        const isAvailable = await checkAvailability(outfit, reservationDate, returnDate);
-        if (!isAvailable) {
-            return res.json({ success: false, message: "Outfit Not Available" });
-        }
-
-        const outfitData = await Outfit.findById(outfit);
-        if (!outfitData) {
-            return res.json({ success: false, message: "Outfit not found" });
-        }
-
-        // Calculate price based on Reservation Date and Return Date
-        const reserved = new Date(reservationDate);
-        const returned = new Date(returnDate);
-        const noOfDays = Math.ceil((returned - reserved) / (1000 * 60 * 60 * 24));  // Calculate number of days
-        const price = outfitData.pricePerDay * noOfDays;
-        
-        await Booking.create({ 
-            outfit, 
-            owner: outfitData.owner, 
-            user: _id, 
-            reservationDate, 
-            returnDate, 
-            price,
-            phone,
-            email,
-            document: documentFile.path // Store the file path
-        });
-
-        res.json({ success: true, message: "Booking Created" });
-
-    } catch (error) {
-        console.log(error.message);
-        res.json({ success: false, message: error.message });
-    }
+    try { const booking = await bookingService.create(req.user, req.body, req.file); res.status(201).json({ success: true, message: 'Booking created', booking }); }
+    catch (error) { if (req.file) require('fs').unlink(req.file.path, () => {}); throw error; }
 };
 
 // API to list User bookings
@@ -127,7 +75,7 @@ const getOwnerBooking = async (req, res) => {
         }
         
         const bookings = await Booking.find(bookingQuery)
-            .populate('outfit user')
+            .populate('outfit').populate('user', 'username email')
             .select("-user.password")
             .sort({ createdAt: -1 });
 
@@ -140,51 +88,14 @@ const getOwnerBooking = async (req, res) => {
 
 // API to Change the booking status
 const changeBookingStatus = async (req, res) => {
-    try {
-        const { _id, role, type } = req.user;
-        const { bookingId, status } = req.body;
-
-        const booking = await Booking.findById(bookingId);
-
-        // Admin users can change any booking status, owner users can only change their own
-        if (role !== 'admin' && type !== 'Admin' && booking.owner.toString() !== _id.toString()) {
-            return res.json({ success: false, message: "Unauthorized" });
-        }
-
-        booking.status = status;
-        await booking.save();
-
-        res.json({ success: true, message: "Status Updated" });
-    } catch (error) {
-        console.log(error.message);
-        res.json({ success: false, message: error.message });
-    }
+    const booking = await bookingService.changeStatus(req.user, req.body.bookingId, req.body.status);
+    res.json({ success: true, message: 'Booking status updated', booking });
 };
 
 // API to delete booking
 const deleteBooking = async (req, res) => {
-    try {
-        const { _id } = req.user;
-        const { bookingId } = req.params;
-
-        const booking = await Booking.findById(bookingId);
-
-        if (!booking) {
-            return res.json({ success: false, message: "Booking not found" });
-        }
-
-        // Only the user who created the booking can delete it
-        if (booking.user.toString() !== _id.toString()) {
-            return res.json({ success: false, message: "Unauthorized to delete this booking" });
-        }
-
-        await Booking.findByIdAndDelete(bookingId);
-
-        res.json({ success: true, message: "Booking deleted successfully" });
-    } catch (error) {
-        console.log(error.message);
-        res.json({ success: false, message: error.message });
-    }
+    await bookingService.remove(req.user, req.params.bookingId);
+    res.json({ success: true, message: 'Booking deleted' });
 };
 
 //API to get single booking by ID for editing
@@ -212,14 +123,14 @@ const generateBookingReport = async (req, res) => {
         const { role, type } = req.user;
         
         // Only admin can generate reports
-        if (role !== 'admin' && type !== 'Admin') {
+        if (role !== 'owner' && !isAdmin(req.user)) {
             return res.json({ success: false, message: "Unauthorized - Admin access required" });
         }
 
         const { startDate, endDate, status, location } = req.query;
         
         // Build query based on filters
-        let query = {};
+        let query = isAdmin(req.user) ? {} : { owner: req.user._id };
         
         // Date filter
         if (startDate && endDate) {
@@ -290,88 +201,8 @@ const generateBookingReport = async (req, res) => {
 
 //API to update booking details
 const updateBooking = async (req, res) => {
-    try {
-        const { bookingId } = req.params;
-        const { _id } = req.user;
-        const { reservationDate, returnDate, phone, email } = req.body;
-        const documentFile = req.file;
-
-        // Verify booking belongs to the user
-        const existingBooking = await Booking.findOne({ _id: bookingId, user: _id }).populate('outfit');
-        if (!existingBooking) {
-            return res.json({ success: false, message: "Booking not found or you don't have permission to edit it" });
-        }
-
-        // Only allow editing if booking is still pending
-        if (existingBooking.status !== 'pending') {
-            return res.json({ success: false, message: "Only pending bookings can be edited" });
-        }
-
-        // Validate required fields
-        if (!phone || !email) {
-            return res.json({ success: false, message: "Phone and email are required" });
-        }
-
-        // Basic email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.json({ success: false, message: "Invalid email format" });
-        }
-
-        // Basic phone validation
-        const phoneRegex = /^[0-9]{10,}$/;
-        if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
-            return res.json({ success: false, message: "Invalid phone number format" });
-        }
-
-        // Check availability for new dates (excluding current booking)
-        const bookings = await Booking.find({
-            outfit: existingBooking.outfit._id,
-            status: { $in: ["pending", "confirmed"] },
-            _id: { $ne: bookingId }, // Exclude current booking
-            reservationDate: { $lte: returnDate },
-            returnDate: { $gte: reservationDate },
-        });
-
-        if (bookings.length > 0) {
-            return res.json({ success: false, message: "Outfit not available for the selected dates" });
-        }
-
-        // Calculate new price if dates changed
-        let price = existingBooking.price;
-        if (reservationDate !== existingBooking.reservationDate.toISOString().split('T')[0] || 
-            returnDate !== existingBooking.returnDate.toISOString().split('T')[0]) {
-            const reserved = new Date(reservationDate);
-            const returned = new Date(returnDate);
-            const noOfDays = Math.ceil((returned - reserved) / (1000 * 60 * 60 * 24));
-            price = existingBooking.outfit.pricePerDay * noOfDays;
-        }
-
-        // Update booking details
-        const updateData = {
-            reservationDate,
-            returnDate,
-            phone,
-            email,
-            price
-        };
-
-        // Update document if new file provided
-        if (documentFile) {
-            updateData.document = documentFile.path;
-        }
-
-        const updatedBooking = await Booking.findByIdAndUpdate(
-            bookingId,
-            updateData,
-            { new: true }
-        ).populate('outfit');
-
-        res.json({ success: true, message: "Booking updated successfully", booking: updatedBooking });
-    } catch (error) {
-        console.log(error.message);
-        res.json({ success: false, message: error.message });
-    }
+    try { const booking = await bookingService.update(req.user, req.params.bookingId, req.body, req.file); res.json({ success: true, message: 'Booking updated', booking }); }
+    catch (error) { if (req.file) require('fs').unlink(req.file.path, () => {}); throw error; }
 };
 
 // Exporting functions using CommonJS
@@ -384,7 +215,7 @@ const sendPayOnReturnConfirmation = async (req, res) => {
         // Find the booking and populate outfit and user details
         const booking = await Booking.findById(bookingId)
             .populate('outfit')
-            .populate('user');
+            .populate('user', 'username email');
 
         if (!booking) {
             return res.json({ success: false, message: "Booking not found" });
@@ -427,14 +258,14 @@ const generateBookingReportPDF = async (req, res) => {
         const { role, type } = req.user;
         
         // Only admin can generate reports
-        if (role !== 'admin' && type !== 'Admin') {
+        if (role !== 'owner' && !isAdmin(req.user)) {
             return res.json({ success: false, message: "Unauthorized - Admin access required" });
         }
 
         const { startDate, endDate, status, location } = req.query;
         
         // Build query based on filters
-        let query = {};
+        let query = isAdmin(req.user) ? {} : { owner: req.user._id };
         
         // Date filter
         if (startDate && endDate) {

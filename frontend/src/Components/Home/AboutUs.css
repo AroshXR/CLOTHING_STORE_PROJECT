@@ -1,12 +1,13 @@
+@layer app-legacy {
 /* About Us Modern Black & White Theme */
-.about-content {
+:where(.ui-page[data-page="home"]) .about-content {
     padding: 120px 20px;
     max-width: 1200px;
     margin: 0 auto;
     position: relative;
 }
 
-.about-content > h2 {
+:where(.ui-page[data-page="home"]) .about-content > h2 {
     font-size: clamp(2.5rem, 5vw, 4rem);
     font-weight: 800;
     text-align: center;
@@ -15,7 +16,7 @@
     letter-spacing: -0.02em;
 }
 
-.about-content > p {
+:where(.ui-page[data-page="home"]) .about-content > p {
     font-size: 1.25rem;
     text-align: center;
     color: #666666;
@@ -24,14 +25,14 @@
     line-height: 1.6;
 }
 
-.about-sections {
+:where(.ui-page[data-page="home"]) .about-sections {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 40px;
     margin-bottom: 80px;
 }
 
-.about-section {
+:where(.ui-page[data-page="home"]) .about-section {
     background: linear-gradient(135deg, #000000 0%, #333333 100%);
     padding: 40px 32px;
     border-radius: 16px;
@@ -42,7 +43,7 @@
     overflow: hidden;
 }
 
-.about-section::before {
+:where(.ui-page[data-page="home"]) .about-section::before {
     content: '';
     position: absolute;
     top: 0;
@@ -53,16 +54,16 @@
     transition: transform 0.3s ease;
 }
 
-.about-section:hover::before {
+:where(.ui-page[data-page="home"]) .about-section:hover::before {
     transform: scaleX(1);
 }
 
-.about-section:hover {
+:where(.ui-page[data-page="home"]) .about-section:hover {
     transform: translateY(-8px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
 }
 
-.about-section h2 {
+:where(.ui-page[data-page="home"]) .about-section h2 {
     font-size: 1.75rem;
     font-weight: 700;
     color: #ffffff;
@@ -72,7 +73,7 @@
     gap: 12px;
 }
 
-.about-section h2::before {
+:where(.ui-page[data-page="home"]) .about-section h2::before {
     content: '';
     width: 6px;
     height: 6px;
@@ -81,20 +82,20 @@
     flex-shrink: 0;
 }
 
-.about-section p {
+:where(.ui-page[data-page="home"]) .about-section p {
     font-size: 1rem;
     line-height: 1.7;
     color: #b9b9b9;
     margin-bottom: 16px;
 }
 
-.about-section ul {
+:where(.ui-page[data-page="home"]) .about-section ul {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.about-section li {
+:where(.ui-page[data-page="home"]) .about-section li {
     font-size: 1rem;
     line-height: 1.7;
     color: #b9b9b9;
@@ -103,7 +104,7 @@
     text-align: left;
 }
 
-.about-section li::before {
+:where(.ui-page[data-page="home"]) .about-section li::before {
     content: '▸';
     position: absolute;
     left: 0;
@@ -111,13 +112,13 @@
     font-weight: bold;
 }
 
-.about-section li strong {
+:where(.ui-page[data-page="home"]) .about-section li strong {
     color: #ffffff;
     font-weight: 600;
 }
 
 /* Contact Section Special Styling */
-.contact-section {
+:where(.ui-page[data-page="home"]) .contact-section {
     background: linear-gradient(135deg, #000000 0%, #333333 100%);
     color: #ffffff;
     border: 1px solid #333333;
@@ -130,34 +131,34 @@
     overflow: hidden;
 }
 
-.contact-section::before {
+:where(.ui-page[data-page="home"]) .contact-section::before {
     background: #ffffff;
 }
 
-.contact-section h2 {
+:where(.ui-page[data-page="home"]) .contact-section h2 {
     color: #ffffff;
 }
 
-.contact-section h2::before {
+:where(.ui-page[data-page="home"]) .contact-section h2::before {
     background: #ffffff;
 }
 
-.contact-section p {
+:where(.ui-page[data-page="home"]) .contact-section p {
     color: #cccccc;
 }
 
-.contact-section a {
+:where(.ui-page[data-page="home"]) .contact-section a {
     color: #ffffff;
     text-decoration: underline;
     transition: color 0.3s ease;
 }
 
-.contact-section a:hover {
+:where(.ui-page[data-page="home"]) .contact-section a:hover {
     color: #cccccc;
 }
 
 /* CTA Button Styling */
-.cta-button {
+:where(.ui-page[data-page="home"]) .cta-button {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -173,14 +174,14 @@
     margin: 16px 0;
 }
 
-.cta-button:hover {
+:where(.ui-page[data-page="home"]) .cta-button:hover {
     background: transparent;
     color: #ffffff;
     transform: translateY(-2px);
 }
 
 /* Stats Section */
-.about-stats {
+:where(.ui-page[data-page="home"]) .about-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 40px;
@@ -189,11 +190,11 @@
     border-top: 1px solid #e5e7eb;
 }
 
-.stat-item {
+:where(.ui-page[data-page="home"]) .stat-item {
     text-align: center;
 }
 
-.stat-number {
+:where(.ui-page[data-page="home"]) .stat-number {
     display: block;
     font-size: 3rem;
     font-weight: 800;
@@ -202,7 +203,7 @@
     margin-bottom: 8px;
 }
 
-.stat-label {
+:where(.ui-page[data-page="home"]) .stat-label {
     font-size: 1rem;
     color: #666666;
     font-weight: 500;
@@ -210,20 +211,20 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .about-content {
+    :where(.ui-page[data-page="home"]) .about-content {
         padding: 80px 20px;
     }
     
-    .about-sections {
+    :where(.ui-page[data-page="home"]) .about-sections {
         grid-template-columns: 1fr;
         gap: 30px;
     }
     
-    .about-section {
+    :where(.ui-page[data-page="home"]) .about-section {
         padding: 30px 24px;
     }
     
-    .about-stats {
+    :where(.ui-page[data-page="home"]) .about-stats {
         grid-template-columns: repeat(2, 1fr);
         gap: 30px;
         margin-top: 60px;
@@ -232,12 +233,13 @@
 }
 
 @media (max-width: 480px) {
-    .about-stats {
+    :where(.ui-page[data-page="home"]) .about-stats {
         grid-template-columns: 1fr;
         gap: 20px;
     }
     
-    .stat-number {
+    :where(.ui-page[data-page="home"]) .stat-number {
         font-size: 2.5rem;
     }
+}
 }

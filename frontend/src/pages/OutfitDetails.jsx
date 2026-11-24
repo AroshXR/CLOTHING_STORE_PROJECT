@@ -1,12 +1,14 @@
+import { API_BASE_URL as API_ORIGIN } from '../config/api';
+import MediaImage from '../Components/MediaImage';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { assets } from '../assets/assets';
 import Loader from '../Components/pasindu/Loader';
 import './OutfitDetails.css';
 import axios from 'axios';
-import { useAuth } from '../AuthGuard/AuthGuard';
-import Navbar from '../Components/pasindu/Navbar';
-import Footer from '../Components/Footer/Footer';
+import { useAuth } from '../AuthGuard/authGuard';
+
+
 
 const OutfitDetails = () => {
   const { id } = useParams();
@@ -25,7 +27,7 @@ const OutfitDetails = () => {
 
   const fetchOutfit = async () => {
     try {
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+      const BASE_URL = API_ORIGIN;
       const { data } = await axios.get(`${BASE_URL}/api/owner/all-outfits`);
       if (data?.success) {
         const foundOutfit = data.outfits.find(o => o._id === id);
@@ -74,7 +76,7 @@ const OutfitDetails = () => {
       }
 
       setIsBooking(true);
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+      const BASE_URL = API_ORIGIN;
       const token = getToken();
       
       // Create FormData for file upload
@@ -142,11 +144,11 @@ const OutfitDetails = () => {
 
   return (
     <div>
-      <Navbar/>
-      <div className=" ">
+      
+      <div className="">
     <div className="px-6 md:px-16 lg:px-24 xl:px-32 mt-16 ">
       <button onClick={() => navigate(-1)} className="back-button ">
-        <img src={assets.arrow_icon} alt="Back" />
+        <MediaImage src={assets.arrow_icon} alt="Back" />
         Back to all Outfits
       </button>
 
@@ -165,7 +167,7 @@ const OutfitDetails = () => {
             <div className="w-full max-w-3xl overflow-hidden relative">
               <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
                 {allImages.map((image, index) => (
-                  <img
+                  <MediaImage
                     key={index}
                     src={image}
                     className="w-full flex-shrink-0 object-cover h-[500px] md:h-[800px]"
@@ -194,7 +196,7 @@ const OutfitDetails = () => {
               { icon: assets.users_icon, text: outfit.size },
               { icon: assets.location_icon, text: outfit.location }].map(({ icon, text }) => (
                 <div key={text} className="flex flex-col items-center bg-light p-4 rounded-lg">
-                  <img src={icon} alt="Icon" className="h-5 mb-2" />
+                  <MediaImage src={icon} alt="Icon" className="h-5 mb-2" />
                   {text}
                 </div>
               ))}
@@ -216,7 +218,7 @@ const OutfitDetails = () => {
                   "Limited Edition", "Perfect for Weddings & Parties", "Comfortable Fit", "Luxury Brand"]
                   .map((item) => (
                     <li key={item} className="flex items-center text-gray-500">
-                      <img src={assets.check_icon} alt="Check Icon" className="h-4 mr-2" />
+                      <MediaImage src={assets.check_icon} alt="Check Icon" className="h-4 mr-2" />
                       {item}
                     </li>
                   ))}
@@ -328,7 +330,7 @@ const OutfitDetails = () => {
       </div>
     </div>
     </div>
-    <Footer/>
+    
     </div>
   );
 }

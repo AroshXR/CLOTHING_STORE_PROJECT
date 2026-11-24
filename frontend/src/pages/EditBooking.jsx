@@ -1,9 +1,11 @@
+import { API_BASE_URL as API_ORIGIN } from '../config/api';
+import MediaImage from '../Components/MediaImage';
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { useAuth } from '../AuthGuard/AuthGuard'
-import NavBar from '../Components/NavBar/navBar'
-import Footer from '../Components/Footer/Footer'
+import { useAuth } from '../AuthGuard/authGuard'
+
+
 
 const EditBooking = () => {
   const { bookingId } = useParams()
@@ -29,7 +31,7 @@ const EditBooking = () => {
   const fetchBookingDetails = async () => {
     try {
       setLoading(true)
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+      const BASE_URL = API_ORIGIN
       const token = getToken()
       
       const { data } = await axios.get(`${BASE_URL}/api/booking/${bookingId}`, {
@@ -73,7 +75,7 @@ const EditBooking = () => {
     e.preventDefault()
     
     try {
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+      const BASE_URL = API_ORIGIN
       const token = getToken()
       
       const formDataToSend = new FormData()
@@ -107,24 +109,24 @@ const EditBooking = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <NavBar />
+      <div className="flex flex-col">
+        
         <div className="flex-1 flex items-center justify-center">
           <div className="text-gray-500">Loading booking details...</div>
         </div>
-        <Footer />
+        
       </div>
     )
   }
 
   if (!booking) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <NavBar />
+      <div className="flex flex-col">
+        
         <div className="flex-1 flex items-center justify-center">
           <div className="text-red-500">Booking not found</div>
         </div>
-        <Footer />
+        
       </div>
     )
   }
@@ -132,8 +134,8 @@ const EditBooking = () => {
   // Only allow editing pending bookings
   if (booking.status !== 'pending') {
     return (
-      <div className="min-h-screen flex flex-col">
-        <NavBar />
+      <div className="flex flex-col">
+        
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="text-red-500 text-lg mb-4">This booking cannot be edited</div>
@@ -146,16 +148,16 @@ const EditBooking = () => {
             </button>
           </div>
         </div>
-        <Footer />
+        
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <NavBar />
+    <div className="flex flex-col">
       
-      <div className="flex-1 bg-gray-50 py-8">
+      
+      <div className="flex-1 bg-gray-50">
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h1 className="text-2xl font-bold text-gray-800 mb-6">Edit Booking</h1>
@@ -164,7 +166,7 @@ const EditBooking = () => {
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
               <h2 className="text-lg font-semibold mb-3">Outfit Details</h2>
               <div className="flex gap-4">
-                <img 
+                <MediaImage
                   src={booking.outfit.image} 
                   alt={booking.outfit.brand}
                   className="w-20 h-20 object-cover rounded"
@@ -299,7 +301,7 @@ const EditBooking = () => {
         </div>
       </div>
       
-      <Footer />
+      
     </div>
   )
 }

@@ -1,8 +1,10 @@
+import { useBranding } from '../../config/branding';
 import React, { useEffect } from "react";
 import "./PrivacyPolicy.css";
 import { useNavigate } from "react-router-dom";
 
 const PrivacyPolicy = () => {
+  const { branding } = useBranding();
     const navigate = useNavigate();
     useEffect(() => {
         window.scrollTo(0, 0); // auto-scroll to top
@@ -20,11 +22,11 @@ const PrivacyPolicy = () => {
                     </button>
                 </div>
                 <header className="policy-header">
-                    <h1>Privacy Policy for Klassy T Shirts</h1>
+                    <h1>Privacy Policy for {branding.name}</h1>
                     <p>Last updated: September 23, 2025</p>
                 </header>
 
-                <main className="policy-main">
+                <section className="policy-main">
                     <section className="policy-section">
                         <p>
                             This Privacy Policy describes Our policies and procedures on the
@@ -61,8 +63,7 @@ const PrivacyPolicy = () => {
                             </li>
                             <li>
                                 <strong>Company</strong> (referred to as either "the Company",
-                                "We", "Us" or "Our" in this Agreement) refers to Klassy T
-                                Shirts.
+                                "We", "Us" or "Our" in this Agreement) refers to {branding.name}.
                             </li>
                             <li>
                                 <strong>Cookies</strong> are small files placed on Your device
@@ -91,8 +92,8 @@ const PrivacyPolicy = () => {
                                 automatically.
                             </li>
                             <li>
-                                <strong>Website</strong> refers to Klassy T Shirts, accessible
-                                from <a href="http://www.klassytshirts.com">www.klassytshirts.com</a>
+                                <strong>Website</strong> refers to {branding.name}, accessible
+                                from <a href={`${branding.websiteUrl || window.location.origin}`}>{branding.websiteUrl || window.location.origin}</a>
                             </li>
                             <li>
                                 <strong>You</strong> means the individual accessing or using the
@@ -216,13 +217,13 @@ const PrivacyPolicy = () => {
                         <ul>
                             <li>
                                 By email:{" "}
-                                <a href="mailto:support@klassytshirts.com">
-                                    support@klassytshirts.com
+                                <a href={branding.contactEmail ? "mailto:" + branding.contactEmail : "/contact"}>
+                                    {branding.contactEmail || "Contact the store"}
                                 </a>
                             </li>
                         </ul>
                     </section>
-                </main>
+                </section>
 
                 
 

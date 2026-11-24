@@ -1,3 +1,5 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../MediaImage';
 import React, { useState, useEffect } from 'react';
 import Title from './Title';
 import { assets } from '../../assets/assets';
@@ -12,7 +14,7 @@ const FeaturedSection = () => {
 
   const fetchOutfits = async () => {
     try {
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+      const BASE_URL = API_ORIGIN;
       const { data } = await axios.get(`${BASE_URL}/api/owner/all-outfits`);
       if (data?.success) {
         setOutfits(data.outfits);
@@ -48,7 +50,7 @@ const FeaturedSection = () => {
     className="px-8 py-2.5 text-sm text-white rounded-full font-medium bg-gray-800 flex items-center gap-2"
   >
     Explore All Outfits
-    <img src={assets.arrow_icon} alt="arrow" className="w-4 h-4" />
+    <MediaImage src={assets.arrow_icon} alt="arrow" className="w-4 h-4" />
   </button>
 </div>
 

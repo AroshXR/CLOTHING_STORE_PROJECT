@@ -115,7 +115,7 @@ const jobSchema = new Schema({
   },
   applications: [{
     type: Schema.Types.ObjectId,
-    ref: "ApplicantModel"
+    ref: "Applicant"
   }]
 }, { 
   timestamps: true,

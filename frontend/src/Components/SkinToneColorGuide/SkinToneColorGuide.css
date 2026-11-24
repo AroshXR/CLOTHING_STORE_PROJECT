@@ -1,4 +1,5 @@
-.color-guide-page {
+@layer app-legacy {
+:where(.ui-page[data-page="color-guide"]) .color-guide-page {
   min-height: 100vh;
   background: linear-gradient(180deg, #eee9e9 0%, #ffffff 60%, #f3f3f3 100%);
   color: #1a1a1a;
@@ -7,7 +8,7 @@
   gap: 48px;
 }
 
-.color-guide-hero {
+:where(.ui-page[data-page="color-guide"]) .color-guide-hero {
   padding: 120px 8% 80px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -15,26 +16,26 @@
   align-items: center;
 }
 
-.color-guide-hero__content h1 {
+:where(.ui-page[data-page="color-guide"]) .color-guide-hero__content h1 {
   font-size: 3rem;
   margin-bottom: 16px;
   color: #0f0f0f;
 }
 
-.color-guide-hero__content p {
+:where(.ui-page[data-page="color-guide"]) .color-guide-hero__content p {
   font-size: 1.1rem;
   line-height: 1.7;
   max-width: 560px;
   color: #4a4a4a;
 }
 
-.color-guide-hero__art {
+:where(.ui-page[data-page="color-guide"]) .color-guide-hero__art {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
 }
 
-.color-guide-hero__art span {
+:where(.ui-page[data-page="color-guide"]) .color-guide-hero__art span {
   flex: 1;
   height: 220px;
   border-radius: 18px;
@@ -47,31 +48,31 @@
   50% { transform: translateY(-14px); }
 }
 
-.color-guide-section {
+:where(.ui-page[data-page="color-guide"]) .color-guide-section {
   padding: 0 8%;
   display: flex;
   flex-direction: column;
   gap: 28px;
 }
 
-.color-guide-section h2 {
+:where(.ui-page[data-page="color-guide"]) .color-guide-section h2 {
   font-size: 2rem;
   color: #111111;
 }
 
-.section-intro {
+:where(.ui-page[data-page="color-guide"]) .section-intro {
   max-width: 720px;
   color: #535353;
   line-height: 1.7;
 }
 
-.tone-grid {
+:where(.ui-page[data-page="color-guide"]) .tone-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 28px;
 }
 
-.tone-card {
+:where(.ui-page[data-page="color-guide"]) .tone-card {
   background: #020024;
   background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(39, 39, 41, 1) 68%, rgb(61, 61, 61) 100%);
   border-radius: 18px;
@@ -83,46 +84,46 @@
   ;
 }
 
-.tone-card header h3 {
+:where(.ui-page[data-page="color-guide"]) .tone-card header h3 {
   margin: 0 0 12px;
   font-size: 1.4rem;
   color: white;
 }
 
-.tone-card header p {
+:where(.ui-page[data-page="color-guide"]) .tone-card header p {
   margin: 0;
   color: #4a4a4a;
   line-height: 1.6;
   color: white
 }
 
-.tone-card__palette {
+:where(.ui-page[data-page="color-guide"]) .tone-card__palette {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
   gap: 8px;
 }
 
-.tone-card__palette div {
+:where(.ui-page[data-page="color-guide"]) .tone-card__palette div {
   height: 54px;
   border-radius: 12px;
   box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
 }
 
-.tone-card__lists {
+:where(.ui-page[data-page="color-guide"]) .tone-card__lists {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 20px;
   
 }
 
-.tone-card__lists h4 {
+:where(.ui-page[data-page="color-guide"]) .tone-card__lists h4 {
   margin-bottom: 8px;
   font-size: 1rem;
   color: #1f2937;
   color: white
 }
 
-.tone-card__lists ul {
+:where(.ui-page[data-page="color-guide"]) .tone-card__lists ul {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -132,13 +133,13 @@
   
 }
 
-.undertone-grid {
+:where(.ui-page[data-page="color-guide"]) .undertone-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 24px;
 }
 
-.undertone-card {
+:where(.ui-page[data-page="color-guide"]) .undertone-card {
   background: #929492;
   background: linear-gradient(0deg, rgba(146, 148, 146, 1) 0%, rgba(255, 250, 250, 1) 99%);
   border-radius: 16px;
@@ -148,25 +149,25 @@
   gap: 12px;
 }
 
-.undertone-card h3 {
+:where(.ui-page[data-page="color-guide"]) .undertone-card h3 {
   margin: 0;
   color: #1f2937;
 }
 
-.undertone-card ul {
+:where(.ui-page[data-page="color-guide"]) .undertone-card ul {
   margin: 0;
   padding-left: 18px;
   color: #535353;
   line-height: 1.6;
 }
 
-.universal-grid {
+:where(.ui-page[data-page="color-guide"]) .universal-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 18px;
 }
 
-.universal-card {
+:where(.ui-page[data-page="color-guide"]) .universal-card {
   background: rgba(255, 255, 255, 0.85);
   border-radius: 14px;
   padding: 18px;
@@ -179,14 +180,14 @@
   color: #1f2937;
 }
 
-.universal-card__swatch {
+:where(.ui-page[data-page="color-guide"]) .universal-card__swatch {
   width: 72px;
   height: 72px;
   border-radius: 16px;
   border: 2px solid transparent;
 }
 
-.color-guide-cta {
+:where(.ui-page[data-page="color-guide"]) .color-guide-cta {
   margin: 40px auto 80px;
   padding: 48px 6%;
   background: linear-gradient(135deg, #000000, #2b2b2b);
@@ -199,18 +200,18 @@
   gap: 16px;
 }
 
-.color-guide-cta h2 {
+:where(.ui-page[data-page="color-guide"]) .color-guide-cta h2 {
   margin: 0;
   font-size: 2rem;
 }
 
-.color-guide-cta p {
+:where(.ui-page[data-page="color-guide"]) .color-guide-cta p {
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.6;
 }
 
-.cta-button {
+:where(.ui-page[data-page="color-guide"]) .cta-button {
   display: inline-flex;
   align-self: center;
   margin-top: 8px;
@@ -223,25 +224,26 @@
   text-decoration: none;
 }
 
-.cta-button:hover {
+:where(.ui-page[data-page="color-guide"]) .cta-button:hover {
   transform: translateY(-3px);
   box-shadow: 0 15px 30px rgba(15, 23, 42, 0.2);
 }
 
 @media (max-width: 768px) {
-  .color-guide-hero {
+  :where(.ui-page[data-page="color-guide"]) .color-guide-hero {
     padding: 100px 6% 60px;
   }
 
-  .color-guide-hero__content h1 {
+  :where(.ui-page[data-page="color-guide"]) .color-guide-hero__content h1 {
     font-size: 2.4rem;
   }
 
-  .color-guide-section {
+  :where(.ui-page[data-page="color-guide"]) .color-guide-section {
     padding: 0 6%;
   }
 
-  .color-guide-cta {
+  :where(.ui-page[data-page="color-guide"]) .color-guide-cta {
     margin: 24px 6% 60px;
   }
+}
 }

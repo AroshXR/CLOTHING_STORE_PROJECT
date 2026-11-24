@@ -1,6 +1,6 @@
-"use client"
-import Footer from "../Footer/Footer"
-import NavBar from "../NavBar/navBar"
+import { API_BASE_URL as API_ORIGIN, apiFetch as fetch } from '../../config/api';
+
+
 import "./MaterialInventoryManagement.css"
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
@@ -26,8 +26,8 @@ export default function MaterialInventoryManagement() {
   const [viewMode, setViewMode] = useState("table") // table or grid
 
   // API base URLs
-  const INVENTORY_API_URL = "http://localhost:5001/inventory"
-  const SUPPLIER_API_URL = "http://localhost:5001/supplier"
+  const INVENTORY_API_URL = `${API_ORIGIN}/inventory`
+  const SUPPLIER_API_URL = `${API_ORIGIN}/supplier`
 
   // API functions
   const fetchInventoryItems = async () => {
@@ -171,7 +171,7 @@ export default function MaterialInventoryManagement() {
       setLoading(true)
       try {
         // Test backend connection first
-        const testResponse = await fetch('http://localhost:5001/test')
+        const testResponse = await fetch(`${API_ORIGIN}/test`)
         if (!testResponse.ok) {
           throw new Error('Backend server is not responding')
         }
@@ -353,7 +353,7 @@ export default function MaterialInventoryManagement() {
 
   return (
     <div className="main">
-      <NavBar />
+      
       <div className="dashboard-header">
         <h1>Material Inventory Management</h1>
         
@@ -370,22 +370,14 @@ export default function MaterialInventoryManagement() {
             className="back-button"
             onClick={() => navigate(-1)}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 20px',
-              background: '#ffffff',
-              border: '2px solid #333',
-              borderRadius: '8px',
-              color: '#333',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              position: 'relative',
-              zIndex: 1001
-            }}
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  position: 'relative',
+  zIndex: 1001
+}}
             onMouseEnter={(e) => {
               e.target.style.background = '#333';
               e.target.style.color = '#fff';
@@ -428,14 +420,9 @@ export default function MaterialInventoryManagement() {
                 window.location.reload()
               }}
               style={{
-                marginLeft: '10px',
-                padding: '5px 10px',
-                backgroundColor: '#dc2626',
-                color: 'white',
-                border: 'none',
-                borderRadius: '3px',
-                cursor: 'pointer'
-              }}
+  marginLeft: '10px',
+  cursor: 'pointer'
+}}
             >
               Retry
             </button>
@@ -497,7 +484,7 @@ export default function MaterialInventoryManagement() {
 
             <div className="chart-container">
               <h3 className="chart-title">Recent Inventory Items</h3>
-              <table className="data-table">
+              <div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table className="data-table">
                 <thead>
                   <tr>
                     <th>Item Name</th>
@@ -524,7 +511,7 @@ export default function MaterialInventoryManagement() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
         )}
@@ -673,7 +660,7 @@ export default function MaterialInventoryManagement() {
             {/* Table View */}
             {viewMode === 'table' && (
               <div className="table-container">
-                <table className="data-table enhanced">
+                <div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table className="data-table enhanced">
                   <thead>
                     <tr>
                       <th>Item Details</th>
@@ -772,7 +759,7 @@ export default function MaterialInventoryManagement() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
               </div>
             )}
 
@@ -877,7 +864,7 @@ export default function MaterialInventoryManagement() {
               <p>Items that need attention due to low or out of stock status</p>
               
               {stats.lowStockAlerts && stats.lowStockAlerts.length > 0 ? (
-                <table className="data-table">
+                <div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table className="data-table">
                   <thead>
                     <tr>
                       <th>Item Name</th>
@@ -909,7 +896,7 @@ export default function MaterialInventoryManagement() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
               ) : (
                 <p>No stock alerts at this time. All items are adequately stocked.</p>
               )}
@@ -1224,7 +1211,7 @@ export default function MaterialInventoryManagement() {
           </div>
         )}
       </div>
-      <Footer />
+      
     </div>
   )
 }

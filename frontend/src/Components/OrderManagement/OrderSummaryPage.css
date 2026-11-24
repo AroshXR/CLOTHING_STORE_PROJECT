@@ -1,14 +1,14 @@
-.orderSummaryPage {
+@layer app-legacy {
+:where(.ui-page[data-page="order-summary"]) .orderSummaryPage {
   min-height: 100vh;
   background: #fff;
   color: #000;
   padding: 28px 56px;
   margin: 0 auto;
-  font-family: "Segoe UI", sans-serif;
 }
 
 /* Header */
-.header {
+:where(.ui-page[data-page="order-summary"]) .header {
   position: relative;
   background: linear-gradient(135deg, #000000 0%, #333333 100%);
   color: #fff;
@@ -20,7 +20,7 @@
 }
 
 /* back button */
-.back-button {
+:where(.ui-page[data-page="order-summary"]) .back-button {
   position: absolute;
   top: 18px;
   left: 18px;
@@ -34,17 +34,17 @@
   border-radius: 8px;
   transition: background 0.2s ease;
 }
-.back-button:hover {
+:where(.ui-page[data-page="order-summary"]) .back-button:hover {
   background: rgba(255, 255, 255, 0.15);
 }
 
 /* center header content */
-.header-content h1 {
+:where(.ui-page[data-page="order-summary"]) .header-content h1 {
   margin: 0;
   font-size: 2.4rem;
   font-weight: 700;
 }
-.header-content p {
+:where(.ui-page[data-page="order-summary"]) .header-content p {
   margin-top: 8px;
   color: #e5e7eb;
   opacity: 0.9;
@@ -53,23 +53,23 @@
 
 
 /* State */
-.state {
+:where(.ui-page[data-page="order-summary"]) .state {
   padding: 12px;
   border-radius: 8px;
   background: #f5f5f5;
 }
-.state.error {
+:where(.ui-page[data-page="order-summary"]) .state.error {
   background: #ffe8e8;
   color: #b00020;
 }
 
 /* Summary grid */
-.summaryGrid {
+:where(.ui-page[data-page="order-summary"]) .summaryGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 18px;
 }
-.card {
+:where(.ui-page[data-page="order-summary"]) .card {
   background: #fff;
   border: 1px solid #e5e5e5;
   border-radius: 14px;
@@ -78,54 +78,54 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   transition: 0.25s ease;
 }
-.card:hover {
+:where(.ui-page[data-page="order-summary"]) .card:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
 }
-.card h3 {
+:where(.ui-page[data-page="order-summary"]) .card h3 {
   font-size: 1rem;
   margin-bottom: 6px;
 }
-.card p {
+:where(.ui-page[data-page="order-summary"]) .card p {
   font-size: 1.4rem;
   font-weight: 600;
 }
 
 /* Report section */
-.reportSection {
+:where(.ui-page[data-page="order-summary"]) .reportSection {
   margin-top: 40px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-.reportSection h2 {
+:where(.ui-page[data-page="order-summary"]) .reportSection h2 {
   font-size: 1.3rem;
   font-weight: 600;
 }
 
 /* Filters */
-.filters {
+:where(.ui-page[data-page="order-summary"]) .filters {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
   align-items: flex-end;
 }
-.field {
+:where(.ui-page[data-page="order-summary"]) .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.field input[type="date"] {
+:where(.ui-page[data-page="order-summary"]) .field input[type="date"] {
   padding: 8px 10px;
   border: 1px solid #ccc;
   border-radius: 8px;
   background: #fff;
 }
-.actions {
+:where(.ui-page[data-page="order-summary"]) .actions {
   display: flex;
   gap: 10px;
 }
-.btn {
+:where(.ui-page[data-page="order-summary"]) .btn {
   padding: 8px 14px;
   border-radius: 8px;
   border: 1px solid #000;
@@ -134,29 +134,29 @@
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.btn:hover {
+:where(.ui-page[data-page="order-summary"]) .btn:hover {
   background: #000;
   color: #fff;
 }
-.btn.primary {
+:where(.ui-page[data-page="order-summary"]) .btn.primary {
   background: #000;
   color: #fff;
 }
-.btn.primary:hover {
+:where(.ui-page[data-page="order-summary"]) .btn.primary:hover {
   background: #333;
 }
-.btn:disabled {
+:where(.ui-page[data-page="order-summary"]) .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Report details */
-.reportDetails {
+:where(.ui-page[data-page="order-summary"]) .reportDetails {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
-.reportInfo {
+:where(.ui-page[data-page="order-summary"]) .reportInfo {
   background: #fafafa;
   border: 1px solid #e5e5e5;
   border-radius: 10px;
@@ -165,58 +165,58 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 8px 16px;
 }
-.reportInfo div {
+:where(.ui-page[data-page="order-summary"]) .reportInfo div {
   font-size: 14px;
   display: flex;
   justify-content: space-between;
 }
 
 /* Table */
-.tableWrapper {
+:where(.ui-page[data-page="order-summary"]) .tableWrapper {
   background: #fff;
   border: 1px solid #e5e5e5;
   border-radius: 10px;
   overflow: hidden;
 }
-.orderTable {
+:where(.ui-page[data-page="order-summary"]) .orderTable {
   width: 100%;
   border-collapse: collapse;
 }
-.orderTable thead {
+:where(.ui-page[data-page="order-summary"]) .orderTable thead {
   background: #000;
   color: #fff;
 }
-.orderTable th,
-.orderTable td {
+:where(.ui-page[data-page="order-summary"]) .orderTable th,
+:where(.ui-page[data-page="order-summary"]) .orderTable td {
   padding: 10px 12px;
   border-bottom: 1px solid #eee;
   text-align: left;
   font-size: 14px;
 }
-.orderTable td.empty {
+:where(.ui-page[data-page="order-summary"]) .orderTable td.empty {
   text-align: center;
   color: #666;
 }
-.orderStatus.completed {
+:where(.ui-page[data-page="order-summary"]) .orderStatus.completed {
   color: #0a7b34;
   font-weight: 600;
 }
-.orderStatus.pending {
+:where(.ui-page[data-page="order-summary"]) .orderStatus.pending {
   color: #b08000;
   font-weight: 600;
 }
-.orderStatus.cancelled,
-.orderStatus.canceled {
+:where(.ui-page[data-page="order-summary"]) .orderStatus.cancelled,
+:where(.ui-page[data-page="order-summary"]) .orderStatus.canceled {
   color: #b00020;
   font-weight: 600;
 }
 
 @media (max-width: 640px) {
-  .header {
+  :where(.ui-page[data-page="order-summary"]) .header {
     padding: 28px 18px;
   }
-  .header h1 {
+  :where(.ui-page[data-page="order-summary"]) .header h1 {
     font-size: 2rem;
   }
 }
-
+}

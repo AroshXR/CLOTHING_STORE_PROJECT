@@ -113,7 +113,7 @@ const updateUser = async (request, response) => {
     if (username !== undefined) updatePayload.username = username;
     if (address !== undefined) updatePayload.address = address;
     if (email !== undefined) updatePayload.email = email;
-    if (type !== undefined) updatePayload.type = type;
+    if (type !== undefined) { updatePayload.type = type; updatePayload.role = type === 'Admin' ? 'admin' : 'customer'; }
     if (phoneNumber !== undefined) updatePayload.phoneNumber = phoneNumber;
     if (identityEvidence !== undefined) updatePayload.identityEvidence = identityEvidence;
     if (identityNotes !== undefined) updatePayload.identityNotes = identityNotes;
@@ -321,7 +321,7 @@ const updateIdentityStatus = async (request, response) => {
 
     if (status === "verified" || status === "rejected") {
         updatePayload.identityReviewedAt = new Date();
-        updatePayload.identityReviewer = reviewer || "System";
+        updatePayload.identityReviewer = request.user.username;
     }
 
     try {

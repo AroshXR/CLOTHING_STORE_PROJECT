@@ -14,7 +14,7 @@
 - ✅ **Manual Alert Check**: Button to manually trigger alert checks
 
 #### Email Content Includes:
-- 🏢 **Company Header**: Klassy T Shirts branding
+- 🏢 **Company Header**: Your Store branding
 - 📊 **Item Details**: Name, current stock, minimum stock, supplier
 - ⚠️ **Alert Level**: Visual indicators for urgency
 - 📋 **Recommended Actions**: What to do next
@@ -210,4 +210,4 @@ curl -X POST http://localhost:5001/inventory/alerts/check
 
 ---
 
-**© 2025 Klassy T Shirts - Enhanced Inventory Management System**
+**© 2025 Your Store - Enhanced Inventory Management System**

@@ -1,6 +1,8 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../../Components/MediaImage';
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { useAuth } from '../../AuthGuard/AuthGuard'
+import { useAuth } from '../../AuthGuard/authGuard'
 
 const BookingReport = () => {
   const { getToken, currentUser } = useAuth()
@@ -16,7 +18,7 @@ const BookingReport = () => {
   const fetchReport = async () => {
     try {
       setLoading(true)
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+      const BASE_URL = API_ORIGIN
       const token = getToken()
       
       const params = new URLSearchParams()
@@ -169,14 +171,14 @@ const BookingReport = () => {
   }
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
-      <div className="mb-6">
+    <div className="bg-white rounded-lg shadow-md">
+      <div className="">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">📊 Booking Reports</h1>
         <p className="text-gray-600">Generate comprehensive booking reports with filters and analytics</p>
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 rounded-lg">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
           <input
@@ -228,7 +230,7 @@ const BookingReport = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-4">
         <button
           onClick={fetchReport}
           disabled={loading}
@@ -249,7 +251,7 @@ const BookingReport = () => {
 
       {/* Report Preview */}
       {reportData && (
-        <div className="border-t pt-6">
+        <div className="border-t">
           <h2 className="text-lg font-semibold mb-4">Report Preview</h2>
           
           {/* Summary Cards */}
@@ -274,7 +276,7 @@ const BookingReport = () => {
 
           {/* Bookings Table */}
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-200">
+            <div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table className="min-w-full bg-white border border-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Booking</th>
@@ -291,7 +293,7 @@ const BookingReport = () => {
                     <td className="px-4 py-4 text-sm">#{booking._id.slice(-6)}</td>
                     <td className="px-4 py-4 text-sm">
                       <div className="flex items-center gap-2">
-                        <img src={booking.outfit?.image} alt="" className="w-8 h-8 object-cover rounded" />
+                        <MediaImage src={booking.outfit?.image} alt="" className="w-8 h-8 object-cover rounded" />
                         <div>
                           <div className="font-medium">{booking.outfit?.brand} - {booking.outfit?.model}</div>
                           <div className="text-gray-500 text-xs">{booking.outfit?.category}</div>
@@ -319,7 +321,7 @@ const BookingReport = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
             {reportData.bookings.length > 10 && (
               <p className="text-center text-gray-500 py-4">
                 Showing first 10 of {reportData.bookings.length} bookings. View full report for complete data.

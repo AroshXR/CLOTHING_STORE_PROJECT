@@ -1,13 +1,15 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../MediaImage';
 import React, { useState, useEffect } from 'react';
-import NavBar from '../NavBar/navBar';
-import Footer from '../Footer/Footer';
+
+
 import './ClothCustomizer.css';
 import { TShirtModel } from './components/TShirtModel';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Bounds } from '@react-three/drei';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../AuthGuard/AuthGuard';
+import { useAuth } from '../../AuthGuard/authGuard';
 //
 import print1 from './customizer_preset_designs/print 1.jpg'
 import print2 from './customizer_preset_designs/print 2.jpg'
@@ -42,7 +44,7 @@ function ClothCustomizer() {
   // Fetch customizer prices from API
   const fetchCustomizerPrices = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/customizer-prices');
+      const response = await axios.get(`${API_ORIGIN}/customizer-prices`);
       if (response.data.status === "ok") {
         setCustomizerPrices(response.data.data);
       }
@@ -75,7 +77,7 @@ function ClothCustomizer() {
     }
 
     try {
-      const response = await axios.get('http://localhost:5001/cloth-customizer', {
+      const response = await axios.get(`${API_ORIGIN}/cloth-customizer`, {
         headers: {
           Authorization: 'Bearer ' + token
         },
@@ -271,14 +273,14 @@ function ClothCustomizer() {
         formData.append('image', file);
 
         // Upload image to backend
-        const uploadResponse = await axios.post('http://localhost:5001/upload/image', formData, {
+        const uploadResponse = await axios.post(`${API_ORIGIN}/upload/image`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
 
         if (uploadResponse.data.status === "ok") {
-          const imageUrl = `http://localhost:5001${uploadResponse.data.data.url}`;
+          const imageUrl = `${API_ORIGIN}${uploadResponse.data.data.url}`;
 
           const customDesign = {
             id: `custom-${Date.now()}`,
@@ -427,10 +429,10 @@ function ClothCustomizer() {
 
       if (isEditMode && editingItemId) {
         console.log('Updating existing item:', editingItemId);
-        response = await axios.put('http://localhost:5001/cloth-customizer/' + editingItemId, clothCustomizerData, { headers: authHeaders });
+        response = await axios.put(`${API_ORIGIN}/cloth-customizer/` + editingItemId, clothCustomizerData, { headers: authHeaders });
       } else {
         console.log('Creating new item');
-        response = await axios.post('http://localhost:5001/cloth-customizer', clothCustomizerData, { headers: authHeaders });
+        response = await axios.post(`${API_ORIGIN}/cloth-customizer`, clothCustomizerData, { headers: authHeaders });
       }
 
       console.log('Backend response:', response.data);
@@ -467,7 +469,7 @@ function ClothCustomizer() {
 
   return (
     <div className="customizer-container">
-      <NavBar />
+      
       <div className="customizer-content">
         <div className="customizer-header">
           <h1>Clothing Customizer</h1>
@@ -558,7 +560,9 @@ function ClothCustomizer() {
                   <button
                     key={color}
                     className={`color-btn ${selectedColor === color ? "active" : ""}`}
+                    
                     style={{ backgroundColor: color }}
+                    aria-pressed={selectedColor === color}
                     onClick={() => handleColorSelect(color)}
                     title={color}
                   />
@@ -583,7 +587,7 @@ function ClothCustomizer() {
               )}
               {selectedDesign?.isCustomUpload && (
                 <div className="custom-image-preview">
-                  <img
+                  <MediaImage
                     src={selectedDesign.preview}
                     alt="Custom uploaded design"
                     className="preview-image"
@@ -604,7 +608,7 @@ function ClothCustomizer() {
                     className={`design-item ${selectedDesign?.id === design.id ? "selected" : ""}`}
                     onClick={() => handleDesignSelect(design)}
                   >
-                    <img src={design.preview} alt={design.name} />
+                    <MediaImage src={design.preview} alt={design.name} />
                     <p>{design.name}</p>
                     <span className="price">${design.price}</span>
                   </div>
@@ -638,14 +642,14 @@ function ClothCustomizer() {
                   <button
                     onClick={() => handleQuantityChange(quantity - 1)}
                     disabled={quantity <= 1}
-                    style={{ padding: '5px 10px' }}
+                    
                   >
                     -
                   </button>
                   <span style={{ minWidth: '30px', textAlign: 'center' }}>{quantity}</span>
                   <button
                     onClick={() => handleQuantityChange(quantity + 1)}
-                    style={{ padding: '5px 10px' }}
+                    
                   >
                     +
                   </button>
@@ -770,7 +774,7 @@ function ClothCustomizer() {
 
         </div>
       </div>
-      <Footer />
+      
       {/* Floating Cart Button */}
       {isAuthenticated() ? (
         <Link to="/orderManagement" className="floating-cart-btn">

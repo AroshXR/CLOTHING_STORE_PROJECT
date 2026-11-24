@@ -1,11 +1,12 @@
-.admin-management-page {
+@layer app-legacy {
+:where(.ui-page[data-page="admin-users"]) .admin-management-page {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     background: #dedfe1;
 }
 
-.admin-management-content {
+:where(.ui-page[data-page="admin-users"]) .admin-management-content {
     flex: 1;
     width: min(1200px, 92%);
     margin: 2rem auto 3rem;
@@ -14,7 +15,7 @@
     gap: 1.5rem;
 }
 
-.admin-header {
+:where(.ui-page[data-page="admin-users"]) .admin-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -23,19 +24,19 @@
 }
 
 /* Header action buttons */
-.header-nav-actions { display: flex; align-items: center; gap: .5rem; }
-.header-nav-btn { padding: 8px 14px; border-radius: 999px; border: 2px solid transparent; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease; }
-.header-nav-btn.primary { background: linear-gradient(135deg, #000, #2b2b2b); color: #fff; }
-.header-nav-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,.25); }
-.header-nav-btn.secondary { background: #fff; color: #111; border-color: #e5e5e5; }
-.header-nav-btn.secondary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,.15); }
+:where(.ui-page[data-page="admin-users"]) .header-nav-actions { display: flex; align-items: center; gap: .5rem; }
+:where(.ui-page[data-page="admin-users"]) .header-nav-btn { padding: 8px 14px; border-radius: 999px; border: 2px solid transparent; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease; }
+:where(.ui-page[data-page="admin-users"]) .header-nav-btn.primary { background: linear-gradient(135deg, #000, #2b2b2b); color: #fff; }
+:where(.ui-page[data-page="admin-users"]) .header-nav-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,.25); }
+:where(.ui-page[data-page="admin-users"]) .header-nav-btn.secondary { background: #fff; color: #111; border-color: #e5e5e5; }
+:where(.ui-page[data-page="admin-users"]) .header-nav-btn.secondary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,.15); }
 
-.admin-header h1 {
+:where(.ui-page[data-page="admin-users"]) .admin-header h1 {
     margin: 0;
     font-size: 2rem;
 }
 
-.admin-badge {
+:where(.ui-page[data-page="admin-users"]) .admin-badge {
     background: white;
     color:black;
     padding: 0.4rem 1rem;
@@ -43,7 +44,7 @@
     font-weight: 600;
 }
 
-.admin-panel {
+:where(.ui-page[data-page="admin-users"]) .admin-panel {
     background: #fff;
     border-radius: 12px;
     padding: 1.5rem;
@@ -53,14 +54,14 @@
     gap: 1rem;
 }
 
-.grid-form {
+:where(.ui-page[data-page="admin-users"]) .grid-form {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1rem;
 }
 
-.grid-form label,
-.vertical-form label {
+:where(.ui-page[data-page="admin-users"]) .grid-form label,
+:where(.ui-page[data-page="admin-users"]) .vertical-form label {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
@@ -68,11 +69,11 @@
     color: #1e293b;
 }
 
-.grid-form input,
-.grid-form select,
-.vertical-form input,
-.vertical-form select,
-.vertical-form textarea {
+:where(.ui-page[data-page="admin-users"]) .grid-form input,
+:where(.ui-page[data-page="admin-users"]) .grid-form select,
+:where(.ui-page[data-page="admin-users"]) .vertical-form input,
+:where(.ui-page[data-page="admin-users"]) .vertical-form select,
+:where(.ui-page[data-page="admin-users"]) .vertical-form textarea {
     padding: 0.7rem;
     border-radius: 8px;
     border: 1px solid #cbd5f5;
@@ -80,25 +81,25 @@
     font-size: 0.95rem;
 }
 
-.grid-form input:focus,
-.grid-form select:focus,
-.vertical-form input:focus,
-.vertical-form select:focus,
-.vertical-form textarea:focus {
+:where(.ui-page[data-page="admin-users"]) .grid-form input:focus,
+:where(.ui-page[data-page="admin-users"]) .grid-form select:focus,
+:where(.ui-page[data-page="admin-users"]) .vertical-form input:focus,
+:where(.ui-page[data-page="admin-users"]) .vertical-form select:focus,
+:where(.ui-page[data-page="admin-users"]) .vertical-form textarea:focus {
     outline: none;
     border-color: #00050e;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.form-actions {
+:where(.ui-page[data-page="admin-users"]) .form-actions {
     display: flex;
     align-items: flex-end;
 }
 
-.form-actions button,
-.panel-heading button,
-.row-actions button,
-.vertical-form button {
+:where(.ui-page[data-page="admin-users"]) .form-actions button,
+:where(.ui-page[data-page="admin-users"]) .panel-heading button,
+:where(.ui-page[data-page="admin-users"]) .row-actions button,
+:where(.ui-page[data-page="admin-users"]) .vertical-form button {
     padding: 0.6rem 1.3rem;
     border-radius: 8px;
     border: none;
@@ -109,16 +110,16 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-button.danger {
+:where(.ui-page[data-page="admin-users"]) button.danger {
     background: linear-gradient(135deg, #a61111, #ab140e);
 }
 
-button:disabled {
+:where(.ui-page[data-page="admin-users"]) button:disabled {
     cursor: not-allowed;
     opacity: 0.6;
 }
 
-.panel-heading {
+:where(.ui-page[data-page="admin-users"]) .panel-heading {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -126,25 +127,25 @@ button:disabled {
 }
 
 /* Users search toolbar */
-.users-toolbar {
+:where(.ui-page[data-page="admin-users"]) .users-toolbar {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.search-input-wrapper {
+:where(.ui-page[data-page="admin-users"]) .search-input-wrapper {
     position: relative;
     min-width: 360px;
 }
 
-.user-search-icon {
+:where(.ui-page[data-page="admin-users"]) .user-search-icon {
     position: static;
     color: #000000;
     font-size: 18px;
     margin-right: 6px;
 }
 
-.user-search-input {
+:where(.ui-page[data-page="admin-users"]) .user-search-input {
     padding: 10px 12px; /* standard padding; icon is outside */
     border-radius: 8px;
     border: 1px solid #ddd;
@@ -153,48 +154,48 @@ button:disabled {
     transition: border-color .2s ease, box-shadow .2s ease;
 }
 
-.user-search-input:focus {
+:where(.ui-page[data-page="admin-users"]) .user-search-input:focus {
     border-color: #000;
     box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
 }
 
-.user-table {
+:where(.ui-page[data-page="admin-users"]) .user-table {
     overflow-x: auto;
 }
 
-.user-table table {
+:where(.ui-page[data-page="admin-users"]) .user-table table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.user-table th,
-.user-table td {
+:where(.ui-page[data-page="admin-users"]) .user-table th,
+:where(.ui-page[data-page="admin-users"]) .user-table td {
     text-align: left;
     padding: 0.75rem;
     border-bottom: 1px solid #e2e8f0;
 }
 
-.user-table tr.selected {
+:where(.ui-page[data-page="admin-users"]) .user-table tr.selected {
     background: rgba(59, 130, 246, 0.08);
 }
 
-.row-actions {
+:where(.ui-page[data-page="admin-users"]) .row-actions {
     display: flex;
     gap: 0.5rem;
 }
 
 /* Make the first action button (Manage) black */
-.row-actions button:first-child {
+:where(.ui-page[data-page="admin-users"]) .row-actions button:first-child {
     background: #111 !important;
     color: #fff !important;
     border: 2px solid #111 !important;
 }
-.row-actions button:first-child:hover {
+:where(.ui-page[data-page="admin-users"]) .row-actions button:first-child:hover {
     transform: translateY(-1px);
     box-shadow: 0 10px 20px rgba(0,0,0,.25);
 }
 
-.status-pill {
+:where(.ui-page[data-page="admin-users"]) .status-pill {
     padding: 0.3rem 0.75rem;
     border-radius: 999px;
     font-weight: 600;
@@ -202,33 +203,33 @@ button:disabled {
     font-size: 0.75rem;
 }
 
-.status-unverified {
+:where(.ui-page[data-page="admin-users"]) .status-unverified {
     background: rgba(148, 163, 184, 0.18);
     color: #334155;
 }
 
-.status-pending {
+:where(.ui-page[data-page="admin-users"]) .status-pending {
     background: rgba(250, 204, 21, 0.2);
     color: #b45309;
 }
 
-.status-verified {
+:where(.ui-page[data-page="admin-users"]) .status-verified {
     background: rgba(34, 197, 94, 0.18);
     color: #15803d;
 }
 
-.status-rejected {
+:where(.ui-page[data-page="admin-users"]) .status-rejected {
     background: rgba(239, 68, 68, 0.2);
     color: #b91c1c;
 }
 
-.management-grid {
+:where(.ui-page[data-page="admin-users"]) .management-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.25rem;
 }
 
-.management-card {
+:where(.ui-page[data-page="admin-users"]) .management-card {
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     padding: 1.25rem;
@@ -238,7 +239,7 @@ button:disabled {
     gap: 1rem;
 }
 
-.identity-evidence {
+:where(.ui-page[data-page="admin-users"]) .identity-evidence {
     background: #fff;
     border-radius: 8px;
     padding: 0.75rem;
@@ -246,31 +247,32 @@ button:disabled {
     color: #475569;
 }
 
-.feedback {
+:where(.ui-page[data-page="admin-users"]) .feedback {
     font-weight: 600;
     text-align: center;
 }
 
-.feedback.success {
+:where(.ui-page[data-page="admin-users"]) .feedback.success {
     color: #059669;
 }
 
-.feedback.error {
+:where(.ui-page[data-page="admin-users"]) .feedback.error {
     color: #dc2626;
 }
 
-.error-text {
+:where(.ui-page[data-page="admin-users"]) .error-text {
     color: #dc2626;
 }
 
 @media (max-width: 768px) {
-    .admin-header {
+    :where(.ui-page[data-page="admin-users"]) .admin-header {
         flex-direction: column;
         align-items: flex-start;
     }
 
-    .row-actions {
+    :where(.ui-page[data-page="admin-users"]) .row-actions {
         flex-direction: column;
         align-items: stretch;
     }
+}
 }

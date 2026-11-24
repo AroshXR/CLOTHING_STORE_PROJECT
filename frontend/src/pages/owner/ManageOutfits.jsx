@@ -1,3 +1,5 @@
+import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import MediaImage from '../../Components/MediaImage';
 import React, { useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
@@ -14,7 +16,7 @@ const ManageOutfits = () => {
 
   const fetchOwnerOutfits = async ()=>{
     try{
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+      const BASE_URL = API_ORIGIN
       const { data } = await axios.get(`${BASE_URL}/api/owner/outfits`)
       if(data?.success){
         setOutfits(data.outfits)
@@ -31,13 +33,13 @@ const ManageOutfits = () => {
 
 
   return (
-    <div className='px-4 pt-10 md:px-10 w-full'>
+    <div className="w-full">
 
       <Title title="Manage Outfits"  subTitle="View all listed outfits, update their details or remove them from the booking platform." />
 
-      <div className='max-w-3xl w-full rounded-md overflow-hidden border border-solid border-borderColor mt-6 bg-white'>
+      <div className="w-full rounded-md overflow-hidden border border-solid border-borderColor bg-white">
 
-        <table className='w-full border-collapse text-left text-sm text-gray-600'>
+        <div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table className='w-full border-collapse text-left text-sm text-gray-600'>
           <thead className='text-gray-500'>
             <tr>
               <th className="p-3 font-medium">Outfit</th>
@@ -51,7 +53,7 @@ const ManageOutfits = () => {
             {outfits.map((outfit,index)=>(
               <tr key={index} className='border border-solid border-borderColor'>
                 <td className='p-3 flex items-center gap-3'>
-                  <img src={outfit.image} alt="" className="h-24 w-16 aspect-square rounded-md object-cover" />
+                  <MediaImage src={outfit.image} alt="" className="h-24 w-16 aspect-square rounded-md object-cover" />
                   <div className='max-md:hidden'>
                     <p className='font-medium'>{outfit.brand} {outfit.model} </p>
                     <p className='text-xs text-gray-500'>{outfit.material} • {outfit.size} </p>
@@ -66,16 +68,16 @@ const ManageOutfits = () => {
 
                 </td>
                 <td className='flex items-center p-3 gap-2'>
-                  <img src={outfit.isAvailable ? assets.eye_close_icon : assets.eye_icon} alt="" className='cursor-pointer' onClick={async()=>{
+                  <MediaImage src={outfit.isAvailable ? assets.eye_close_icon : assets.eye_icon} alt="" className='cursor-pointer' onClick={async()=>{
                     try{
-                      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+                      const BASE_URL = API_ORIGIN
                       const { data } = await axios.post(`${BASE_URL}/api/owner/toggle-outfit`, { outfitId: outfit._id })
                       if(data?.success){
                         fetchOwnerOutfits()
                       }
                     }catch(err){ console.error(err) }
                   }}/>
-                  <img 
+                  <MediaImage
                     src={assets.edit_icon} 
                     alt="Edit" 
                     className='cursor-pointer w-5 h-4' 
@@ -83,11 +85,11 @@ const ManageOutfits = () => {
                       navigate(`/owner/edit-outfit/${outfit._id}`)
                     }}
                   />
-                  <img src={assets.delete_icon} alt="" className='cursor-pointer' onClick={async()=>{
+                  <MediaImage src={assets.delete_icon} alt="" className='cursor-pointer' onClick={async()=>{
                     try{
                       const ok = window.confirm('Are you sure you want to delete this outfit? This will permanently remove the outfit and all related bookings.')
                       if(!ok) return
-                      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+                      const BASE_URL = API_ORIGIN
                       const { data } = await axios.post(`${BASE_URL}/api/owner/delete-outfit`, { outfitId: outfit._id })
                       if(data?.success){
                         alert(`${data.message}${data.deletedBookings ? ` (${data.deletedBookings} related bookings also deleted)` : ''}`)
@@ -106,7 +108,7 @@ const ManageOutfits = () => {
             ))}
 
           </tbody>
-        </table>
+        </table></div>
 
       </div>
         

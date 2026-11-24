@@ -1,6 +1,8 @@
+import { API_BASE_URL as API_ORIGIN, apiFetch as fetch } from '../../config/api';
+import MediaImage from '../../Components/MediaImage';
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { useAuth } from '../../AuthGuard/AuthGuard'
+import { useAuth } from '../../AuthGuard/authGuard'
 import Title from '../../Components/pasindu/owner/Title'
 
 const Reports = () => {
@@ -17,7 +19,7 @@ const Reports = () => {
   const fetchReport = async () => {
     try {
       setLoading(true)
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+      const BASE_URL = API_ORIGIN
       const token = getToken()
       
       const params = new URLSearchParams()
@@ -26,7 +28,7 @@ const Reports = () => {
       if (filters.status !== 'all') params.append('status', filters.status)
       if (filters.location !== 'all') params.append('location', filters.location)
 
-      const { data } = await axios.get(`${BASE_URL}/api/booking/admin/report?${params}`, {
+      const { data } = await axios.get(`${BASE_URL}/api/booking/owner/report?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
 
@@ -47,7 +49,7 @@ const Reports = () => {
     if (!reportData) return
 
     try {
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'
+      const BASE_URL = API_ORIGIN
       const token = getToken()
       
       const params = new URLSearchParams()
@@ -56,7 +58,7 @@ const Reports = () => {
       if (filters.status !== 'all') params.append('status', filters.status)
       if (filters.location !== 'all') params.append('location', filters.location)
 
-      const response = await fetch(`${BASE_URL}/api/booking/admin/report/pdf?${params}`, {
+      const response = await fetch(`${BASE_URL}/api/booking/owner/report/pdf?${params}`, {
         method: 'GET',
         headers: { 
           Authorization: `Bearer ${token}`,
@@ -212,8 +214,8 @@ const Reports = () => {
   }
 
   return (
-    <div className='px-4 py-10 md:px-10 flex-1'>
-      <div className="w-full h-full bg-gradient-to-br from-[#e6e5e5] to-[#858585] rounded-[50px] p-10 shadow-lg shadow-gray-400/30 relative overflow-hidden">
+    <div className="flex-1">
+      <div className="w-full h-full bg-gradient-to-br from-[#e6e5e5] to-[#858585] rounded-[50px] shadow-lg shadow-gray-400/30 relative overflow-hidden">
         
         <div className="text-center mb-8">
           <Title title=" Booking Reports" subTitle="Generate comprehensive booking reports with detailed analytics and insights for your rental business." />
@@ -327,7 +329,7 @@ const Reports = () => {
             {/* Bookings Table */}
             <div className="bg-white/50 rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full">
+                <div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table className="min-w-full">
                   <thead className="bg-gray-800/80 text-white">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium uppercase">Booking</th>
@@ -344,7 +346,7 @@ const Reports = () => {
                         <td className="px-4 py-4 text-sm font-mono">#{booking._id.slice(-6)}</td>
                         <td className="px-4 py-4 text-sm">
                           <div className="flex items-center gap-2">
-                            <img src={booking.outfit?.image} alt="" className="w-8 h-8 object-cover rounded" />
+                            <MediaImage src={booking.outfit?.image} alt="" className="w-8 h-8 object-cover rounded" />
                             <div>
                               <div className="font-medium">{booking.outfit?.brand} - {booking.outfit?.model}</div>
                               <div className="text-gray-600 text-xs">{booking.outfit?.category}</div>
@@ -372,7 +374,7 @@ const Reports = () => {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
                 {reportData.bookings.length > 10 && (
                   <div className="text-center text-gray-600 py-4 bg-white/20">
                     Showing first 10 of {reportData.bookings.length} bookings. View full report for complete data.

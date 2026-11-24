@@ -15,3 +15,7 @@ frontend/.cache/
 #.env
 #backend/.env
 frontend/.env
+# Private documents are served only through authorized download endpoints.
+backend/private-uploads/
+.env.local
+backend/.env.local

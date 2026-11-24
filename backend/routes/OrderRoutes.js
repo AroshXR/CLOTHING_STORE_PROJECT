@@ -1,31 +1,12 @@
-const express = require("express");
-const router = express.Router();
-
-// Import order controller
-const orderController = require("../controllers/OrderController");
-
-// Import authentication middleware (if needed)
-const { protect } = require("../middleware/auth");
-
-// Order routes
-
-// POST /orders - Create new order
-router.post("/", orderController.createOrder);
-
-// GET /orders - Get all orders (with optional query parameters)
-// Query parameters: page, limit, AdminID
-router.get("/", orderController.getAllOrders);
-
-// GET /orders/my - Get orders for authenticated user
-router.get("/my", protect, orderController.getMyOrders);
-
-// GET /orders/statistics - Get order statistics
-router.get("/statistics", orderController.getOrderStatistics);
-
-// GET /orders/:id - Get order by ID (supports both OrderID and MongoDB _id)
-router.get("/:id", orderController.getOrderById);
-
-// DELETE /orders/:id - Delete order by ID
-router.delete("/:id", orderController.deleteOrder);
-
+const router = require('express').Router();
+const { protect, adminOnly } = require('../middleware/auth');
+const ctrl = require('../controllers/OrderController');
+router.use(protect);
+router.post('/', ctrl.createOrder);
+router.get('/', adminOnly, ctrl.getAllOrders);
+router.get('/my', ctrl.getMyOrders);
+router.get('/statistics', adminOnly, ctrl.getOrderStatistics);
+router.get('/:id', ctrl.getOrderById);
+router.patch('/:id/fulfillment', adminOnly, ctrl.updateFulfillment);
+router.delete('/:id', adminOnly, ctrl.deleteOrder);
 module.exports = router;

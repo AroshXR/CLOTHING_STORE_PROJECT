@@ -1,8 +1,9 @@
+require('dotenv').config({ path: [require('path').join(__dirname, '.env.local'), require('path').join(__dirname, '.env')] });
 const mongoose = require("mongoose");
 require("./models/ClothCustomizerModel");
 
 // Connect to MongoDB
-mongoose.connect("mongodb+srv://chearoavitharipasi:8HTrHAF28N1VTvAK@klassydb.vfbvnvq.mongodb.net/")
+mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.MONGODB_DBNAME })
 .then(async () => {
     console.log("Connected to MongoDB");
     
@@ -41,4 +42,4 @@ mongoose.connect("mongodb+srv://chearoavitharipasi:8HTrHAF28N1VTvAK@klassydb.vfb
 })
 .catch((err) => {
     console.error("Failed to connect to MongoDB:", err);
-}); 
+});

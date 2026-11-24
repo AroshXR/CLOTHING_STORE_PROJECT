@@ -1,10 +1,11 @@
+import { API_BASE_URL as API_ORIGIN } from '../config/api';
 import React, { useState, useEffect } from 'react'
 import Title from '../Components/pasindu/Title'
 //import { assets } from '../assets/assets'
 import OutfitCard from '../Components/pasindu/OutfitCard'
-import Navbar from '../Components/pasindu/Navbar'
+
 import axios from 'axios'
-import Footer from '../Components/Footer/Footer'
+
 import "./outfits.css"
 import { useLocation } from 'react-router-dom'
 
@@ -19,7 +20,7 @@ const Outfits = () => {
 
   const fetchOutfits = async () => {
     try {
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+      const BASE_URL = API_ORIGIN;
       const params = new URLSearchParams();
       
       if (input) params.append('search', input);
@@ -71,8 +72,8 @@ const Outfits = () => {
 
   return (
     <div>
-      <Navbar></Navbar>
-      <div className='flex flex-col items-center py-20 bg-light max-md:px-4'>
+      
+      <div className="flex flex-col items-center bg-light max-md:px-4">
         <Title title='Available Outfits' subTitle= 'Find Your Perfect Fit with Stunning Dresses for Every Celebration!'/>
 
         {/* Search Bar */}
@@ -140,7 +141,7 @@ const Outfits = () => {
     </div>
       </div>
 
-      <div className='px-6 md:px-16 lg:px-24 xl:px-32 mt-10 pb-24'>
+      <div className="">
         <p className='text-gray-500 xl:px-20 max-w-7xl mx-auto'>Showing {filteredOutfits.length} Outfits </p>
 
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 xl:px-20 max-w-7xl mx-auto'>
@@ -151,7 +152,7 @@ const Outfits = () => {
           ))}
         </div>
       </div>
-      <Footer></Footer>
+      
     </div>
   )
 }

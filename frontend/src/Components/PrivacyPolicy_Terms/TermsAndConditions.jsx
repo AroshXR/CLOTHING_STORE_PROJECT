@@ -1,8 +1,10 @@
+import { useBranding } from '../../config/branding';
 import React, { useEffect } from "react";
 import "./TermsAndConditions.css";
 import { useNavigate } from "react-router-dom";
 
 const TermsAndConditions = () => {
+  const { branding } = useBranding();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -22,14 +24,14 @@ const TermsAndConditions = () => {
                 </div>
 
                 <header className="tc-header">
-                    <h1>Terms and Conditions for Klassy T Shirts</h1>
+                    <h1>Terms and Conditions for {branding.name}</h1>
                     <p>Last updated: September 23, 2025</p>
                 </header>
 
-                <main className="tc-main">
+                <section className="tc-main">
                     <section className="tc-section">
                         <p>
-                            Welcome to Klassy T Shirts. By accessing or using our website,
+                            Welcome to {branding.name}. By accessing or using our website,
                             you agree to comply with these Terms and Conditions. If you do
                             not agree, please do not use our Service.
                         </p>
@@ -38,12 +40,12 @@ const TermsAndConditions = () => {
                     <section className="tc-section">
                         <h2>Definitions</h2>
                         <ul>
-                            <li><strong>Company</strong> refers to Klassy T Shirts.</li>
+                            <li><strong>Company</strong> refers to {branding.name}.</li>
                             <li><strong>Service</strong> refers to our website and related services.</li>
                             <li><strong>You</strong> means the individual using the Service.</li>
                             <li>
-                                <strong>Website</strong> refers to Klassy T Shirts, accessible
-                                from <a href="http://www.klassytshirts.com">www.klassytshirts.com</a>.
+                                <strong>Website</strong> refers to {branding.name}, accessible
+                                from <a href={`${branding.websiteUrl || window.location.origin}`}>{branding.websiteUrl || window.location.origin}</a>.
                             </li>
                         </ul>
                     </section>
@@ -62,7 +64,7 @@ const TermsAndConditions = () => {
                         <h2>Intellectual Property</h2>
                         <p>
                             All content, trademarks, and logos on this website are owned or
-                            licensed by Klassy T Shirts. You may not use our intellectual
+                            licensed by {branding.name}. You may not use our intellectual
                             property without prior permission.
                         </p>
                     </section>
@@ -79,7 +81,7 @@ const TermsAndConditions = () => {
                     <section className="tc-section">
                         <h2>Limitation of Liability</h2>
                         <p>
-                            To the maximum extent permitted by law, Klassy T Shirts will not
+                            To the maximum extent permitted by law, {branding.name} will not
                             be liable for any damages arising from your use of the Service.
                         </p>
                     </section>
@@ -106,13 +108,13 @@ const TermsAndConditions = () => {
                         <ul>
                             <li>
                                 By email:{" "}
-                                <a href="mailto:support@klassytshirts.com">
-                                    support@klassytshirts.com
+                                <a href={branding.contactEmail ? "mailto:" + branding.contactEmail : "/contact"}>
+                                    {branding.contactEmail || "Contact the store"}
                                 </a>
                             </li>
                         </ul>
                     </section>
-                </main>
+                </section>
             </div>
         </div>
     );
