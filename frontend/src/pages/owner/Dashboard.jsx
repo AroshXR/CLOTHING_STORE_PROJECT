@@ -8,7 +8,7 @@ import './Dashboard.css'
 
 const Dashboard = () => {
 
-  const currency = process.env.REACT_APP_CURRENCY
+  const currency = process.env.REACT_APP_CURRENCY || 'LKR'
 
   const [data,setData] = useState({
     totalOutfits: 0,

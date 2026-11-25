@@ -315,7 +315,7 @@ const sendBulkLowStockAlerts = async (items, recipientEmail = process.env.STOCK_
       `
     };
 
-    const result = await transporter.sendMail(mailOptions);
+    const result = await getTransporter().sendMail(mailOptions);
     console.log(`Bulk low stock alert sent to ${recipientEmail}`);
     return { success: true, messageId: result.messageId };
   } catch (error) {

@@ -86,19 +86,24 @@ exports.importCSV = async (req, res) => {
         const itemName = read(col.itemName);
         if (!itemName) continue;
         const supplierName = read(col.supplierName);
+        const quantity = Number(read(col.quantity)) || 0;
+        const unitPrice = Number(read(col.unitPrice)) || 0;
+        const minimumStock = Number(read(col.minimumStock)) || 0;
+        const computedStatus = quantity === 0 ? 'out_of_stock' : quantity <= minimumStock ? 'low_stock' : 'available';
         const payload = {
           itemName,
           description: read(col.description),
-          quantity: Number(read(col.quantity)) || 0,
+          quantity,
           unit: read(col.unit) || 'pieces',
-          unitPrice: Number(read(col.unitPrice)) || 0,
+          unitPrice,
+          totalValue: quantity * unitPrice,
           supplierName,
           category: read(col.category) || 'Materials',
           location: read(col.location) || 'Main Warehouse',
-          minimumStock: Number(read(col.minimumStock)) || 0,
+          minimumStock,
+          status: read(col.status) || computedStatus,
+          lastUpdated: new Date()
         };
-        const s = read(col.status);
-        if (s) payload.status = s;
         payloads.push(payload);
       } catch (e) {
         errors += 1;
@@ -106,8 +111,16 @@ exports.importCSV = async (req, res) => {
     }
 
     if (payloads.length) {
+      // Deduplicate repeated rows within the same CSV (latest row wins per key)
+      const dedupedMap = new Map();
+      for (const payload of payloads) {
+        const dedupKey = payload.supplierName ? `${payload.itemName}::${payload.supplierName}` : `${payload.itemName}::`;
+        dedupedMap.set(dedupKey, payload);
+      }
+      const uniquePayloads = [...dedupedMap.values()];
+
       const existingDocs = await MaterialInventory.find({
-        itemName: { $in: payloads.map(p => p.itemName) }
+        itemName: { $in: uniquePayloads.map(p => p.itemName) }
       }).select('_id itemName supplierName').lean();
       const existingByKey = new Map();
       const existingByName = new Map();
@@ -117,7 +130,7 @@ exports.importCSV = async (req, res) => {
       }
 
       const bulkOps = [];
-      for (const payload of payloads) {
+      for (const payload of uniquePayloads) {
         const matchId = payload.supplierName
           ? existingByKey.get(`${payload.itemName}::${payload.supplierName}`)
           : existingByName.get(payload.itemName);
@@ -125,11 +138,16 @@ exports.importCSV = async (req, res) => {
           bulkOps.push({ updateOne: { filter: { _id: matchId }, update: { $set: payload } } });
           updated += 1;
         } else {
+          const validationError = new MaterialInventory(payload).validateSync();
+          if (validationError) {
+            errors += 1;
+            continue;
+          }
           bulkOps.push({ insertOne: { document: payload } });
           created += 1;
         }
       }
-      await MaterialInventory.bulkWrite(bulkOps);
+      if (bulkOps.length) await MaterialInventory.bulkWrite(bulkOps);
     }
 
     return res.status(200).json({ message: 'Import complete', created, updated, errors });

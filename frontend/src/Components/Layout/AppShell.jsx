@@ -28,7 +28,7 @@ export default function AppShell({ children }) {
     <a className="ui-skip-link" href="#main-content">Skip to content</a>
     <NavBar />
     <main id="main-content" ref={content} tabIndex={-1} className={'ui-page ui-page--' + page.layout} data-page={page.id}>
-      <motion.div className="ui-route" initial={reduced ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .35, ease: [.22, 1, .36, 1] }}><PageBoundary>{children}</PageBoundary></motion.div>
+      <motion.div className="ui-route" initial={reduced ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .35, ease: [.22, 1, .36, 1] }}><PageBoundary resetKey={pathname}>{children}</PageBoundary></motion.div>
     </main>
     <Footer />
   </div></MotionConfig>;

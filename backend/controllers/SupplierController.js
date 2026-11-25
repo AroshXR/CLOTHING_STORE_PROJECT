@@ -11,13 +11,31 @@ const addItemsToInventory = async (order) => {
     
     const inventoryItems = [];
     
-    const parsedItems = itemsArray.map((itemString) => {
+    const computeInventoryStatus = (quantity, minimumStock = 10) => (
+      quantity === 0 ? 'out_of_stock' : quantity <= minimumStock ? 'low_stock' : 'available'
+    );
+
+    // Parse and merge duplicate item names within the same order
+    const mergedItemsMap = new Map();
+    const lineValue = itemsArray.length ? order.total / itemsArray.length : 0;
+    for (const itemString of itemsArray) {
+      if (!itemString) continue;
       const match = itemString.match(/^(.+?)\s*x(\d+)$/i);
       const itemName = match ? match[1].trim() : itemString;
       const quantity = match ? parseInt(match[2], 10) : 1;
-      const unitPrice = order.total / itemsArray.length / quantity;
-      return { itemName, quantity, unitPrice };
-    });
+      const prev = mergedItemsMap.get(itemName);
+      if (prev) {
+        prev.quantity += quantity;
+        prev.totalLineValue += lineValue;
+      } else {
+        mergedItemsMap.set(itemName, { itemName, quantity, totalLineValue: lineValue });
+      }
+    }
+    const parsedItems = [...mergedItemsMap.values()].map(({ itemName, quantity, totalLineValue }) => ({
+      itemName,
+      quantity,
+      unitPrice: quantity > 0 ? totalLineValue / quantity : 0
+    }));
 
     const existingDocs = parsedItems.length
       ? await MaterialInventory.find({
@@ -34,11 +52,19 @@ const addItemsToInventory = async (order) => {
       if (existingItem) {
         existingItem.quantity += quantity;
         existingItem.totalValue = existingItem.quantity * existingItem.unitPrice;
+        existingItem.status = computeInventoryStatus(existingItem.quantity, existingItem.minimumStock ?? 10);
         existingItem.lastUpdated = new Date();
         bulkOps.push({
           updateOne: {
             filter: { _id: existingItem._id },
-            update: { $set: { quantity: existingItem.quantity, totalValue: existingItem.totalValue, lastUpdated: existingItem.lastUpdated } }
+            update: {
+              $set: {
+                quantity: existingItem.quantity,
+                totalValue: existingItem.totalValue,
+                status: existingItem.status,
+                lastUpdated: existingItem.lastUpdated
+              }
+            }
           }
         });
         inventoryItems.push(existingItem);
@@ -48,12 +74,14 @@ const addItemsToInventory = async (order) => {
           quantity,
           unitPrice,
           totalValue: quantity * unitPrice,
+          status: computeInventoryStatus(quantity, 10),
           supplierId: order.supplierId,
           supplierName: order.supplierName,
           orderId: order._id,
           description: `Added from order #${order._id}`,
           category: 'Materials',
-          unit: 'pieces'
+          unit: 'pieces',
+          lastUpdated: new Date()
         });
       }
     }

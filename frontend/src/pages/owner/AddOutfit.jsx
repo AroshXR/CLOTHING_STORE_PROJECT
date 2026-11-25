@@ -9,7 +9,7 @@ import { useAuth } from '../../AuthGuard/authGuard'
 
 const AddOutfit = () => {
 
-  const currency = process.env.REACT_APP_CURRENCY
+  const currency = process.env.REACT_APP_CURRENCY || 'LKR'
   const { getToken } = useAuth()
 
   const [mainImage, setMainImage] = useState(null)

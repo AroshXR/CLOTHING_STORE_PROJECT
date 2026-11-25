@@ -15,7 +15,7 @@ const MyBookings = () => {
   const [bookings, setBookings] = useState([])  
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const currency = process.env.REACT_APP_CURRENCY
+  const currency = process.env.REACT_APP_CURRENCY || 'LKR'
   const navigate = useNavigate()
   const { isAuthenticated, getToken, currentUser } = useAuth()
 

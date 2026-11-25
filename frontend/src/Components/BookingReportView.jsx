@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { API_BASE_URL as API_ORIGIN, apiFetch as fetch } from '../config/api';
+import { API_BASE_URL as API_ORIGIN, apiFetch as fetch, mediaUrl } from '../config/api';
+import { escapeHtml } from '../config/branding';
 import { useAuth } from '../AuthGuard/authGuard';
 import MediaImage from './MediaImage';
 
@@ -10,34 +11,38 @@ const STATUS_BADGE = {
 };
 
 function buildBookingReportHtml({ bookings, summary, roleLabel, username, accentColor }) {
-  const currency = process.env.REACT_APP_CURRENCY || 'Rs.';
+  const currency = escapeHtml(process.env.REACT_APP_CURRENCY || 'Rs.');
+  const safeAccent = /^#[0-9a-f]{3,8}$/i.test(accentColor) ? accentColor : '#4F46E5';
   const rows = bookings.map((booking) => {
-    const startDate = new Date(booking.reservationDate).toLocaleDateString();
-    const endDate = new Date(booking.returnDate).toLocaleDateString();
+    const startDate = escapeHtml(new Date(booking.reservationDate).toLocaleDateString());
+    const endDate = escapeHtml(new Date(booking.returnDate).toLocaleDateString());
     const duration = Math.ceil((new Date(booking.returnDate) - new Date(booking.reservationDate)) / (1000 * 60 * 60 * 24));
+    const safeImg = escapeHtml(booking.outfit?.image ? mediaUrl(booking.outfit.image) : '');
+    const safeStatus = escapeHtml(booking.status || '');
+    const statusClass = ['pending', 'confirmed', 'cancelled'].includes(booking.status) ? booking.status : '';
     return `
       <tr>
-        <td>#${booking._id.slice(-6)}</td>
+        <td>#${escapeHtml(String(booking._id || '').slice(-6))}</td>
         <td>
           <div class="outfit-info">
-            <img src="${booking.outfit?.image || ''}" alt="Outfit" class="outfit-img" onerror="this.style.display='none'">
+            <img src="${safeImg}" alt="Outfit" class="outfit-img" onerror="this.style.display='none'">
             <div>
-              <strong>${booking.outfit?.brand || 'N/A'} - ${booking.outfit?.model || 'N/A'}</strong><br>
-              <small>${booking.outfit?.category || 'N/A'} | ${booking.outfit?.location || 'N/A'}</small>
+              <strong>${escapeHtml(booking.outfit?.brand || 'N/A')} - ${escapeHtml(booking.outfit?.model || 'N/A')}</strong><br>
+              <small>${escapeHtml(booking.outfit?.category || 'N/A')} | ${escapeHtml(booking.outfit?.location || 'N/A')}</small>
             </div>
           </div>
         </td>
         <td>
-          <strong>${booking.user?.username || 'N/A'}</strong><br>
-          <small>${booking.user?.email || 'N/A'}</small>
+          <strong>${escapeHtml(booking.user?.username || 'N/A')}</strong><br>
+          <small>${escapeHtml(booking.user?.email || 'N/A')}</small>
         </td>
         <td>
           <strong>Start:</strong> ${startDate}<br>
           <strong>End:</strong> ${endDate}
         </td>
         <td>${duration} day${duration !== 1 ? 's' : ''}</td>
-        <td><span class="status ${booking.status}">${booking.status.toUpperCase()}</span></td>
-        <td><strong>${currency}${booking.price.toFixed(2)}</strong></td>
+        <td><span class="status ${statusClass}">${safeStatus.toUpperCase()}</span></td>
+        <td><strong>${currency}${Number(booking.price || 0).toFixed(2)}</strong></td>
       </tr>`;
   }).join('');
 
@@ -47,18 +52,18 @@ function buildBookingReportHtml({ bookings, summary, roleLabel, username, accent
   <title>Booking Report</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-    .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid ${accentColor}; padding-bottom: 20px; }
-    .header h1 { color: ${accentColor}; margin: 0; }
+    .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid ${safeAccent}; padding-bottom: 20px; }
+    .header h1 { color: ${safeAccent}; margin: 0; }
     .header p { margin: 5px 0; color: #666; }
     .summary { background: #F8FAFC; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #E5E7EB; }
-    .summary h2 { color: ${accentColor}; margin-top: 0; }
+    .summary h2 { color: ${safeAccent}; margin-top: 0; }
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-    .summary-item { background: white; padding: 15px; border-radius: 6px; border-left: 4px solid ${accentColor}; }
-    .summary-item h3 { margin: 0 0 5px 0; color: ${accentColor}; }
+    .summary-item { background: white; padding: 15px; border-radius: 6px; border-left: 4px solid ${safeAccent}; }
+    .summary-item h3 { margin: 0 0 5px 0; color: ${safeAccent}; }
     .summary-item p { margin: 0; font-size: 18px; font-weight: bold; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #E5E7EB; }
-    th { background: ${accentColor}; color: white; font-weight: bold; }
+    th { background: ${safeAccent}; color: white; font-weight: bold; }
     tr:nth-child(even) { background: #F9FAFB; }
     .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
     .status.pending { background: #FEF3C7; color: #92400E; }
@@ -72,17 +77,17 @@ function buildBookingReportHtml({ bookings, summary, roleLabel, username, accent
 <body>
   <div class="header">
     <h1>Booking Report</h1>
-    <p><strong>Generated on:</strong> ${new Date().toLocaleDateString()}</p>
-    <p><strong>${roleLabel}:</strong> ${username || roleLabel}</p>
-    <p><strong>Report Period:</strong> ${summary.reportPeriod.startDate} to ${summary.reportPeriod.endDate}</p>
+    <p><strong>Generated on:</strong> ${escapeHtml(new Date().toLocaleDateString())}</p>
+    <p><strong>${escapeHtml(roleLabel)}:</strong> ${escapeHtml(username || roleLabel)}</p>
+    <p><strong>Report Period:</strong> ${escapeHtml(summary.reportPeriod.startDate)} to ${escapeHtml(summary.reportPeriod.endDate)}</p>
   </div>
   <div class="summary">
     <h2>Summary &amp; Analytics</h2>
     <div class="summary-grid">
-      <div class="summary-item"><h3>Total Bookings</h3><p>${summary.totalBookings}</p></div>
-      <div class="summary-item"><h3>Total Revenue</h3><p>${currency}${summary.totalRevenue.toFixed(2)}</p></div>
-      <div class="summary-item"><h3>Confirmed Bookings</h3><p>${summary.statusCounts.confirmed || 0}</p></div>
-      <div class="summary-item"><h3>Pending Bookings</h3><p>${summary.statusCounts.pending || 0}</p></div>
+      <div class="summary-item"><h3>Total Bookings</h3><p>${Number(summary.totalBookings || 0)}</p></div>
+      <div class="summary-item"><h3>Total Revenue</h3><p>${currency}${Number(summary.totalRevenue || 0).toFixed(2)}</p></div>
+      <div class="summary-item"><h3>Confirmed Bookings</h3><p>${Number(summary.statusCounts.confirmed || 0)}</p></div>
+      <div class="summary-item"><h3>Pending Bookings</h3><p>${Number(summary.statusCounts.pending || 0)}</p></div>
     </div>
   </div>
   <h2>Detailed Booking Information</h2>
@@ -175,10 +180,13 @@ export default function BookingReportView({
     });
     const reportWindow = window.open('', '_blank');
     if (reportWindow) {
+      reportWindow.opener = null;
       reportWindow.document.write(htmlContent);
       reportWindow.document.close();
     }
   };
+
+  const currency = process.env.REACT_APP_CURRENCY || 'Rs.';
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -272,7 +280,7 @@ export default function BookingReportView({
             </div>
             <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
               <h3 className="text-green-700 font-medium">Total Revenue</h3>
-              <p className="text-2xl font-bold text-green-800">Rs.{reportData.summary.totalRevenue.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-green-800">{currency}{reportData.summary.totalRevenue.toFixed(2)}</p>
             </div>
             <div className="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
               <h3 className="text-yellow-700 font-medium">Confirmed</h3>
@@ -323,7 +331,7 @@ export default function BookingReportView({
                           {booking.status.toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-sm font-medium">Rs.{booking.price.toFixed(2)}</td>
+                      <td className="px-4 py-4 text-sm font-medium">{currency}{booking.price.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>

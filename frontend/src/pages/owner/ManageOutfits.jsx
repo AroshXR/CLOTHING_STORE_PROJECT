@@ -9,7 +9,7 @@ import { useState } from 'react'
 
 const ManageOutfits = () => {
 
-  const currency = process.env.REACT_APP_CURRENCY
+  const currency = process.env.REACT_APP_CURRENCY || 'LKR'
   const navigate = useNavigate()
 
   const [outfits,setOutfits] = useState([])

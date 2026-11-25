@@ -11,7 +11,7 @@ import { useAuth } from '../../AuthGuard/authGuard'
 const EditOutfit = () => {
   const { outfitId } = useParams()
   const navigate = useNavigate()
-  const currency = process.env.REACT_APP_CURRENCY
+  const currency = process.env.REACT_APP_CURRENCY || 'LKR'
   const { getToken } = useAuth()
 
   const [loading, setLoading] = useState(true)
