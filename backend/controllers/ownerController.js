@@ -334,11 +334,11 @@ const updateOutfit = async (req, res) => {
 
         // Update additional images if provided (parallel upload)
         if (files && files.additionalImages) {
-            additionalImages = await Promise.all(files.additionalImages.map(async (file) => {
+            additionalImages = await Promise.all(files.additionalImages.map(async (file, index) => {
                 const fileBuffer = await fs.promises.readFile(file.path);
                 const upload = await imagekit.upload({
                     file: fileBuffer,
-                    fileName: `outfit_${Date.now()}_additional.${file.originalname.split('.').pop()}`,
+                    fileName: `outfit_${Date.now()}_${index}_additional.${file.originalname.split('.').pop()}`,
                     folder: '/outfits'
                 });
                 return upload.url;

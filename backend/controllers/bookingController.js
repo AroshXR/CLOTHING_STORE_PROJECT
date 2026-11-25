@@ -22,16 +22,23 @@ const getPdfBrowser = async () => {
     return sharedBrowserPromise;
 };
 
-// Function to check the availability of the Outfit at a given date
-const checkAvailability = async (outfit, reservationDate, returnDate) => {
-    const bookings = await Booking.find({
-        outfit,
-        status: { $in: ["pending", "confirmed"] }, // Check both pending and confirmed bookings
-        reservationDate: { $lte: returnDate },
-        returnDate: { $gte: reservationDate },
-    });
-    return bookings.length === 0;
+const closePdfBrowser = async () => {
+    const pending = sharedBrowserPromise;
+    sharedBrowserPromise = null;
+    if (!pending) return;
+    try {
+        const browser = await pending;
+        await browser.close();
+    } catch (_) {
+        // Ignore shutdown errors if browser already exited
+    }
 };
+
+['SIGINT', 'SIGTERM'].forEach((signal) => {
+    process.once(signal, () => {
+        closePdfBrowser().catch(() => {});
+    });
+});
 
 // API to check availability of Outfit for given Date and Location
 const checkAvailabilityOfOutfit = async (req, res) => {

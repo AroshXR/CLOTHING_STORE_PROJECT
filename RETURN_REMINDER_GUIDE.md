@@ -119,16 +119,16 @@ Authorization: Bearer <token>
 
 ## 🧪 Testing
 
-### 1. Run Test Script
+### 1. Trigger Reminder Check Locally
 ```bash
 cd backend
-node test-return-reminder.js
+node -e "require('dotenv').config(); require('./services/reminderScheduler').triggerManualCheck().then(() => process.exit(0))"
 ```
 
 This will:
 - Connect to your database
 - Find bookings with upcoming returns
-- Send a test email
+- Send return reminder emails
 - Run the reminder check process
 
 ### 2. Manual Testing via API

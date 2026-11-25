@@ -2,8 +2,10 @@ const nodemailer = require('nodemailer');
 const { getEmailBranding } = require('./siteSettingsService');
 
 // Email configuration - Try multiple approaches for compatibility
+const getEmailCurrency = () => process.env.CURRENCY || process.env.REACT_APP_CURRENCY || 'Rs.';
+
 const getEmailConfig = () => {
-  if (process.env.SMTP_HOST) return { host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT) || 587, secure: process.env.SMTP_SECURE === 'true', auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } };
+  if (process.env.SMTP_HOST) return { host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT) || 587, secure: String(process.env.SMTP_SECURE || '').toLowerCase() === 'true', auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } };
   // First try: Gmail with App Password (most secure)
   if (process.env.EMAIL_PASS && process.env.EMAIL_PASS.length === 16 && !process.env.EMAIL_PASS.includes(' ')) {
     return {
@@ -30,11 +32,18 @@ const getEmailConfig = () => {
   };
 };
 
-// Create transporter lazily on first send
+// Create transporter lazily on first send; reset automatically if email env config changes
 let cachedTransporter = null;
+let cachedConfigKey = null;
 const getTransporter = () => {
-  if (!cachedTransporter) {
-    cachedTransporter = nodemailer.createTransport(getEmailConfig());
+  const config = getEmailConfig();
+  const configKey = JSON.stringify(config);
+  if (!cachedTransporter || cachedConfigKey !== configKey) {
+    if (cachedTransporter && typeof cachedTransporter.close === 'function') {
+      cachedTransporter.close();
+    }
+    cachedTransporter = nodemailer.createTransport(config);
+    cachedConfigKey = configKey;
   }
   return cachedTransporter;
 };
@@ -523,7 +532,7 @@ const sendPayOnReturnEmail = async (booking, recipientEmail) => {
               <div class="important-box">
                 <h3 style="margin: 0 0 15px 0; color: #ffffff;">TOTAL AMOUNT TO PAY ON RETURN</h3>
                 <p class="price-highlight" style="color: #ffffff; margin: 0;">
-                  ${process.env.REACT_APP_CURRENCY || 'Rs.'} ${booking.price.toFixed(2)}
+                  ${getEmailCurrency()} ${booking.price.toFixed(2)}
                 </p>
               </div>
               
@@ -762,7 +771,7 @@ const sendReturnReminderEmail = async (booking, recipientEmail, prefetchedBrand 
                 
                 <div class="detail-row">
                   <span class="detail-label">Rental Price:</span>
-                  <span class="detail-value">${process.env.REACT_APP_CURRENCY || 'Rs.'} ${booking.price.toFixed(2)}</span>
+                  <span class="detail-value">${getEmailCurrency()} ${booking.price.toFixed(2)}</span>
                 </div>
                 
                 <div class="detail-row">

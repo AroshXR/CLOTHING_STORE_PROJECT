@@ -1,5 +1,12 @@
 const Job = require("../models/JobModel");
 
+const attachJobVirtuals = (job) => ({
+  ...job,
+  id: String(job._id),
+  isActive: job.status === 'active',
+  applicationCount: Array.isArray(job.applications) ? job.applications.length : 0
+});
+
 // Get all active jobs
 const getAllJobs = async (req, res, next) => {
   try {
@@ -15,11 +22,11 @@ const getAllJobs = async (req, res, next) => {
       sort: { postedAt: -1 }
     };
     
-    const jobs = await Job.find(query)
+    const jobs = (await Job.find(query)
       .sort(options.sort)
       .limit(options.limit)
       .skip((options.page - 1) * options.limit)
-      .lean();
+      .lean()).map(attachJobVirtuals);
     
     const total = await Job.countDocuments(query);
     
@@ -270,11 +277,11 @@ const getAllJobsAdmin = async (req, res, next) => {
       sort: { postedAt: -1 }
     };
     
-    const jobs = await Job.find(query)
+    const jobs = (await Job.find(query)
       .sort(options.sort)
       .limit(options.limit)
       .skip((options.page - 1) * options.limit)
-      .lean();
+      .lean()).map(attachJobVirtuals);
     
     const total = await Job.countDocuments(query);
     

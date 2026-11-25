@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const { protect, adminOnly, isAdmin } = require('./middleware/auth');
+const { protect, isAdmin } = require('./middleware/auth');
 
 module.exports = function createApp() {
   const app = express();

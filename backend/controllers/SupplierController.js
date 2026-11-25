@@ -345,7 +345,7 @@ exports.fixSupplierOrderCounts = async (req, res) => {
         bulkOps.push({
           updateOne: {
             filter: { _id: supplier._id },
-            update: { $set: { totalOrders: stats.totalOrders, lastOrder: stats.lastOrder } }
+            update: { $set: { totalOrders: stats.totalOrders, lastOrder: stats.lastOrder, updatedAt: new Date() } }
           }
         });
       }

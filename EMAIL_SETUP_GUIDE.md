@@ -3,7 +3,7 @@
 ## 🎯 Current Status
 ✅ **Email System**: Fully implemented and working  
 ✅ **Mock Emails**: Currently showing in backend logs  
-✅ **Recipient**: kadavishkakanakasekara@gmail.com  
+✅ **Recipient**: Configured via `ADMIN_EMAIL` / `EMAIL_USER` in `backend/.env`  
 ⚠️ **Real Emails**: Need Gmail App Password configuration  
 
 ## 🔧 Setup Steps to Receive Real Emails
@@ -31,13 +31,13 @@
 
 ```env
 # Email Configuration for Low Stock Alerts
-EMAIL_USER=kadavishkakanakasekara@gmail.com
+EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-16-character-app-password-here
 ```
 
 **Example:**
 ```env
-EMAIL_USER=kadavishkakanakasekara@gmail.com
+EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=abcd efgh ijkl mnop
 ```
 

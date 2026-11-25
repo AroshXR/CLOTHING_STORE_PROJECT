@@ -111,7 +111,7 @@ The canonical routes are under /api/custom-orders:
 
 Public registration permits Customer and Applicant accounts. Administrator and Tailor accounts must be provisioned by an administrator; existing administrators remain valid. Outfit listing keeps the existing authenticated owner-onboarding flow. User, applicant, booking, production, and upload endpoints enforce applicable ownership or staff access.
 
-Legacy AssignmentRoutes and OrderStatusRoutes are not mounted. The current tailor UI uses the canonical CustomOrder workflow.
+Legacy tailor assignment routes were removed. The current tailor UI uses the canonical CustomOrder workflow.
 
 ## Pricing configuration
 
@@ -124,9 +124,9 @@ $env:TEST_MONGODB_URI = 'mongodb+srv://...'
 npm test
 ~~~
 
-Tests require `TEST_MONGODB_URI` to point to a MongoDB replica set (such as MongoDB Atlas or a local replica set), connect using the dedicated `platform-priority-tests` database name, and never load `.env` or `MONGODB_URI`. They cover ownership and roles, websocket authentication, mixed checkout, server pricing, immutable snapshots, transaction rollback, retry idempotency, cash receipt, cancellation, production transitions, private artwork, concurrent stock reservations, and overlapping rentals.
+Tests require `TEST_MONGODB_URI` to point to a MongoDB replica set (such as MongoDB Atlas or a local replica set), connect using an isolated per-run `platform-priority-tests-*` database name (dropped on teardown), and never load `.env` or `MONGODB_URI`. They cover ownership and roles, websocket authentication, mixed checkout, server pricing, immutable snapshots, transaction rollback, retry idempotency, cash receipt, cancellation, production transitions, private artwork, concurrent stock reservations, and overlapping rentals.
 
-The older root-level test-payment and debug scripts predate the checkout contract. Use the isolated test suite above for regression checks.
+Use the isolated test suite above for regression checks.
 
 ## Existing data and deployment
 

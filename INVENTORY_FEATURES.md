@@ -4,7 +4,7 @@
 
 ### 1. **Low Stock Email Notifications** 📧
 
-**Automatic email alerts sent to `kadavishkakanakasekara@gmail.com` when items reach low stock levels.**
+**Automatic email alerts sent to the configured admin email (`ADMIN_EMAIL` / `EMAIL_USER`) when items reach low stock levels.**
 
 #### Features:
 - ✅ **Automatic Detection**: System monitors stock levels in real-time
@@ -138,7 +138,7 @@ POST /alerts/check          // Check low stock alerts
    - Use Gmail address and App Password in .env
 
 ### Email Recipients:
-- **Primary**: `kadavishkakanakasekara@gmail.com`
+- **Primary**: Configured via `ADMIN_EMAIL` / `EMAIL_USER` in `backend/.env`
 - **Configurable**: Can be changed in email service
 
 ## 🧪 Testing

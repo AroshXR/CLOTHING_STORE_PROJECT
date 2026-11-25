@@ -83,18 +83,9 @@ JWT_SECRET=your-jwt-secret-key-here
    npm start
    ```
 
-2. Test email configuration:
+2. Verify SMTP credentials from `backend/`:
    ```bash
-   curl http://localhost:5001/test-email
-   ```
-
-   You should see:
-   ```json
-   {
-     "status": "ok",
-     "message": "Email configuration is valid",
-     "timestamp": "2025-09-21T10:00:00.000Z"
-   }
+   node -e "require('dotenv').config(); require('./services/emailService').testEmailConnection().then(ok => { console.log(ok ? 'Email configuration is valid' : 'Email verification failed'); process.exit(ok ? 0 : 1); })"
    ```
 
 ## 🧪 Testing Email Functionality
