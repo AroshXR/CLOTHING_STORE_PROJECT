@@ -28,3 +28,9 @@ test('cleanup retains additional quantities and items added after checkout start
   clearPurchasedCart({ direct: false, items: [{ kind: 'product', id: 'p', quantity: 2 }] }, local, storage({}));
   expect(JSON.parse(local.getItem('outletCart'))).toEqual([{ _id: 'p', quantity: 1 }, { _id: 'other', quantity: 1 }]);
 });
+
+test.each([{ type: 'booking', _id: 'rental' }, { kind: 'booking', _id: 'rental' }, { kind: 'booking', id: 'rental' }])('rental metadata does not prevent cleanup after an explicit cart checkout: %p', entry => {
+  const local = storage({ outletCart: JSON.stringify([{ ...entry, quantity: 1, size: 'L', color: 'Blue' }, { _id: 'remaining', quantity: 2 }]) });
+  clearPurchasedCart({ direct: false, items: [{ kind: 'booking', id: 'rental', quantity: 1 }] }, local, storage({}));
+  expect(JSON.parse(local.getItem('outletCart'))).toEqual([{ _id: 'remaining', quantity: 2 }]);
+});

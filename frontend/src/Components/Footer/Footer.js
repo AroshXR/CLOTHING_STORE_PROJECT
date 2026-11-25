@@ -9,7 +9,7 @@ import developerLogo from '../../assets/developer-logo.png';
 import './Footer.css';
 export default function Footer() {
   const { branding } = useBranding(), { pathname } = useLocation();
-  const expanded = ['/', '/home', '/userHome', '/about', '/contact', '/rentalHome', '/outlet'].includes(pathname) || pathname.startsWith('/outlet/') || pathname.startsWith('/outfit-details/');
+  const expanded = ['/', '/home', '/userHome', '/about', '/contact', '/rentalHome', '/outlet', '/career', '/color-guide'].includes(pathname) || pathname.startsWith('/outlet/') || pathname.startsWith('/outfit-details/');
   const social = Object.entries(branding.socialLinks || {}).filter(([, url]) => url);
   return <footer className={'site-footer' + (expanded ? ' site-footer--editorial' : '')}>
     {expanded && <div className="site-footer__campaign"><img src={model} alt="" aria-hidden="true" className="site-footer__model" /><Reveal><span className="ed-kicker">INDIVIDUAL BY DESIGN</span><h2>WEAR YOUR<br />OWN STORY.</h2><Link to="/customizer">Make your mark <ArrowUpRight size={23} /></Link></Reveal><span className="site-footer__campaign-note">A LITTLE MORE YOU.<br />EVERY SINGLE DAY.</span></div>}

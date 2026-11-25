@@ -47,3 +47,14 @@ test('cash collection needs contact only, retries with the same key, and leaves 
   expect(sessionStorage.getItem('directPurchase')).toBeNull();
   expect(screen.queryByLabelText(/card number/i)).not.toBeInTheDocument();
 });
+
+test('checkout uses the explicit bag selection without depending on customizer loading', async () => {
+  const items = [{ kind: 'product', id: productId, quantity: 1 }];
+  sessionStorage.removeItem('directPurchase');
+  axios.get.mockRejectedValue(new Error('Customizer offline'));
+  axios.post.mockResolvedValue({ data: { data: quote } });
+  render(<MemoryRouter initialEntries={[{ pathname: '/paymentManagement', state: { cartItems: items } }]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><PaymentManagement /></MemoryRouter>);
+  await screen.findByText('Shirt');
+  expect(axios.get).not.toHaveBeenCalled();
+  expect(axios.post).toHaveBeenCalledWith('/payment/quote', expect.objectContaining({ items }), expect.anything());
+});

@@ -1,249 +1,46 @@
-@layer app-legacy {
-:where(.ui-page[data-page="color-guide"]) .color-guide-page {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #eee9e9 0%, #ffffff 60%, #f3f3f3 100%);
-  color: #1a1a1a;
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
-}
-
-:where(.ui-page[data-page="color-guide"]) .color-guide-hero {
-  padding: 120px 8% 80px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 40px;
-  align-items: center;
-}
-
-:where(.ui-page[data-page="color-guide"]) .color-guide-hero__content h1 {
-  font-size: 3rem;
-  margin-bottom: 16px;
-  color: #0f0f0f;
-}
-
-:where(.ui-page[data-page="color-guide"]) .color-guide-hero__content p {
-  font-size: 1.1rem;
-  line-height: 1.7;
-  max-width: 560px;
-  color: #4a4a4a;
-}
-
-:where(.ui-page[data-page="color-guide"]) .color-guide-hero__art {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-}
-
-:where(.ui-page[data-page="color-guide"]) .color-guide-hero__art span {
-  flex: 1;
-  height: 220px;
-  border-radius: 18px;
-  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15);
-  animation: floatUp 4.5s ease-in-out infinite;
-}
-
-@keyframes floatUp {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-14px); }
-}
-
-:where(.ui-page[data-page="color-guide"]) .color-guide-section {
-  padding: 0 8%;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-:where(.ui-page[data-page="color-guide"]) .color-guide-section h2 {
-  font-size: 2rem;
-  color: #111111;
-}
-
-:where(.ui-page[data-page="color-guide"]) .section-intro {
-  max-width: 720px;
-  color: #535353;
-  line-height: 1.7;
-}
-
-:where(.ui-page[data-page="color-guide"]) .tone-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 28px;
-}
-
-:where(.ui-page[data-page="color-guide"]) .tone-card {
-  background: #020024;
-  background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(39, 39, 41, 1) 68%, rgb(61, 61, 61) 100%);
-  border-radius: 18px;
-  padding: 28px;
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  ;
-}
-
-:where(.ui-page[data-page="color-guide"]) .tone-card header h3 {
-  margin: 0 0 12px;
-  font-size: 1.4rem;
-  color: white;
-}
-
-:where(.ui-page[data-page="color-guide"]) .tone-card header p {
-  margin: 0;
-  color: #4a4a4a;
-  line-height: 1.6;
-  color: white
-}
-
-:where(.ui-page[data-page="color-guide"]) .tone-card__palette {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
-  gap: 8px;
-}
-
-:where(.ui-page[data-page="color-guide"]) .tone-card__palette div {
-  height: 54px;
-  border-radius: 12px;
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
-}
-
-:where(.ui-page[data-page="color-guide"]) .tone-card__lists {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 20px;
-  
-}
-
-:where(.ui-page[data-page="color-guide"]) .tone-card__lists h4 {
-  margin-bottom: 8px;
-  font-size: 1rem;
-  color: #1f2937;
-  color: white
-}
-
-:where(.ui-page[data-page="color-guide"]) .tone-card__lists ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 6px;
-  color: white;
-  
-}
-
-:where(.ui-page[data-page="color-guide"]) .undertone-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 24px;
-}
-
-:where(.ui-page[data-page="color-guide"]) .undertone-card {
-  background: #929492;
-  background: linear-gradient(0deg, rgba(146, 148, 146, 1) 0%, rgba(255, 250, 250, 1) 99%);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-  display: grid;
-  gap: 12px;
-}
-
-:where(.ui-page[data-page="color-guide"]) .undertone-card h3 {
-  margin: 0;
-  color: #1f2937;
-}
-
-:where(.ui-page[data-page="color-guide"]) .undertone-card ul {
-  margin: 0;
-  padding-left: 18px;
-  color: #535353;
-  line-height: 1.6;
-}
-
-:where(.ui-page[data-page="color-guide"]) .universal-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 18px;
-}
-
-:where(.ui-page[data-page="color-guide"]) .universal-card {
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
-  display: grid;
-  gap: 12px;
-  align-items: center;
-  justify-items: center;
-  text-align: center;
-  color: #1f2937;
-}
-
-:where(.ui-page[data-page="color-guide"]) .universal-card__swatch {
-  width: 72px;
-  height: 72px;
-  border-radius: 16px;
-  border: 2px solid transparent;
-}
-
-:where(.ui-page[data-page="color-guide"]) .color-guide-cta {
-  margin: 40px auto 80px;
-  padding: 48px 6%;
-  background: linear-gradient(135deg, #000000, #2b2b2b);
-  border-radius: 24px;
-  color: #f8fafc;
-  text-align: center;
-  max-width: 960px;
-  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.35);
-  display: grid;
-  gap: 16px;
-}
-
-:where(.ui-page[data-page="color-guide"]) .color-guide-cta h2 {
-  margin: 0;
-  font-size: 2rem;
-}
-
-:where(.ui-page[data-page="color-guide"]) .color-guide-cta p {
-  margin: 0;
-  font-size: 1.05rem;
-  line-height: 1.6;
-}
-
-:where(.ui-page[data-page="color-guide"]) .cta-button {
-  display: inline-flex;
-  align-self: center;
-  margin-top: 8px;
-  padding: 12px 28px;
-  background: #ffffff;
-  color: #1f2937;
-  border-radius: 999px;
-  font-weight: 600;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-decoration: none;
-}
-
-:where(.ui-page[data-page="color-guide"]) .cta-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 30px rgba(15, 23, 42, 0.2);
-}
-
-@media (max-width: 768px) {
-  :where(.ui-page[data-page="color-guide"]) .color-guide-hero {
-    padding: 100px 6% 60px;
-  }
-
-  :where(.ui-page[data-page="color-guide"]) .color-guide-hero__content h1 {
-    font-size: 2.4rem;
-  }
-
-  :where(.ui-page[data-page="color-guide"]) .color-guide-section {
-    padding: 0 6%;
-  }
-
-  :where(.ui-page[data-page="color-guide"]) .color-guide-cta {
-    margin: 24px 6% 60px;
-  }
-}
+@layer app-components {
+.ed-colour-hero{background:#1c1d1a;color:#e8e3d8}
+.ed-palette-art{display:flex;align-items:center;height:430px;gap:0;min-width:0}
+.ed-art-tile{display:flex;flex-direction:column;width:33.333%;height:80%;background:#d9d6ca;color:#181914;min-width:0}
+.ed-art-tile>span{display:block;flex:1;min-height:0}
+.ui-app .ui-page .ed-art-tile p{font-size:8px;text-transform:uppercase;line-height:1.7;margin:0;padding:18px 12px;overflow-wrap:anywhere}
+.ed-art-tile small{font-size:6px;letter-spacing:.07em}
+.ed-art-tile--main{height:100%;position:relative;z-index:2}
+.ed-colour-palettes{background:#d2d1c9;scroll-margin-top:20px}
+.ui-app .ui-page .ed-colour-palettes h2,.ui-app .ui-page .ed-colour-staples h2{font-size:clamp(30px,3.9vw,59px)}
+.ed-colour-palettes .ed-section-heading>p,.ed-colour-staples .ed-section-heading>p{max-width:320px;font-size:11px;color:#646657}
+.ed-colour-selection{display:flex;align-items:center;gap:16px 22px;padding:18px 20px;margin:35px 0 45px;background:#242620;color:#e6e1d3;flex-wrap:wrap}
+.ed-colour-selected-chip{height:44px;width:44px;border:1px solid #797f6c;flex-shrink:0}
+.ui-page .ed-colour-selection p{font-size:12px;margin:4px 0 0;color:inherit}
+.ed-colour-selection code{font-family:monospace;font-size:11px;margin-left:10px;user-select:all}
+.ui-app .ui-page .ed-colour-selection button{background:transparent;border:1px solid #808b72;border-radius:0;color:#e7e2d3;font-size:10px;min-height:40px;padding:10px 13px}
+.ed-colour-selection>a{display:flex;align-items:center;gap:15px;font-size:10px;text-decoration:none;margin-left:auto;border-bottom:1px solid #848f75;padding-bottom:6px}
+.ui-app .ui-page .ed-colour-selection .ed-copy-message{flex-basis:100%;font-size:10px;color:#c6c7af}
+.ed-tone-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.ed-tone{border-top:1px solid #8f9980;padding-top:22px}
+.ui-app .ui-page .ed-tone h3{font-size:clamp(19px,1.7vw,25px);font-weight:650;line-height:1.3;letter-spacing:-.035em;margin:16px 0 22px;min-height:65px}
+.ed-tone-swatches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px 10px}
+.ui-app .ui-page button.ed-swatch{display:flex;flex-direction:column;align-items:stretch;justify-content:start;gap:0;background:transparent;border:1px solid transparent;border-radius:0;padding:3px;color:#1d2117;text-align:left;min-width:0;min-height:0;box-shadow:none}
+.ui-app .ui-page button.ed-swatch:hover{background:#c5cabb;border-color:#969f87}
+.ui-app .ui-page button.ed-swatch[aria-pressed=true]{background:transparent;border:2px solid #20281a;color:#1d2117;padding:2px}
+.ed-swatch-sample{display:block;aspect-ratio:1/1;border:1px solid #979d8d;min-height:52px;width:100%}
+.ed-swatch-name{font-family:Arial,sans-serif;font-size:9px;font-weight:500;line-height:1.5;overflow-wrap:anywhere;margin-top:10px}
+.ed-swatch code{font-size:8px;line-height:1.5;margin:6px 0 3px;color:#626c55;font-weight:400}
+.ed-tone-notes{margin-top:24px;padding-top:18px;border-top:1px solid #b2b9a5}
+.ui-app .ui-page .ed-tone-notes h4{font-family:Arial,sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px;color:inherit}
+.ui-app .ui-page .ed-tone-notes p{font-size:10px;line-height:1.8;color:#69715c;margin:0 0 20px}
+.ed-undertones{background:#252721;color:#e7e2d6;display:grid;grid-template-columns:1fr 1fr;gap:12%;align-items:center}
+.ed-undertones .ed-kicker{margin-top:25px}
+.ui-app .ui-page .ed-undertones h2{font-size:clamp(40px,5vw,76px)}
+.ui-app .ui-page .ed-undertones>div>p{font-size:12px;color:#b8b6a3}
+.ed-undertones article{border-top:1px solid #626d53;padding:25px 0}
+.ui-app .ui-page .ed-undertones h3{font-size:19px;font-weight:650;letter-spacing:-.025em;margin:0 0 14px}
+.ui-app .ui-page .ed-undertones article p,.ed-undertones article li{font-size:11px;line-height:1.8;color:#c1c0aa}
+.ed-undertones ul{padding-left:18px;margin-bottom:0}
+.ed-staples-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px;margin-top:35px}
+.ed-swatch--large .ed-swatch-sample{aspect-ratio:4/3;min-height:100px}
+.ed-swatch--large .ed-swatch-name{font-size:11px}
+.ed-colour-links{display:flex;flex-direction:column;align-items:start;gap:22px}
+@media(max-width:1050px){.ed-tone-grid{gap:18px}.ed-tone-swatches{grid-template-columns:repeat(2,minmax(0,1fr))}.ed-colour-selection>a{margin-left:0}.ed-staples-grid{gap:12px}}
+@media(max-width:760px){.ed-palette-art{height:340px;max-width:390px!important;width:100%;margin-top:10px}.ui-app .ui-page .ed-art-tile p{font-size:7px;padding:14px 9px}.ed-art-tile small{font-size:5px}.ed-tone-grid{grid-template-columns:1fr;gap:35px}.ed-tone-swatches{grid-template-columns:repeat(3,minmax(0,1fr))}.ui-app .ui-page .ed-tone h3{min-height:0;font-size:24px;margin-bottom:20px}.ed-tone-notes{margin-top:18px}.ed-colour-selection{padding:18px 15px;gap:16px}.ed-colour-selection>div:nth-child(2){flex:1}.ed-colour-selection code{display:block;margin:5px 0 0}.ed-colour-selection>a{font-size:10px}.ui-app .ui-page .ed-colour-palettes h2,.ui-app .ui-page .ed-colour-staples h2{font-size:clamp(27px,7.5vw,44px)}.ed-undertones{grid-template-columns:1fr;gap:28px}.ui-app .ui-page .ed-undertones h2{font-size:clamp(35px,9.5vw,57px)}.ed-staples-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 12px}.ed-swatch--large .ed-swatch-sample{min-height:85px}}
 }
