@@ -3,12 +3,12 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import AppShell from './AppShell';
 import { useAuth } from '../../AuthGuard/authGuard';
-jest.mock('../../AuthGuard/authGuard', () => ({ useAuth: jest.fn() }));
-jest.mock('../../config/branding', () => ({ useBranding: () => ({ branding: { name: 'Sample store', logoUrl: '', tagline: 'Made for you', socialLinks: {} } }) }));
-jest.mock('../../config/api', () => ({ mediaUrl: path => path }));
+vi.mock('../../AuthGuard/authGuard', () => ({ useAuth: vi.fn() }));
+vi.mock('../../config/branding', () => ({ useBranding: () => ({ branding: { name: 'Sample store', logoUrl: '', tagline: 'Made for you', socialLinks: {} } }) }));
+vi.mock('../../config/api', () => ({ mediaUrl: path => path }));
 beforeEach(() => {
-  useAuth.mockReturnValue({ currentUser: null, isAuthenticated: () => false, logout: jest.fn() });
-  window.scrollTo = jest.fn();
+  useAuth.mockReturnValue({ currentUser: null, isAuthenticated: () => false, logout: vi.fn() });
+  window.scrollTo = vi.fn();
 });
 function show(path = '/') {
   render(<MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -42,7 +42,7 @@ test('mobile navigation closes on a route change and on Escape', () => {
   expect(screen.getByRole('button', { name: 'Menu' })).toHaveAttribute('aria-expanded', 'false');
 });
 test('owners receive their workspace link without administrator-only links', () => {
-  useAuth.mockReturnValue({ currentUser: { type: 'Customer', role: 'owner', username: 'Owner' }, isAuthenticated: () => true, logout: jest.fn() });
+  useAuth.mockReturnValue({ currentUser: { type: 'Customer', role: 'owner', username: 'Owner' }, isAuthenticated: () => true, logout: vi.fn() });
   show('/owner');
   fireEvent.click(screen.getByText('Workspace'));
   expect(screen.getByRole('link', { name: 'Rental management' })).toHaveAttribute('href', '/owner');
@@ -51,7 +51,7 @@ test('owners receive their workspace link without administrator-only links', () 
 });
 test('a page failure preserves navigation and the footer and supports retry', () => {
   let fail = true;
-  const log = jest.spyOn(console, 'error').mockImplementation(() => {});
+  const log = vi.spyOn(console, 'error').mockImplementation(() => {});
   function Page() { if (fail) throw new Error('Test-only page failure'); return <h1>Recovered page</h1>; }
   render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><AppShell><Page /></AppShell></MemoryRouter>);
   expect(screen.getByRole('alert')).toHaveTextContent('Unable to display this page');

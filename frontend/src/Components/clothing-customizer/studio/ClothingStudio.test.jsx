@@ -4,11 +4,11 @@ import { MemoryRouter } from 'react-router-dom';
 import axios from 'axios';
 import ClothingStudio from './ClothingStudio';
 import { useAuth } from '../../../AuthGuard/authGuard';
-jest.mock('axios', () => ({ get: jest.fn(), post: jest.fn(), put: jest.fn(), interceptors: { request: { use: jest.fn() } } }));
-jest.mock('../../../AuthGuard/authGuard', () => ({ useAuth: jest.fn() }));
-jest.mock('./StudioWorkspace', () => ({ __esModule: true, default: ({ design }) => <output data-testid="preview-config">{JSON.stringify(design)}</output> }));
+vi.mock('axios', () => ({ default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), interceptors: { request: { use: vi.fn() } } } }));
+vi.mock('../../../AuthGuard/authGuard', () => ({ useAuth: vi.fn() }));
+vi.mock('./StudioWorkspace', () => ({ __esModule: true, default: ({ design }) => <output data-testid="preview-config">{JSON.stringify(design)}</output> }));
 beforeEach(() => {
-  localStorage.clear(); sessionStorage.clear(); jest.clearAllMocks();
+  localStorage.clear(); sessionStorage.clear(); vi.clearAllMocks();
   useAuth.mockReturnValue({ token: 'test-token', isAuthenticated: () => true });
   axios.get.mockResolvedValue({ data: { status: 'ok', data: { basePrices: { tshirt: 25 }, sizePrices: { M: 0 }, presetDesigns: [{ id: 1, name: 'Design 1', price: 15 }], customUploadPrice: 25, customTextPrice: 0 } } });
   axios.post.mockResolvedValue({ data: { status: 'ok', data: { _id: 'saved-design' } } });

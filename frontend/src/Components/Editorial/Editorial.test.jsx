@@ -6,11 +6,11 @@ import Contact from './Contact';
 import CollectionPreview from './CollectionPreview';
 import Rentals from './Rentals';
 import { useBranding } from '../../config/branding';
-jest.mock('axios', () => ({ get: jest.fn() }));
-jest.mock('../../config/api', () => ({ apiUrl: path => path }));
-jest.mock('../../config/branding', () => ({ useBranding: jest.fn() }));
-jest.mock('../MediaImage', () => ({ src, alt }) => <img src={src} alt={alt} />);
-beforeEach(() => { jest.clearAllMocks(); useBranding.mockReturnValue({ branding: { name: 'Sample store', contactEmail: '', contactPhone: '', address: '' } }); });
+vi.mock('axios', () => ({ default: { get: vi.fn() } }));
+vi.mock('../../config/api', () => ({ apiUrl: path => path }));
+vi.mock('../../config/branding', () => ({ useBranding: vi.fn() }));
+vi.mock('../MediaImage', () => ({ default: ({ src, alt }) => <img src={src} alt={alt} /> }));
+beforeEach(() => { vi.clearAllMocks(); useBranding.mockReturnValue({ branding: { name: 'Sample store', contactEmail: '', contactPhone: '', address: '' } }); });
 const show = element => render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>{element}</MemoryRouter>);
 function CurrentPath() { const location = useLocation(); return <output data-testid="current-path">{location.pathname + location.search}</output>; }
 test('rental category search and real outfit cards preserve the booking destinations', async () => {

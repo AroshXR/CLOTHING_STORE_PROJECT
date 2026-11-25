@@ -4,16 +4,16 @@ import { MemoryRouter } from 'react-router-dom';
 import axios from 'axios';
 import Career from '../Career/Career';
 import SkinToneColorGuide from '../SkinToneColorGuide/SkinToneColorGuide';
-jest.mock('axios', () => ({ get: jest.fn(), post: jest.fn() }));
-jest.mock('../../config/api', () => ({ apiUrl: path => path }));
-jest.mock('../../config/branding', () => ({ useBranding: () => ({ branding: { name: 'Sample store' } }) }));
+vi.mock('axios', () => ({ default: { get: vi.fn(), post: vi.fn() } }));
+vi.mock('../../config/api', () => ({ apiUrl: path => path }));
+vi.mock('../../config/branding', () => ({ useBranding: () => ({ branding: { name: 'Sample store' } }) }));
 const role = { _id: 'tailor', title: 'Tailor', department: 'Production', location: 'Colombo', type: 'Full-time', experience: '2 years', description: 'Create thoughtful garments.', requirements: ['Sewing experience'], status: 'active' };
 const show = component => render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>{component}</MemoryRouter>);
 beforeEach(() => {
-  jest.clearAllMocks(); localStorage.clear(); window.scrollTo = jest.fn();
+  vi.clearAllMocks(); localStorage.clear(); window.scrollTo = vi.fn();
   axios.get.mockResolvedValue({ data: { data: [role, { ...role, _id: 'closed', title: 'Closed role', status: 'closed' }] } });
   axios.post.mockResolvedValue({ data: { message: 'Application submitted' } });
-  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: jest.fn().mockResolvedValue(undefined) } });
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: vi.fn().mockResolvedValue(undefined) } });
 });
 async function openApplication() {
   show(<Career />); fireEvent.click(await screen.findByRole('button', { name: 'Apply for Tailor' }));

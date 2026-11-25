@@ -39,7 +39,7 @@ test('both sleeves include the full cuff and no triangle crosses the texture sea
 });
 test('the actual garment produces a clipped placement silhouette without vector tessellation', () => {
   let rendered;
-  const create = jest.spyOn(document, 'createElement').mockReturnValue({ getContext: () => ({ createImageData: (width, height) => ({ data: new Uint8ClampedArray(width * height * 4) }), putImageData: data => { rendered = data.data; } }) });
+  const create = vi.spyOn(document, 'createElement').mockReturnValue({ getContext: () => ({ createImageData: (width, height) => ({ data: new Uint8ClampedArray(width * height * 4) }), putImageData: data => { rendered = data.data; } }) });
   const original = mesh('Object_10'), geometry = panelGeometry(original, 'front');
   try {
     panelMask([{ panel: 'front', geometry }], 'front');

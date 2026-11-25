@@ -4,10 +4,10 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import OrderManagement from './OrderManagement';
 import { addBookingToCart, readBrowserCart, writeBrowserLine } from './cartItems';
-jest.mock('axios', () => ({ get: jest.fn(), put: jest.fn(), delete: jest.fn() }));
-jest.mock('../../config/api', () => ({ apiUrl: path => path }));
-jest.mock('../../AuthGuard/authGuard', () => ({ useAuth: () => ({ token: 'test-token', getToken: () => 'test-token', logout: jest.fn() }) }));
-jest.mock('../MediaImage', () => ({ src, alt }) => <img src={src} alt={alt} />);
+vi.mock('axios', () => ({ default: { get: vi.fn(), put: vi.fn(), delete: vi.fn() } }));
+vi.mock('../../config/api', () => ({ apiUrl: path => path }));
+vi.mock('../../AuthGuard/authGuard', () => ({ useAuth: () => ({ token: 'test-token', getToken: () => 'test-token', logout: vi.fn() }) }));
+vi.mock('../MediaImage', () => ({ default: ({ src, alt }) => <img src={src} alt={alt} /> }));
 const design = { _id: 'design1', nickname: 'My custom tee', clothingType: 'tshirt', quantity: 2, totalPrice: 80, size: 'M', color: '#ffffff', placedDesigns: [] };
 const product = { _id: 'product1', name: 'Everyday shirt', price: 30, quantity: 2, size: 'M', color: 'Black', imageUrl: '/shirt.png' };
 const rental = { type: 'booking', _id: 'booking1', bookingId: 'booking1', name: 'Saved rental', price: 1, quantity: 8 };
@@ -15,7 +15,7 @@ const booking = { _id: 'booking1', status: 'confirmed', paymentStatus: 'unpaid',
 function CheckoutProbe() { const location = useLocation(); return <><h1>Checkout selection</h1><output data-testid="checkout-selection">{JSON.stringify(location.state?.cartItems)}</output></>; }
 function show() { return render(<MemoryRouter initialEntries={['/orderManagement']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Routes><Route path="/orderManagement" element={<OrderManagement />} /><Route path="/paymentManagement" element={<CheckoutProbe />} /></Routes></MemoryRouter>); }
 beforeEach(() => {
-  jest.clearAllMocks(); localStorage.clear(); sessionStorage.clear(); window.scrollTo = jest.fn(); window.confirm = jest.fn(() => true);
+  vi.clearAllMocks(); localStorage.clear(); sessionStorage.clear(); window.scrollTo = vi.fn(); window.confirm = vi.fn(() => true);
   axios.get.mockImplementation(url => Promise.resolve({ data: url === '/cloth-customizer' ? { status: 'ok', data: [design] } : { success: true, bookings: [booking] } }));
   localStorage.setItem('outletCart', JSON.stringify([product, rental]));
 });

@@ -1,11 +1,11 @@
 import { apiFetch } from './api';
 import axios from 'axios';
-jest.mock('axios', () => ({ __esModule: true, default: { interceptors: { request: { use: jest.fn() } } } }));
+vi.mock('axios', () => ({ __esModule: true, default: { interceptors: { request: { use: vi.fn() } } } }));
 const interceptor = axios.interceptors.request.use.mock.calls[0][0];
 beforeEach(() => {
   localStorage.clear();
   localStorage.setItem('token', 'current-session');
-  window.fetch = jest.fn().mockResolvedValue({ ok: true });
+  window.fetch = vi.fn().mockResolvedValue({ ok: true });
 });
 test('native API requests include the current session and preserve body, headers and cancellation', async () => {
   const controller = new AbortController();

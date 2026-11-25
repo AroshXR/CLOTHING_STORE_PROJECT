@@ -8,15 +8,15 @@ import OutfitDetails from '../../pages/OutfitDetails';
 import { CommerceGallery } from './CommerceParts';
 import { useAuth } from '../../AuthGuard/authGuard';
 
-jest.mock('axios', () => ({ get: jest.fn(), post: jest.fn() }));
-jest.mock('../../config/api', () => ({ apiUrl: path => path }));
-jest.mock('../../config/branding', () => ({ useBranding: () => ({ branding: { name: 'Sample store' } }) }));
-jest.mock('../../AuthGuard/authGuard', () => ({ useAuth: jest.fn() }));
-jest.mock('../MediaImage', () => ({ src, alt, ...props }) => <img src={src} alt={alt} {...props} />);
+vi.mock('axios', () => ({ default: { get: vi.fn(), post: vi.fn() } }));
+vi.mock('../../config/api', () => ({ apiUrl: path => path }));
+vi.mock('../../config/branding', () => ({ useBranding: () => ({ branding: { name: 'Sample store' } }) }));
+vi.mock('../../AuthGuard/authGuard', () => ({ useAuth: vi.fn() }));
+vi.mock('../MediaImage', () => ({ default: ({ src, alt, ...props }) => <img src={src} alt={alt} {...props} /> }));
 const product = { _id: 'tee', name: 'Daily cotton tee', brand: 'Studio', category: 'T-Shirts', material: 'Cotton', price: 25, stock: 5, sizes: ['S', 'M'], colors: ['White', 'Black'], imageUrl: '/tee.jpg', gallery: ['/back.jpg'], reviews: [] };
 const outfit = { _id: 'gown', brand: 'Studio', model: 'Evening gown', pricePerDay: 45, image: '/gown.jpg', images: [], isAvailable: true, material: 'Cotton', size: 'M', color: 'Black', location: 'Colombo' };
 beforeEach(() => {
-  jest.clearAllMocks(); localStorage.clear(); sessionStorage.clear(); window.scrollTo = jest.fn();
+  vi.clearAllMocks(); localStorage.clear(); sessionStorage.clear(); window.scrollTo = vi.fn();
   useAuth.mockReturnValue({ isAuthenticated: () => true, getToken: () => 'test-only-token' });
 });
 function show(element, path = '/') {
@@ -68,7 +68,7 @@ test('outfit booking preserves the authenticated multipart request and uses real
   fireEvent.change(screen.getByLabelText('Reservation date'), { target: { value: '2099-12-10' } }); fireEvent.change(screen.getByLabelText('Return date'), { target: { value: '2099-12-12' } });
   fireEvent.change(screen.getByLabelText('Phone number'), { target: { value: '0771234567' } }); fireEvent.change(screen.getByLabelText('Email address'), { target: { value: 'customer@example.test' } });
   const file = new File(['synthetic test document'], 'test-id.pdf', { type: 'application/pdf' }); fireEvent.change(screen.getByLabelText('ID document'), { target: { files: [file] } });
-  fireEvent.click(screen.getByRole('button', { name: 'Request booking' })); await screen.findByRole('heading', { name: 'Your booking destination' });
+  fireEvent.submit(screen.getByRole('button', { name: 'Request booking' }).closest('form')); await screen.findByRole('heading', { name: 'Your booking destination' });
   const [url, form, options] = axios.post.mock.calls[0]; expect(url).toBe('/api/booking/create'); expect(form.get('outfit')).toBe('gown'); expect(form.get('reservationDate')).toBe('2099-12-10'); expect(form.get('returnDate')).toBe('2099-12-12'); expect(form.get('document')).toBe(file); expect(options.headers.Authorization).toBe('Bearer test-only-token');
 });
 test('unavailable rental outfits cannot submit a booking', async () => {

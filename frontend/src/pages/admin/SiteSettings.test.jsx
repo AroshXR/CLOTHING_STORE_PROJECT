@@ -5,18 +5,18 @@ import axios from 'axios';
 import SiteSettings from './SiteSettings';
 import SiteBrand from '../../Components/SiteBrand';
 import { BrandingProvider, defaultBranding, escapeHtml, brandSlug, csvCell } from '../../config/branding';
-jest.mock('axios', () => ({ __esModule: true, default: { get: jest.fn(), put: jest.fn(), post: jest.fn() } }));
-jest.mock('../../config/api', () => ({ apiUrl: path => path, mediaUrl: path => path }));
-jest.mock('../../Components/NavBar/navBar', () => () => null);
-jest.mock('../../Components/Footer/Footer', () => () => null);
-jest.mock('../../Components/MediaImage', () => () => null);
+vi.mock('axios', () => ({ __esModule: true, default: { get: vi.fn(), put: vi.fn(), post: vi.fn() } }));
+vi.mock('../../config/api', () => ({ apiUrl: path => path, mediaUrl: path => path }));
+vi.mock('../../Components/NavBar/navBar', () => ({ default: () => null }));
+vi.mock('../../Components/Footer/Footer', () => ({ default: () => null }));
+vi.mock('../../Components/MediaImage', () => ({ default: () => null }));
 function show() {
   return render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
     <BrandingProvider><SiteSettings /><SiteBrand /></BrandingProvider>
   </MemoryRouter>);
 }
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   document.head.innerHTML = '<title>Your Store</title><meta name="description"><meta name="theme-color"><link rel="icon"><link rel="manifest">';
 });
 test('saving buyer branding updates visible identity, browser metadata and subsequent loads', async () => {

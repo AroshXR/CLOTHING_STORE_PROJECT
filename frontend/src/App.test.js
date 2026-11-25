@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './AuthGuard/ProtectedRoute';
 import { useAuth } from './AuthGuard/authGuard';
-jest.mock('./AuthGuard/authGuard', () => ({ useAuth: jest.fn() }));
+vi.mock('./AuthGuard/authGuard', () => ({ useAuth: vi.fn() }));
 function show(user, allowed, authenticated = true) {
   useAuth.mockReturnValue({ currentUser: user, loading: false, isAuthenticated: () => authenticated });
   render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Routes>

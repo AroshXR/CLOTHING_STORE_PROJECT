@@ -3,7 +3,7 @@ import MediaImage from '../../Components/MediaImage';
 import React, { useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
-import { assets, dummyOutfitData } from '../../assets/assets'
+import { assets } from '../../assets/assets'
 import Title from '../../Components/pasindu/owner/Title'
 import { useState } from 'react'
 

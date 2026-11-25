@@ -11,11 +11,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@imagekit/nodejs": "^7.15.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "imagekit": "^6.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.0",
     "multer": "^2.0.2",
@@ -26,5 +26,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
+  },
+  "allowScripts": {
+    "puppeteer@25.18.1": true
   }
 }
