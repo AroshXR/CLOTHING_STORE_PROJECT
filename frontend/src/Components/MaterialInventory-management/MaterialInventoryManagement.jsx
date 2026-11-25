@@ -2,11 +2,25 @@ import { API_BASE_URL as API_ORIGIN, apiFetch as fetch } from '../../config/api'
 
 
 import "./MaterialInventoryManagement.css"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 
 export default function MaterialInventoryManagement() {
   const navigate = useNavigate()
+  const successTimerRef = useRef(null)
+  const errorTimerRef = useRef(null)
+  useEffect(() => () => {
+    clearTimeout(successTimerRef.current)
+    clearTimeout(errorTimerRef.current)
+  }, [])
+  const clearSuccessAfter = (ms = 3000) => {
+    clearTimeout(successTimerRef.current)
+    successTimerRef.current = setTimeout(() => setSuccessMessage(""), ms)
+  }
+  const clearErrorAfter = (ms = 5000) => {
+    clearTimeout(errorTimerRef.current)
+    errorTimerRef.current = setTimeout(() => setError(null), ms)
+  }
   const [activeTab, setActiveTab] = useState("dashboard")
   const [inventoryItems, setInventoryItems] = useState([])
   const [suppliers, setSuppliers] = useState([])
@@ -188,19 +202,19 @@ export default function MaterialInventoryManagement() {
   const filteredItems = useMemo(() => inventoryItems
     .filter(item => {
       const matchesSearch = item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           item.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           item.category.toLowerCase().includes(searchTerm.toLowerCase())
-      
+        item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchTerm.toLowerCase())
+
       const matchesStatus = filterStatus === "all" || item.status === filterStatus
       const matchesCategory = filterCategory === "all" || item.category === filterCategory
-      
+
       return matchesSearch && matchesStatus && matchesCategory
     })
     .sort((a, b) => {
       let aValue = a[sortBy]
       let bValue = b[sortBy]
-      
+
       if (sortBy === 'totalValue' || sortBy === 'unitPrice' || sortBy === 'quantity') {
         aValue = parseFloat(aValue) || 0
         bValue = parseFloat(bValue) || 0
@@ -208,7 +222,7 @@ export default function MaterialInventoryManagement() {
         aValue = String(aValue).toLowerCase()
         bValue = String(bValue).toLowerCase()
       }
-      
+
       if (sortOrder === 'asc') {
         return aValue > bValue ? 1 : -1
       } else {
@@ -225,7 +239,7 @@ export default function MaterialInventoryManagement() {
     setEditingItem(item)
     setError(null)
     setSuccessMessage("")
-    
+
     if (type === "quantity" && item) {
       setFormData({
         quantity: item.quantity,
@@ -294,8 +308,8 @@ export default function MaterialInventoryManagement() {
       }
 
       closeModal()
-      setTimeout(() => setSuccessMessage(""), 3000)
-      
+      clearSuccessAfter(3000)
+
       // Refresh data
       await Promise.all([fetchInventoryItems(), fetchInventoryStats()])
     } catch (error) {
@@ -309,10 +323,10 @@ export default function MaterialInventoryManagement() {
       try {
         await deleteInventoryItem(id)
         setSuccessMessage("Item deleted successfully!")
-        setTimeout(() => setSuccessMessage(""), 3000)
+        clearSuccessAfter(3000)
       } catch (error) {
         setError(error.message)
-        setTimeout(() => setError(null), 5000)
+        clearErrorAfter(5000)
       }
     }
   }
@@ -345,31 +359,31 @@ export default function MaterialInventoryManagement() {
 
   return (
     <div className="main">
-      
+
       <div className="dashboard-header">
         <h1>Material Inventory Management</h1>
-        
+
         {/* Back Button */}
-        <div className="back-button-container" style={{ 
-          marginTop: '20px', 
+        <div className="back-button-container" style={{
+          marginTop: '20px',
           marginBottom: '20px',
           position: 'relative',
           zIndex: 1000,
           display: 'block',
           width: 'fit-content'
         }}>
-          <button 
+          <button
             className="back-button"
             onClick={() => navigate(-1)}
             style={{
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  cursor: 'pointer',
-  transition: 'all 0.3s ease',
-  position: 'relative',
-  zIndex: 1001
-}}
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              position: 'relative',
+              zIndex: 1001
+            }}
             onMouseEnter={(e) => {
               e.target.style.background = '#333';
               e.target.style.color = '#fff';
@@ -383,7 +397,7 @@ export default function MaterialInventoryManagement() {
             <span>Back</span>
           </button>
         </div>
- 
+
         {successMessage && (
           <div style={{
             backgroundColor: '#dcfce7',
@@ -412,9 +426,9 @@ export default function MaterialInventoryManagement() {
                 window.location.reload()
               }}
               style={{
-  marginLeft: '10px',
-  cursor: 'pointer'
-}}
+                marginLeft: '10px',
+                cursor: 'pointer'
+              }}
             >
               Retry
             </button>
@@ -526,7 +540,7 @@ export default function MaterialInventoryManagement() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                   {searchTerm && (
-                    <button 
+                    <button
                       className="clear-search"
                       onClick={() => setSearchTerm("")}
                       title="Clear search"
@@ -536,7 +550,7 @@ export default function MaterialInventoryManagement() {
                   )}
                 </div>
               </div>
-              
+
               <div className="filter-section">
                 <div className="filter-group">
                   <label className="filter-label">Status</label>
@@ -551,7 +565,7 @@ export default function MaterialInventoryManagement() {
                     <option value="out_of_stock">Out of Stock</option>
                   </select>
                 </div>
-                
+
                 <div className="filter-group">
                   <label className="filter-label">Category</label>
                   <select
@@ -565,7 +579,7 @@ export default function MaterialInventoryManagement() {
                     ))}
                   </select>
                 </div>
-                
+
                 <div className="filter-group">
                   <label className="filter-label">Sort By</label>
                   <select
@@ -581,8 +595,8 @@ export default function MaterialInventoryManagement() {
                     <option value="status">Status</option>
                   </select>
                 </div>
-                
-                <button 
+
+                <button
                   className="sort-order-btn"
                   onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                   title={`Sort ${sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
@@ -590,10 +604,10 @@ export default function MaterialInventoryManagement() {
                   {sortOrder === 'asc' ? '↑' : '↓'}
                 </button>
               </div>
-              
+
               <div className="action-section">
                 <div className="view-toggle">
-                  <button 
+                  <button
                     className={`view-btn ${viewMode === 'table' ? 'active' : ''}`}
                     onClick={() => setViewMode('table')}
                     title="Table View"
@@ -606,7 +620,7 @@ export default function MaterialInventoryManagement() {
                       <line x1="3" y1="15" x2="7" y2="15"></line>
                     </svg>
                   </button>
-                  <button 
+                  <button
                     className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
                     onClick={() => setViewMode('grid')}
                     title="Grid View"
@@ -619,7 +633,7 @@ export default function MaterialInventoryManagement() {
                     </svg>
                   </button>
                 </div>
-                
+
                 <button className="add-item-btn" onClick={() => openModal("item")}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -629,14 +643,14 @@ export default function MaterialInventoryManagement() {
                 </button>
               </div>
             </div>
-            
+
             {/* Results Summary */}
             <div className="results-summary">
               <span className="results-count">
                 Showing {filteredItems.length} of {inventoryItems.length} items
               </span>
               {(searchTerm || filterStatus !== 'all' || filterCategory !== 'all') && (
-                <button 
+                <button
                   className="clear-filters-btn"
                   onClick={() => {
                     setSearchTerm("")
@@ -689,8 +703,8 @@ export default function MaterialInventoryManagement() {
                           <div className={`status-indicator status-${item.status}`}>
                             <span className="status-icon">
                               {item.status === 'available'}
-                              {item.status === 'low_stock' }
-                              {item.status === 'out_of_stock' }
+                              {item.status === 'low_stock'}
+                              {item.status === 'out_of_stock'}
                             </span>
                             <span className="status-text">
                               {item.status.replace('_', ' ').toUpperCase()}
@@ -709,7 +723,7 @@ export default function MaterialInventoryManagement() {
                               disabled={item.quantity === 0}
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M9 11H1v2h8v8h2v-8h8v-2h-8V3H9v8z"/>
+                                <path d="M9 11H1v2h8v8h2v-8h8v-2h-8V3H9v8z" />
                               </svg>
                               Use
                             </button>
@@ -719,8 +733,8 @@ export default function MaterialInventoryManagement() {
                               title="Update Quantity"
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                               </svg>
                               Qty
                             </button>
@@ -730,8 +744,8 @@ export default function MaterialInventoryManagement() {
                               title="Edit Item"
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                               </svg>
                               Edit
                             </button>
@@ -741,8 +755,8 @@ export default function MaterialInventoryManagement() {
                               title="Delete Item"
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <polyline points="3,6 5,6 21,6"/>
-                                <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+                                <polyline points="3,6 5,6 21,6" />
+                                <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2" />
                               </svg>
                               Del
                             </button>
@@ -764,16 +778,16 @@ export default function MaterialInventoryManagement() {
                       <h3 className="card-title">{item.itemName}</h3>
                       <div className={`status-indicator status-${item.status}`}>
                         <span className="status-icon">
-                          {item.status === 'available' }
-                          {item.status === 'low_stock' }
+                          {item.status === 'available'}
+                          {item.status === 'low_stock'}
                           {item.status === 'out_of_stock'}
                         </span>
                       </div>
                     </div>
-                    
+
                     <div className="card-content">
                       <p className="card-description">{item.description || 'No description available'}</p>
-                      
+
                       <div className="card-details">
                         <div className="detail-row">
                           <span className="detail-label">Quantity:</span>
@@ -797,7 +811,7 @@ export default function MaterialInventoryManagement() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="card-actions">
                       <button
                         className="card-action-btn primary"
@@ -836,8 +850,8 @@ export default function MaterialInventoryManagement() {
                 <div className="empty-icon">📦</div>
                 <h3>No items found</h3>
                 <p>
-                  {searchTerm || filterStatus !== 'all' || filterCategory !== 'all' 
-                    ? 'Try adjusting your search or filters' 
+                  {searchTerm || filterStatus !== 'all' || filterCategory !== 'all'
+                    ? 'Try adjusting your search or filters'
                     : 'Start by adding your first inventory item'
                   }
                 </p>
@@ -854,7 +868,7 @@ export default function MaterialInventoryManagement() {
             <div className="chart-container">
               <h3 className="chart-title">Stock Alerts</h3>
               <p>Items that need attention due to low or out of stock status</p>
-              
+
               {stats.lowStockAlerts && stats.lowStockAlerts.length > 0 ? (
                 <div className="ui-table-scroll" tabIndex={0} role="region" aria-label="Scrollable table"><table className="data-table">
                   <thead>
@@ -908,12 +922,12 @@ export default function MaterialInventoryManagement() {
                     {modalType === "item" && (editingItem ? "✏️" : "➕")}
                   </div>
                   <h2>
-                    {modalType === "quantity" 
-                      ? "Update Quantity" 
+                    {modalType === "quantity"
+                      ? "Update Quantity"
                       : modalType === "use"
                         ? "Use Item"
-                        : editingItem 
-                          ? "Edit Inventory Item" 
+                        : editingItem
+                          ? "Edit Inventory Item"
                           : "Add New Inventory Item"
                     }
                   </h2>
@@ -925,7 +939,7 @@ export default function MaterialInventoryManagement() {
                   </svg>
                 </button>
               </div>
-              
+
               <form onSubmit={handleSubmit}>
                 {modalType === "quantity" ? (
                   <>
@@ -938,7 +952,7 @@ export default function MaterialInventoryManagement() {
                         type="number"
                         className="form-input"
                         value={formData.quantity || ""}
-                        onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                         required
                         min="0"
                       />
@@ -948,7 +962,7 @@ export default function MaterialInventoryManagement() {
                       <textarea
                         className="form-textarea"
                         value={formData.reason || ""}
-                        onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                         placeholder="Enter reason for quantity change..."
                       />
                     </div>
@@ -965,7 +979,7 @@ export default function MaterialInventoryManagement() {
                         type="number"
                         className="form-input"
                         value={formData.quantityUsed || ""}
-                        onChange={(e) => setFormData({...formData, quantityUsed: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, quantityUsed: e.target.value })}
                         required
                         min="1"
                         max={formData.availableStock}
@@ -977,7 +991,7 @@ export default function MaterialInventoryManagement() {
                       <select
                         className="form-select"
                         value={formData.reason || ""}
-                        onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                         required
                       >
                         <option value="">Select reason...</option>
@@ -995,7 +1009,7 @@ export default function MaterialInventoryManagement() {
                         type="text"
                         className="form-input"
                         value={formData.usedBy || ""}
-                        onChange={(e) => setFormData({...formData, usedBy: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, usedBy: e.target.value })}
                         placeholder="Enter name of person using the item..."
                       />
                     </div>
@@ -1015,7 +1029,7 @@ export default function MaterialInventoryManagement() {
                             type="text"
                             className="form-input"
                             value={formData.itemName || ""}
-                            onChange={(e) => setFormData({...formData, itemName: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, itemName: e.target.value })}
                             required
                             placeholder="Enter item name"
                           />
@@ -1027,7 +1041,7 @@ export default function MaterialInventoryManagement() {
                           <textarea
                             className="form-textarea"
                             value={formData.description || ""}
-                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             placeholder="Enter item description (optional)"
                             rows="3"
                           />
@@ -1041,7 +1055,7 @@ export default function MaterialInventoryManagement() {
                               type="text"
                               className="form-input"
                               value={formData.category || "Materials"}
-                              onChange={(e) => setFormData({...formData, category: e.target.value})}
+                              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                               placeholder="Enter or select category"
                               list="categories"
                             />
@@ -1073,7 +1087,7 @@ export default function MaterialInventoryManagement() {
                             type="number"
                             className="form-input"
                             value={formData.quantity || ""}
-                            onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value)})}
+                            onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
                             required
                             min="0"
                             placeholder="0"
@@ -1084,7 +1098,7 @@ export default function MaterialInventoryManagement() {
                           <select
                             className="form-select"
                             value={formData.unit || "pieces"}
-                            onChange={(e) => setFormData({...formData, unit: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
                             required
                           >
                             <option value="pieces">📦 Pieces</option>
@@ -1106,7 +1120,7 @@ export default function MaterialInventoryManagement() {
                             type="number"
                             className="form-input"
                             value={formData.minimumStock || 10}
-                            onChange={(e) => setFormData({...formData, minimumStock: parseInt(e.target.value)})}
+                            onChange={(e) => setFormData({ ...formData, minimumStock: parseInt(e.target.value) })}
                             min="0"
                             placeholder="10"
                           />
@@ -1120,7 +1134,7 @@ export default function MaterialInventoryManagement() {
                             type="text"
                             className="form-input"
                             value={formData.location || "Main Warehouse"}
-                            onChange={(e) => setFormData({...formData, location: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                             placeholder="e.g., Main Warehouse, Section A, Shelf 1"
                           />
                         </div>
@@ -1143,7 +1157,7 @@ export default function MaterialInventoryManagement() {
                               step="0.01"
                               className="form-input price-input"
                               value={formData.unitPrice || ""}
-                              onChange={(e) => setFormData({...formData, unitPrice: parseFloat(e.target.value)})}
+                              onChange={(e) => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) })}
                               required
                               min="0"
                               placeholder="0.00"
@@ -1165,7 +1179,7 @@ export default function MaterialInventoryManagement() {
                             onChange={(e) => {
                               const supplier = suppliers.find(s => s._id === e.target.value)
                               setFormData({
-                                ...formData, 
+                                ...formData,
                                 supplierId: e.target.value,
                                 supplierName: supplier ? supplier.name : ""
                               })
@@ -1189,7 +1203,7 @@ export default function MaterialInventoryManagement() {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="form-actions">
                   <button type="button" className="btn btn-secondary" onClick={closeModal}>
                     Cancel
@@ -1203,7 +1217,7 @@ export default function MaterialInventoryManagement() {
           </div>
         )}
       </div>
-      
+
     </div>
   )
 }
