@@ -12,77 +12,36 @@ const addItemsToInventory = async (order) => {
     const inventoryItems = [];
     
     for (const itemString of itemsArray) {
-      // Extract item name and quantity using regex
       const match = itemString.match(/^(.+?)\s*x(\d+)$/i);
-      
-      if (match) {
-        const itemName = match[1].trim();
-        const quantity = parseInt(match[2]);
-        const unitPrice = order.total / itemsArray.length / quantity; // Estimate unit price
-        
-        // Check if item already exists in inventory
-        let existingItem = await MaterialInventory.findOne({ 
-          itemName: itemName,
-          supplierId: order.supplierId 
-        });
-        
-        if (existingItem) {
-          // Update existing item quantity
-          existingItem.quantity += quantity;
-          existingItem.totalValue = existingItem.quantity * existingItem.unitPrice;
-          existingItem.lastUpdated = new Date();
-          await existingItem.save();
-          inventoryItems.push(existingItem);
-        } else {
-          // Create new inventory item
-          const newInventoryItem = new MaterialInventory({
-            itemName: itemName,
-            quantity: quantity,
-            unitPrice: unitPrice,
-            totalValue: quantity * unitPrice,
-            supplierId: order.supplierId,
-            supplierName: order.supplierName,
-            orderId: order._id,
-            description: `Added from order #${order._id}`,
-            category: 'Materials',
-            unit: 'pieces'
-          });
-          
-          const savedItem = await newInventoryItem.save();
-          inventoryItems.push(savedItem);
-        }
+      const itemName = match ? match[1].trim() : itemString;
+      const quantity = match ? parseInt(match[2], 10) : 1;
+      const unitPrice = order.total / itemsArray.length / quantity;
+
+      const existingItem = await MaterialInventory.findOne({
+        itemName,
+        supplierId: order.supplierId
+      });
+
+      if (existingItem) {
+        existingItem.quantity += quantity;
+        existingItem.totalValue = existingItem.quantity * existingItem.unitPrice;
+        existingItem.lastUpdated = new Date();
+        await existingItem.save();
+        inventoryItems.push(existingItem);
       } else {
-        // If format doesn't match, create with quantity 1
-        const unitPrice = order.total / itemsArray.length;
-        
-        let existingItem = await MaterialInventory.findOne({ 
-          itemName: itemString,
-          supplierId: order.supplierId 
+        const savedItem = await MaterialInventory.create({
+          itemName,
+          quantity,
+          unitPrice,
+          totalValue: quantity * unitPrice,
+          supplierId: order.supplierId,
+          supplierName: order.supplierName,
+          orderId: order._id,
+          description: `Added from order #${order._id}`,
+          category: 'Materials',
+          unit: 'pieces'
         });
-        
-        if (existingItem) {
-          existingItem.quantity += 1;
-          existingItem.totalValue = existingItem.quantity * existingItem.unitPrice;
-          existingItem.lastUpdated = new Date();
-          await existingItem.save();
-          inventoryItems.push(existingItem);
-        } else {
-          const newInventoryItem = new MaterialInventory({
-            itemName: itemString,
-            quantity: 1,
-            unitPrice: unitPrice,
-            totalValue: unitPrice,
-            supplierId: order.supplierId,
-            supplierName: order.supplierName,
-            orderId: order._id,
-            description: `Added from order #${order._id}`,
-            category: 'Materials',
-            unit: 'pieces'
-          });
-          
-          const savedItem = await newInventoryItem.save();
-          inventoryItems.push(savedItem);
-        }
+        inventoryItems.push(savedItem);
       }
     }
     

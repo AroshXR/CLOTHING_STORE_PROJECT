@@ -233,7 +233,7 @@ exports.remove = async (req, res) => {
 
 exports.addReview = async (req, res) => {
   try {
-    const { rating, comment, username, userId } = req.body;
+    const { rating, comment } = req.body;
     if (!rating) return res.status(400).json({ message: 'Rating is required' });
     const item = await ClothingItem.findById(req.params.id);
     if (!item) return res.status(404).json({ message: 'Item not found' });

@@ -117,81 +117,64 @@ const getBookingById = async (req, res) => {
     }
 };
 
+const buildBookingReportData = async (req) => {
+    const { startDate, endDate, status, location } = req.query;
+    const query = isAdmin(req.user) ? {} : { owner: req.user._id };
+
+    if (startDate && endDate) {
+        query.createdAt = {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate + 'T23:59:59.999Z')
+        };
+    }
+
+    if (status && status !== 'all') {
+        query.status = status;
+    }
+
+    let bookings = await Booking.find(query)
+        .populate({ path: 'outfit', select: 'brand model category pricePerDay location image' })
+        .populate({ path: 'user', select: 'username email' })
+        .populate({ path: 'owner', select: 'username email' })
+        .sort({ createdAt: -1 });
+
+    if (location && location !== 'all') {
+        bookings = bookings.filter(booking => booking.outfit && booking.outfit.location === location);
+    }
+
+    const totalBookings = bookings.length;
+    const totalRevenue = bookings
+        .filter(booking => booking.status === 'confirmed')
+        .reduce((sum, booking) => sum + booking.price, 0);
+
+    const statusCounts = bookings.reduce((acc, booking) => {
+        acc[booking.status] = (acc[booking.status] || 0) + 1;
+        return acc;
+    }, {});
+
+    return {
+        bookings,
+        summary: {
+            totalBookings,
+            totalRevenue,
+            statusCounts,
+            reportPeriod: {
+                startDate: startDate || 'All time',
+                endDate: endDate || 'Present'
+            }
+        }
+    };
+};
+
 //API to generate booking report for admin
 const generateBookingReport = async (req, res) => {
     try {
-        const { role, type } = req.user;
-        
-        // Only admin can generate reports
+        const { role } = req.user;
         if (role !== 'owner' && !isAdmin(req.user)) {
             return res.json({ success: false, message: "Unauthorized - Admin access required" });
         }
 
-        const { startDate, endDate, status, location } = req.query;
-        
-        // Build query based on filters
-        let query = isAdmin(req.user) ? {} : { owner: req.user._id };
-        
-        // Date filter
-        if (startDate && endDate) {
-            query.createdAt = {
-                $gte: new Date(startDate),
-                $lte: new Date(endDate + 'T23:59:59.999Z')
-            };
-        }
-        
-        // Status filter
-        if (status && status !== 'all') {
-            query.status = status;
-        }
-        
-        // Get all bookings with populated data
-        let bookings = await Booking.find(query)
-            .populate({
-                path: 'outfit',
-                select: 'brand model category pricePerDay location image'
-            })
-            .populate({
-                path: 'user',
-                select: 'username email'
-            })
-            .populate({
-                path: 'owner',
-                select: 'username email'
-            })
-            .sort({ createdAt: -1 });
-
-        // Location filter (after population)
-        if (location && location !== 'all') {
-            bookings = bookings.filter(booking => 
-                booking.outfit && booking.outfit.location === location
-            );
-        }
-
-        // Calculate summary statistics
-        const totalBookings = bookings.length;
-        const totalRevenue = bookings
-            .filter(booking => booking.status === 'confirmed')
-            .reduce((sum, booking) => sum + booking.price, 0);
-        
-        const statusCounts = bookings.reduce((acc, booking) => {
-            acc[booking.status] = (acc[booking.status] || 0) + 1;
-            return acc;
-        }, {});
-
-        const reportData = {
-            bookings,
-            summary: {
-                totalBookings,
-                totalRevenue,
-                statusCounts,
-                reportPeriod: {
-                    startDate: startDate || 'All time',
-                    endDate: endDate || 'Present'
-                }
-            }
-        };
-
+        const reportData = await buildBookingReportData(req);
         res.json({ success: true, reportData });
     } catch (error) {
         console.log(error.message);
@@ -255,74 +238,12 @@ const sendPayOnReturnConfirmation = async (req, res) => {
 //API to generate booking report as PDF
 const generateBookingReportPDF = async (req, res) => {
     try {
-        const { role, type } = req.user;
-        
-        // Only admin can generate reports
+        const { role } = req.user;
         if (role !== 'owner' && !isAdmin(req.user)) {
             return res.json({ success: false, message: "Unauthorized - Admin access required" });
         }
 
-        const { startDate, endDate, status, location } = req.query;
-        
-        // Build query based on filters
-        let query = isAdmin(req.user) ? {} : { owner: req.user._id };
-        
-        // Date filter
-        if (startDate && endDate) {
-            query.createdAt = {
-                $gte: new Date(startDate),
-                $lte: new Date(endDate + 'T23:59:59.999Z')
-            };
-        }
-        
-        // Status filter
-        if (status && status !== 'all') {
-            query.status = status;
-        }
-        
-        // Get all bookings with populated data
-        let bookings = await Booking.find(query)
-            .populate({
-                path: 'outfit',
-                select: 'brand model category pricePerDay location image'
-            })
-            .populate({
-                path: 'user',
-                select: 'username email'
-            })
-            .populate({
-                path: 'owner',
-                select: 'username email'
-            })
-            .sort({ createdAt: -1 });
-
-        // Location filter (after population)
-        if (location && location !== 'all') {
-            bookings = bookings.filter(booking => 
-                booking.outfit && booking.outfit.location === location
-            );
-        }
-
-        // Calculate summary statistics
-        const totalBookings = bookings.length;
-        const totalRevenue = bookings
-            .filter(booking => booking.status === 'confirmed')
-            .reduce((sum, booking) => sum + booking.price, 0);
-        
-        const statusCounts = bookings.reduce((acc, booking) => {
-            acc[booking.status] = (acc[booking.status] || 0) + 1;
-            return acc;
-        }, {});
-
-        const summary = {
-            totalBookings,
-            totalRevenue,
-            statusCounts,
-            reportPeriod: {
-                startDate: startDate || 'All time',
-                endDate: endDate || 'Present'
-            }
-        };
+        const { bookings, summary } = await buildBookingReportData(req);
 
         // Get current user info for the report
         const currentUser = req.user;

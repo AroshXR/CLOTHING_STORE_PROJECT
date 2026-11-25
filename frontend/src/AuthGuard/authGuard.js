@@ -27,7 +27,6 @@ export const AuthProvider = ({ children }) => {
     const clearAuthState = () => {
         localStorage.removeItem(TOKEN_STORAGE_KEY);
         localStorage.removeItem(USER_STORAGE_KEY);
-        delete axios.defaults.headers.common['Authorization'];
         setToken(null);
         setCurrentUser(null);
     };
@@ -36,7 +35,6 @@ export const AuthProvider = ({ children }) => {
         const normalizedUser = normalizeUser(userData);
         localStorage.setItem(TOKEN_STORAGE_KEY, sessionToken);
         localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(normalizedUser));
-        axios.defaults.headers.common['Authorization'] = `Bearer ${sessionToken}`;
         setToken(sessionToken);
         setCurrentUser(normalizedUser);
     };
@@ -64,7 +62,6 @@ export const AuthProvider = ({ children }) => {
                 setCurrentUser(updatedUser);
             }
 
-            axios.defaults.headers.common['Authorization'] = authHeader;
             setToken(effectiveToken);
             return true;
         } catch (error) {
@@ -89,7 +86,6 @@ export const AuthProvider = ({ children }) => {
                 const parsedUser = normalizeUser(JSON.parse(storedUserRaw));
                 setToken(storedToken);
                 setCurrentUser(parsedUser);
-                axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
 
                 await refreshAuth(parsedUser.id, storedToken);
             } catch (error) {

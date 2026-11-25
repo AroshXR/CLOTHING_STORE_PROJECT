@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './authGuard';
 
@@ -11,7 +11,7 @@ const normalizeTypes = (types) => {
     return list.map((type) => type?.toLowerCase()).filter(Boolean);
 };
 
-const ProtectedRoute = ({ children, requiredUserType = null, allowedUserTypes = null }) => {
+const ProtectedRoute = ({ children, allowedUserTypes = null }) => {
     const { isAuthenticated, currentUser, loading } = useAuth();
     const location = useLocation();
 
@@ -33,7 +33,7 @@ const ProtectedRoute = ({ children, requiredUserType = null, allowedUserTypes = 
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    const allowedTypes = normalizeTypes(allowedUserTypes || requiredUserType);
+    const allowedTypes = normalizeTypes(allowedUserTypes);
 
     const accountRoles = [currentUser?.type, ...(['owner', 'admin'].includes(currentUser?.role) ? [currentUser.role] : [])].filter(Boolean).map(value => value.toLowerCase());
     if (allowedTypes && !allowedTypes.some(type => accountRoles.includes(type))) {

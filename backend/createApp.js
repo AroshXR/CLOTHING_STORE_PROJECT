@@ -43,15 +43,6 @@ module.exports = function createApp() {
   const auth = require('./controllers/AuthController');
   app.post('/register', auth.register);
   app.post('/login', auth.login);
-  app.get('/test', (_req, res) => res.json({ status: 'ok', message: 'Backend server is running' }));
-  app.get('/debug/orders', protect, adminOnly, async (_req, res) => {
-    const Order = require('./models/OrderModel');
-    res.json({ status: 'ok', data: await Order.find().sort({ CreatedAt: -1 }).limit(10) });
-  });
-  app.get('/test-email', protect, adminOnly, async (_req, res) => {
-    const result = await require('./utils/email').testEmailConfiguration();
-    res.json({ status: result.success ? 'ok' : 'error', message: result.message });
-  });
   app.use((_req, res) => res.status(404).json({ status: 'error', message: 'Route not found' }));
   app.use((error, _req, res, _next) => {
     const statusCode = error.statusCode || (['ValidationError', 'CastError', 'MulterError'].includes(error.name) ? 400 : error.code === 11000 ? 409 : 500);

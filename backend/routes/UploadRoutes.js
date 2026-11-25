@@ -3,7 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Upload = require('../models/Upload');
-const { protect, optionalAuth } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const directory = path.join(__dirname, '..', 'uploads');
 const imageTypes = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/gif': '.gif', 'image/webp': '.webp' };
 const upload = multer({
@@ -20,5 +20,4 @@ router.post('/image', protect, upload.single('image'), async (req, res) => {
   catch (error) { fs.unlink(req.file.path, () => {}); throw error; }
   res.json({ status: 'ok', data: { filename: req.file.filename, url: '/uploads/' + req.file.filename } });
 });
-router.get('/uploads/:filename', optionalAuth, require('../controllers/ImageAccessController').serve);
 module.exports = router;

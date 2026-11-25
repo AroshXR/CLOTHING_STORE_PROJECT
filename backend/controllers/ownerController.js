@@ -1,7 +1,7 @@
 const { isAdmin } = require('../middleware/auth');
 const User = require("../models/User");
 const fs = require("fs");  // Replaced import with require
-const imagekit = require("../configs/imageKit");  // Replaced import with require
+const imagekit = require("../config/imageKit");
 const Outfit = require("../models/Outfit");
 const Booking = require("../models/Booking");
 
