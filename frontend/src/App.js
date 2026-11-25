@@ -5,24 +5,23 @@ import { AuthProvider } from './AuthGuard/authGuard';
 import { BrandingProvider } from './config/branding';
 import SiteSettings from './pages/admin/SiteSettings';
 import ProtectedRoute from './AuthGuard/ProtectedRoute';
-import Home from './Components/Home/Home';
+import HomeLanding from './Components/Editorial/HomeLanding';
 import Splash from './Components/Editorial/Splash';
 import About from './Components/Editorial/About';
 import LoginPage from './Components/Login_Register/Login';
 import RegisterPage from './Components/Login_Register/Register';
-import ClothCustomizer from './Components/clothing-customizer/ClothCustomizer';
+import ClothingStudio from './Components/clothing-customizer/studio/ClothingStudio';
 import Career from './Components/Career/Career';
 import ApplicantDashboard from './Components/ApplicantDashboard/ApplicantDashboard';
 import AdminJobManagement from './Components/AdminJobManagement/AdminJobManagement';
 import AdminApplicantManagement from './Components/AdminApplicantManagement/AdminApplicantManagement';
 import AdminApplicantDetail from './Components/AdminApplicantManagement/AdminApplicantDetail';
 import AdminPanel from './Components/AdminPanel/AdminPanel';
-import ContactUs from './Components/ContactUsPage/ContactUsPage';
+import Contact from './Components/Editorial/Contact';
 import OrderManagement from './Components/OrderManagement/OrderManagement';
 import PaymentManagement from './Components/PaymentManagement/PaymentManagement';
 import PaymentDetailsDisplay from './Components/PaymentDetailsDisplay/PaymentDetailsDisplay';
 import TailorHome from './Components/Home/Tailor_Interface/TailorHome';
-import UserHome from './Components/Home/UserHome/UserHome';
 import SupplierManagement from './Components/Supplier-management/SupplierManagement';
 import MaterialInventoryManagement from './Components/MaterialInventory-management/MaterialInventoryManagement';
 import SkinToneColorGuide from './Components/SkinToneColorGuide/SkinToneColorGuide';
@@ -40,7 +39,7 @@ import BookingReport from './pages/admin/BookingReport';
 import LearnMore from './Components/LearnMore/LearnMore';
 
 
-import RentalHome from './pages/RentalHome';
+import Rentals from './Components/Editorial/Rentals';
 import OutfitDetails from './pages/OutfitDetails';
 import Outfits from './pages/Outfits';
 import MyBookings from './pages/MyBookings';
@@ -52,21 +51,12 @@ import EditOutfit from './pages/owner/EditOutfit';
 import ManageOutfits from './pages/owner/ManageOutfits';
 import ManageBookings from './pages/owner/ManageBookings';
 import Reports from './pages/owner/Reports';
-//import { Toaster} from 'react-hot-toast'
 
 import AdminHub from './Components/AdminHub/AdminHub';
 import AdminCustomOrders from './pages/admin/CustomOrders';
 import AdminCustomOrderDetail from './pages/admin/CustomOrderDetail';
 import AdminTailors from './pages/admin/Tailors';
 import AdminClothCustomizer from './Components/clothing-customizer/admin-cloth-customizer';
-
-// Gate that redirects logged-in customers to UserHome on outlet routes only
-const OutletGate = ({ id = null }) => {
-  // Always allow access to Outlet and OutletDetail for all roles
-  // Render Outlet or OutletDetail based on whether an id is provided via route match
-  return id ? <OutletDetail /> : <Outlet />;
-};
-
 
 function App() {
   return (
@@ -76,16 +66,16 @@ function App() {
         <Route path="/admin/site-settings" element={<ProtectedRoute allowedUserTypes="Admin"><SiteSettings /></ProtectedRoute>} />
         {/* Public routes */}
         <Route path="/" element={<Splash />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/home" element={<HomeLanding />} />
         <Route path="/about" element={<About />} />
         <Route path="/learn-more" element={<LearnMore />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/career" element={<Career />} />
-        <Route path="/customizer" element={<ClothCustomizer />} />
-        <Route path="/outlet" element={<OutletGate />} />
-        <Route path="/outlet/:id" element={<OutletGate id />} />
+        <Route path="/customizer" element={<ClothingStudio />} />
+        <Route path="/outlet" element={<Outlet />} />
+        <Route path="/outlet/:id" element={<OutletDetail />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsConditions />} />
@@ -100,7 +90,7 @@ function App() {
           path="/userHome"
           element={(
             <ProtectedRoute allowedUserTypes={["Customer", "Applicant"]}>
-              <UserHome />
+              <HomeLanding />
             </ProtectedRoute>
           )}
         />
@@ -274,7 +264,7 @@ function App() {
         />
 
 
-        <Route path='/rentalHome' element={<RentalHome />}/>
+        <Route path='/rentalHome' element={<Rentals />}/>
         <Route path='/outfit-details/:id' element = {<OutfitDetails/>}/>
         <Route path='/outfits' element = {<Outfits/>}/>
         <Route 

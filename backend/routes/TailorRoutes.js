@@ -1,13 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+const { protect, adminOnly } = require('../middleware/auth');
 const { registerTailor, getMyTailorProfile, listTailors, syncTailorsFromUsers, adminOverview } = require('../controllers/TailorController');
-
-// Simple admin check middleware
-const ensureAdmin = (req, res, next) => {
-  if (req.user?.type === 'Admin' || req.user?.role === 'admin') return next();
-  return res.status(403).json({ status: 'error', message: 'Admin only' });
-};
 
 // Tailor self registration / update
 router.post('/register', protect, (req, res, next) => req.user.type === 'Tailor' ? next() : res.sendStatus(403), registerTailor);
@@ -16,12 +10,12 @@ router.post('/register', protect, (req, res, next) => req.user.type === 'Tailor'
 router.get('/me', protect, getMyTailorProfile);
 
 // Admin: list tailors
-router.get('/', protect, ensureAdmin, listTailors);
+router.get('/', protect, adminOnly, listTailors);
 
 // Admin: combined overview (tailors + custom orders)
-router.get('/overview', protect, ensureAdmin, adminOverview);
+router.get('/overview', protect, adminOnly, adminOverview);
 
 // Admin: sync Tailors from Users(type='Tailor')
-router.post('/sync', protect, ensureAdmin, syncTailorsFromUsers);
+router.post('/sync', protect, adminOnly, syncTailorsFromUsers);
 
 module.exports = router;

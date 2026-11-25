@@ -1,5 +1,4 @@
 const MaterialInventory = require('../models/MaterialInventoryModel');
-const Supplier = require('../models/SupplierModel');
 
 // Email service - temporarily disabled for testing
 let sendLowStockAlert;

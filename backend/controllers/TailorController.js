@@ -1,7 +1,6 @@
 const Tailor = require('../models/Tailor');
 const User = require('../models/User');
 const CustomOrder = require('../models/CustomOrder');
-const ClothCustomizer = require('../models/ClothCustomizerModel');
 
 // Register or update current user as a Tailor
 exports.registerTailor = async (req, res) => {
