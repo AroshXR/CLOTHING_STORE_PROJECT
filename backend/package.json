@@ -21,13 +21,10 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.0",
     "multer": "^2.0.2",
-    "node-cron": "^3.0.3",
-    "nodemailer": "^7.0.6",
+    "node-cron": "^4.6.0",
+    "nodemailer": "^10.6.1",
     "nodemon": "^3.1.10",
-    "puppeteer": "^24.23.1",
+    "puppeteer": "^25.18.1",
     "socket.io": "^4.8.1"
-  },
-  "devDependencies": {
-    "mongodb-memory-server": "^11.4.0"
   }
 }
