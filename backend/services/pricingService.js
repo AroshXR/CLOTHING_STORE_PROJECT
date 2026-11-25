@@ -23,6 +23,8 @@ async function getPrices(session) {
   return (await query) || defaultPrices;
 }
 
+const PRESET_ARTWORK_PATH = /^\/(?:static\/media|assets|src\/Components\/clothing-customizer\/customizer_preset_designs)\/[^/]+\.(png|jpe?g|gif|webp)$/i;
+
 function artwork(input, prices) {
   if (!input || (!input.id && !input.preview)) return null;
   const uploaded = input.isCustomUpload === true;
@@ -35,7 +37,7 @@ function artwork(input, prices) {
   if (uploaded && !/^\/uploads\/image-[\w.-]+\.(png|jpe?g|gif|webp)$/i.test(url.pathname)) {
     throw new HttpError(400, 'Upload your artwork using the image uploader');
   }
-  if (!uploaded && !/^\/static\/media\/[^/]+\.(png|jpe?g|gif|webp)$/i.test(url.pathname)) {
+  if (!uploaded && !PRESET_ARTWORK_PATH.test(url.pathname)) {
     throw new HttpError(400, 'Invalid preset artwork');
   }
   if (!preview) throw new HttpError(400, 'Artwork preview is required');
