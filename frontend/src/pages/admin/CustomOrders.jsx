@@ -195,7 +195,6 @@ export default function AdminCustomOrders() {
         </div>
 
         {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
-        {info && <div style={{ color: '#555', marginBottom: 8 }}>{info}</div>}
         {loading ? (
           <div>Loading...</div>
         ) : (
