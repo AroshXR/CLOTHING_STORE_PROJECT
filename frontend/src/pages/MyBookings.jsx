@@ -2,6 +2,7 @@ import { API_BASE_URL as API_ORIGIN } from '../config/api';
 import MediaImage from '../Components/MediaImage';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Phone } from 'lucide-react'
 import { assets } from '../assets/assets'
 import Title from '../Components/pasindu/Title'
 
@@ -152,7 +153,7 @@ const MyBookings = () => {
 
               {/* Contact Information */}
               <div className='flex items-start gap-2 mt-3'>
-                <MediaImage src={assets.phone_icon || assets.location_icon} alt="" className='w-4 h-4 mt-1' />
+                <Phone className='w-4 h-4 mt-1 text-gray-500 shrink-0' aria-hidden="true" />
                 <div>
                   <p className='text-gray-500'>Contact</p>
                   <p className='text-sm'>{booking.phone}</p>

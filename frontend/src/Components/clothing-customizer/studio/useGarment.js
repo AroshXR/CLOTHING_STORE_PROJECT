@@ -54,30 +54,60 @@ export function useGarment(design) {
     }
     return { canvases: nextCanvases, textures: nextTextures };
   }, []);
-  const prevPanelKeys = useRef({});
-  const versionRef = useRef(0);
-  useMemo(() => {
+  const [version, setVersion] = useState(0);
+  const prevPanelState = useRef({});
+  const pendingDispose = useRef(new WeakMap());
+  useEffect(() => {
     let changed = false;
     for (const panel of PANELS) {
       const id = panel.id;
+      const placed = design.placedDesigns.filter(layer => layer.side === id);
       const key = JSON.stringify({
         bg: design.panelColors[id] || design.color,
         trim: id.includes('Sleeve') ? design.trimColor : '',
-        placed: design.placedDesigns.filter(layer => layer.side === id),
+        placed,
         lettering: design.lettering.filter(layer => layer.side === id),
         loading: artwork.loading
       });
-      if (prevPanelKeys.current[id] !== key) {
-        prevPanelKeys.current[id] = key;
+      const prev = prevPanelState.current[id];
+      const artworkChanged = placed.length > 0 && prev?.images !== artwork.images;
+      if (!prev || prev.key !== key || artworkChanged) {
+        prevPanelState.current[id] = { key, images: artwork.images };
         paintPanel(id, design, artwork.images, canvases[id]);
         textures[id].needsUpdate = true;
         changed = true;
       }
     }
-    if (changed) versionRef.current += 1;
+    if (changed) setVersion(v => v + 1);
   }, [design, artwork.images, artwork.loading, canvases, textures]);
-  useEffect(() => () => Object.values(textures).forEach(texture => texture.dispose()), [textures]);
-  useEffect(() => () => meshes.forEach(mesh => mesh.geometry.dispose()), [meshes]);
-  return { meshes, masks, canvases, textures, version: versionRef.current, trimColor: design.trimColor, loading: artwork.loading, error: artwork.error };
+  useEffect(() => {
+    const disposeMap = pendingDispose.current;
+    const timer = disposeMap.get(textures);
+    if (timer) {
+      clearTimeout(timer);
+      disposeMap.delete(textures);
+    }
+    return () => {
+      disposeMap.set(textures, setTimeout(() => {
+        disposeMap.delete(textures);
+        Object.values(textures).forEach(texture => texture.dispose());
+      }, 0));
+    };
+  }, [textures]);
+  useEffect(() => {
+    const disposeMap = pendingDispose.current;
+    const timer = disposeMap.get(meshes);
+    if (timer) {
+      clearTimeout(timer);
+      disposeMap.delete(meshes);
+    }
+    return () => {
+      disposeMap.set(meshes, setTimeout(() => {
+        disposeMap.delete(meshes);
+        meshes.forEach(mesh => mesh.geometry.dispose());
+      }, 0));
+    };
+  }, [meshes]);
+  return { meshes, masks, canvases, textures, version, trimColor: design.trimColor, loading: artwork.loading, error: artwork.error };
 }
 useGLTF.preload('/models/t_shirt.glb');

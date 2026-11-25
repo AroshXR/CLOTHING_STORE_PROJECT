@@ -99,7 +99,7 @@ const createJob = async (req, res, next) => {
       type,
       experience,
       description,
-      postedBy: req.user?.id || null // This should come from auth middleware
+      postedBy: req.user?._id || null // From protect auth middleware (.lean() user has _id, not virtual id)
     };
     
     if (requirements && Array.isArray(requirements)) {

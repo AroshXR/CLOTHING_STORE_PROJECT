@@ -1,7 +1,6 @@
 const { test, before, after, beforeEach } = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('path');
-const os = require('os');
 const fs = require('fs');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
@@ -27,26 +26,40 @@ async function request(method, url, user, body, headers = {}) {
   const data = response.headers.get('content-type')?.includes('application/json') ? await response.json() : await response.text();
   return { status: response.status, data };
 }
+const testDbName = `platform-priority-tests-${process.pid}-${Date.now()}`;
 before(async () => {
   const uri = process.env.TEST_MONGODB_URI;
   if (!uri) throw new Error('TEST_MONGODB_URI must be set to a MongoDB replica set URI to run priority tests.');
-  await mongoose.connect(uri, { dbName: 'platform-priority-tests' });
+  await mongoose.connect(uri, { dbName: testDbName });
+  const app = createApp();
   await Promise.all(Object.values(mongoose.models).map(model => model.init()));
-  server = createApp().listen(0, '127.0.0.1');
+  server = app.listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve));
   base = 'http://127.0.0.1:' + server.address().port;
   sockets = require('../utils/socket').initSocket(server);
-}, { timeout: 300000 });
+}, { timeout: 30000 });
 beforeEach(async () => {
-  assert.equal(mongoose.connection.name, 'platform-priority-tests');
+  assert.equal(mongoose.connection.name, testDbName);
   await Promise.all(Object.values(mongoose.models).map(model => model.deleteMany({})));
   const roles = [['customer', 'Customer', 'customer'], ['other', 'Customer', 'customer'], ['admin', 'Admin', 'admin'], ['owner', 'Customer', 'owner'], ['tailor', 'Tailor', 'customer'], ['otherTailor', 'Tailor', 'customer']];
-  people = {};
-  for (const [name, type, role] of roles) people[name] = await User.create({ username: name, address: 'Test address', email: name + '@example.com', password: 'unused-test-password-hash', type, role });
+  const createdUsers = await User.insertMany(
+    roles.map(([name, type, role]) => ({
+      username: name,
+      address: 'Test address',
+      email: name + '@example.com',
+      password: 'unused-test-password-hash',
+      type,
+      role
+    }))
+  );
+  people = Object.fromEntries(createdUsers.map(user => [user.username, user]));
 });
 after(async () => {
   if (sockets) await new Promise(resolve => sockets.close(resolve));
   if (server?.listening) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
+  if (mongoose.connection.readyState === 1 && mongoose.connection.name === testDbName) {
+    await mongoose.connection.dropDatabase();
+  }
   await mongoose.disconnect();
   for (const filename of uploaded) {
     assert.match(filename, /^image-[\w-]+\.png$/);

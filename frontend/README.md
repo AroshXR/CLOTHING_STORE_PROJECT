@@ -48,12 +48,11 @@ Public registration offers Customer and Applicant accounts. Staff access is prov
 ## Verification
 
 ~~~powershell
-$env:CI = 'true'
-npm test -- --watchAll=false --runInBand
+npm test
 npm run build
 ~~~
 
-Tests cover saved buyer branding, logo publishing, report escaping, role routing, mixed-cart request construction, Buy Now isolation, cart cleanup, and cash collection retries. The production build still reports existing repository lint warnings and outdated Browserslist data; dependency modernization is separate work.
+Tests run with Vitest (`vitest run`) and cover saved buyer branding, logo publishing, report escaping, role routing, mixed-cart request construction, Buy Now isolation, cart cleanup, and cash collection retries. Production builds use Vite (`vite build` -> `frontend/build/`).
 
 For transaction requirements, backend setup, payment semantics, and deployment considerations, see ../backend/README.md.
 

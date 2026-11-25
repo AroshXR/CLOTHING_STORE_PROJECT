@@ -84,7 +84,7 @@ function createCheckoutService({ models = defaults, transaction = runTransaction
         findByIds(models.Booking, bookingIds, null)
       ]);
     }
-    const outfitIds = [...new Set(bookings.map(b => String(b.outfit)).filter(Boolean))];
+    const outfitIds = [...new Set(bookings.map(b => b.outfit).filter(Boolean).map(String))];
     const outfits = await findByIds(models.Outfit, outfitIds, session);
     const designMap = mapById(designs), productMap = mapById(products), bookingMap = mapById(bookings), outfitMap = mapById(outfits);
     for (const item of items) {

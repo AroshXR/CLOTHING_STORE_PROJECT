@@ -7,6 +7,7 @@ export function paintPanel(side, design, images, targetCanvas) {
   if (canvas.width !== WIDTH) canvas.width = WIDTH;
   if (canvas.height !== HEIGHT) canvas.height = HEIGHT;
   const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, WIDTH, HEIGHT);
   ctx.fillStyle = design.panelColors[side] || design.color; ctx.fillRect(0, 0, WIDTH, HEIGHT);
   design.placedDesigns.filter(layer => layer.side === side).forEach(layer => {
     const img = images[layer.preview]; if (!img) return;
