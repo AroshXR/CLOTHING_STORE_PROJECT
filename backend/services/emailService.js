@@ -568,11 +568,11 @@ const sendPayOnReturnEmail = async (booking, recipientEmail) => {
 };
 
 // Send return reminder email
-const sendReturnReminderEmail = async (booking, recipientEmail) => {
+const sendReturnReminderEmail = async (booking, recipientEmail, prefetchedBrand = null) => {
   console.log(`Sending return reminder to: ${recipientEmail}`);
   
   try {
-    const brand = await getEmailBranding();
+    const brand = prefetchedBrand || await getEmailBranding();
     const returnDate = new Date(booking.returnDate);
     const today = new Date();
     const daysUntilReturn = Math.ceil((returnDate - today) / (1000 * 60 * 60 * 24));

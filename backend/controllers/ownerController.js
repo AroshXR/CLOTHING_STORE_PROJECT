@@ -50,20 +50,16 @@ const addOutfit = async (req, res) => {
             ]
         });
 
-        // Upload additional images (optional, max 3)
-        const additionalImages = [];
-        const additionalFiles = files.additionalImages || [];
-        
-        for (let i = 0; i < Math.min(additionalFiles.length, 3); i++) {
-            const file = additionalFiles[i];
-            const fileBuffer = fs.readFileSync(file.path);
+        // Upload additional images (optional, max 3) in parallel
+        const additionalFiles = (files.additionalImages || []).slice(0, 3);
+        const additionalImages = await Promise.all(additionalFiles.map(async (file) => {
+            const fileBuffer = await fs.promises.readFile(file.path);
             const response = await imagekit.upload({
                 file: fileBuffer,
                 fileName: file.originalname,
                 folder: '/outfits'
             });
-
-            const optimizedImageUrl = imagekit.url({
+            return imagekit.url({
                 path: response.filePath,
                 transformation: [
                     { width: '1280' },
@@ -71,8 +67,7 @@ const addOutfit = async (req, res) => {
                     { format: 'webp' }
                 ]
             });
-            additionalImages.push(optimizedImageUrl);
-        }
+        }));
 
         await Outfit.create({ 
             ...outfit, 
@@ -127,20 +122,14 @@ const getAllOutfits = async (req, res) => {
         // Get all outfits matching the query
         let outfits = await Outfit.find(query).populate('owner', 'username email');
         
-        // Filter out outfits with pending or confirmed bookings
-        const availableOutfits = [];
-        
-        for (const outfit of outfits) {
-            const activeBookings = await Booking.find({
-                outfit: outfit._id,
+        // Filter out outfits with pending or confirmed bookings in one query
+        const bookedIds = outfits.length
+            ? new Set((await Booking.distinct('outfit', {
+                outfit: { $in: outfits.map(o => o._id) },
                 status: { $in: ['pending', 'confirmed'] }
-            });
-            
-            // Only include outfit if no pending or confirmed bookings exist
-            if (activeBookings.length === 0) {
-                availableOutfits.push(outfit);
-            }
-        }
+            })).map(String))
+            : new Set();
+        const availableOutfits = outfits.filter(outfit => !bookedIds.has(String(outfit._id)));
         
         res.json({ success: true, outfits: availableOutfits });
     } catch (error) {
@@ -319,19 +308,17 @@ const updateOutfit = async (req, res) => {
             imageUrl = mainImageUpload.url;
         }
 
-        // Update additional images if provided
+        // Update additional images if provided (parallel upload)
         if (files && files.additionalImages) {
-            const additionalImageUploads = [];
-            for (const file of files.additionalImages) {
-                const fileBuffer = fs.readFileSync(file.path);
+            additionalImages = await Promise.all(files.additionalImages.map(async (file) => {
+                const fileBuffer = await fs.promises.readFile(file.path);
                 const upload = await imagekit.upload({
                     file: fileBuffer,
                     fileName: `outfit_${Date.now()}_additional.${file.originalname.split('.').pop()}`,
                     folder: '/outfits'
                 });
-                additionalImageUploads.push(upload.url);
-            }
-            additionalImages = additionalImageUploads;
+                return upload.url;
+            }));
         }
 
         // Update outfit in database

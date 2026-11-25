@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const Booking = require('../models/Booking');
 const { sendReturnReminderEmail } = require('./emailService');
+const { getEmailBranding } = require('./siteSettingsService');
 
 // Track sent reminders to avoid duplicates
 const sentReminders = new Set();
@@ -25,34 +26,33 @@ const checkReturnReminders = async () => {
         $lte: twoDaysFromNow
       },
       status: 'confirmed'      //Only confirmed bookings get reminders
-    }).populate('user').populate('outfit');
+    }).populate('user', 'username').populate('outfit', 'brand model category').lean();
     
     console.log(`Found ${upcomingReturns.length} bookings with upcoming return dates`);
-    
-    for (const booking of upcomingReturns) {
-      const returnDate = new Date(booking.returnDate);
-      const reminderKey = `${booking._id}_${returnDate.toDateString()}`;
-      
-      // Skip if reminder already sent for this booking today
-      if (sentReminders.has(reminderKey)) {
-        console.log(`Reminder already sent for booking #${booking._id.toString().slice(-6)}`);
-        continue;
-      }
-      
-      try {
-        // Send reminder email
-        const result = await sendReturnReminderEmail(booking, booking.email);
-        
-        if (result.success) {
-          // Mark reminder as sent
+
+    const pendingReminders = upcomingReturns
+      .map(booking => ({
+        booking,
+        reminderKey: `${booking._id}_${new Date(booking.returnDate).toDateString()}`
+      }))
+      .filter(({ reminderKey }) => !sentReminders.has(reminderKey));
+
+    if (pendingReminders.length) {
+      const brand = await getEmailBranding();
+      const results = await Promise.allSettled(
+        pendingReminders.map(({ booking }) => sendReturnReminderEmail(booking, booking.email, brand))
+      );
+      results.forEach((entry, idx) => {
+        const { booking, reminderKey } = pendingReminders[idx];
+        const shortId = booking._id.toString().slice(-6);
+        if (entry.status === 'fulfilled' && entry.value?.success) {
           sentReminders.add(reminderKey);
-          console.log(`Return reminder sent for booking #${booking._id.toString().slice(-6)} to ${booking.email}`);
+          console.log(`Return reminder sent for booking #${shortId} to ${booking.email}`);
         } else {
-          console.error(`Failed to send reminder for booking #${booking._id.toString().slice(-6)}:`, result.error);
+          const reason = entry.status === 'rejected' ? entry.reason?.message : entry.value?.error;
+          console.error(`Failed to send reminder for booking #${shortId}:`, reason);
         }
-      } catch (error) {
-        console.error(`Error sending reminder for booking #${booking._id.toString().slice(-6)}:`, error.message);
-      }
+      });
     }
     
     // Clean up old reminder keys (older than 7 days)

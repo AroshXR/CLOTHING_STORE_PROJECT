@@ -61,11 +61,35 @@ function createCheckoutService({ models = defaults, transaction = runTransaction
     const query = Model.findById(id);
     return session ? query.session(session) : query;
   };
+  const findByIds = (Model, ids, session) => {
+    if (!ids.length) return Promise.resolve([]);
+    const query = Model.find({ _id: { $in: ids } });
+    return session ? query.session(session) : query;
+  };
+  const mapById = (docs) => new Map(docs.map(doc => [String(doc._id), doc]));
   async function quote(userId, request, session) {
     const items = normalizeItems(request.items), prices = await getPrices(session), snapshots = [];
+    const customIds = [...new Set(items.filter(i => i.kind === 'custom').map(i => i.id))];
+    const productIds = [...new Set(items.filter(i => i.kind === 'product').map(i => i.id))];
+    const bookingIds = [...new Set(items.filter(i => i.kind === 'booking').map(i => i.id))];
+    let designs, products, bookings;
+    if (session) {
+      designs = await findByIds(models.Design, customIds, session);
+      products = await findByIds(models.Product, productIds, session);
+      bookings = await findByIds(models.Booking, bookingIds, session);
+    } else {
+      [designs, products, bookings] = await Promise.all([
+        findByIds(models.Design, customIds, null),
+        findByIds(models.Product, productIds, null),
+        findByIds(models.Booking, bookingIds, null)
+      ]);
+    }
+    const outfitIds = [...new Set(bookings.map(b => String(b.outfit)).filter(Boolean))];
+    const outfits = await findByIds(models.Outfit, outfitIds, session);
+    const designMap = mapById(designs), productMap = mapById(products), bookingMap = mapById(bookings), outfitMap = mapById(outfits);
     for (const item of items) {
       if (item.kind === 'custom') {
-        const design = await read(models.Design, item.id, session);
+        const design = designMap.get(String(item.id));
         if (!design || String(design.userId) !== String(userId)) throw new HttpError(404, 'Custom design not found');
         if (design.inCart === false) throw new HttpError(409, 'This design is no longer in your cart');
         const calculated = pricing.priceCustomization({ ...(design.toObject ? design.toObject() : design), quantity: item.quantity }, prices);
@@ -74,7 +98,7 @@ function createCheckoutService({ models = defaults, transaction = runTransaction
           size: calculated.design.size, color: calculated.design.color, designVersion: calculated.design.designVersion,
           imageUrl: calculated.design.selectedDesign?.preview, design: clone(calculated.design) });
       } else if (item.kind === 'product') {
-        const product = await read(models.Product, item.id, session);
+        const product = productMap.get(String(item.id));
         if (!product || product.status !== 'active') throw new HttpError(404, 'Clothing item is not available');
         for (const field of ['size', 'color']) {
           const options = product[field === 'size' ? 'sizes' : 'colors'] || [];
@@ -88,11 +112,11 @@ function createCheckoutService({ models = defaults, transaction = runTransaction
           size: item.size, color: item.color, variantId: variant?._id, imageUrl: product.imageUrl,
           unitPrice, totalPrice: pricing.money(unitPrice * item.quantity) });
       } else {
-        const booking = await read(models.Booking, item.id, session);
+        const booking = bookingMap.get(String(item.id));
         if (!booking || String(booking.user) !== String(userId)) throw new HttpError(404, 'Booking not found');
         if (booking.status !== 'confirmed') throw new HttpError(409, 'Only confirmed bookings can be checked out');
         if (['pending', 'paid'].includes(booking.paymentStatus)) throw new HttpError(409, 'This booking already has a payment arrangement');
-        const outfit = await read(models.Outfit, String(booking.outfit), session);
+        const outfit = outfitMap.get(String(booking.outfit));
         if (!outfit) throw new HttpError(404, 'Rental outfit not found');
         snapshots.push({ kind: 'booking', sourceId: booking._id, name: outfit.brand + ' ' + outfit.model, quantity: 1,
           unitPrice: pricing.priceValue(booking.price), totalPrice: pricing.priceValue(booking.price),
@@ -139,7 +163,7 @@ function createCheckoutService({ models = defaults, transaction = runTransaction
             giftWrapFee: calculated.giftWrapFee, total: calculated.total, cartItems: calculated.items },
           giftMessage: normalized.giftMessage, status: 'pending'
         }], { session });
-        const orders = [];
+        const orderDocs = [];
         for (const item of calculated.items) {
           if (item.kind === 'product') {
             const filter = { _id: item.sourceId, status: 'active', stock: { $gte: item.quantity } }, increment = { stock: -item.quantity };
@@ -157,26 +181,37 @@ function createCheckoutService({ models = defaults, transaction = runTransaction
             const reserved = await models.Design.updateOne({ _id: item.sourceId, userId, inCart: { $ne: false } }, { $set: { inCart: false } }, { session });
             if (reserved.modifiedCount !== 1) throw new HttpError(409, 'Your customization cart changed; please refresh');
           }
-          const [order] = await models.Order.create([{
+          orderDocs.push({
             OrderID: 'ORD-' + randomUUID(), AdminID: userId, PaymentID: String(payment._id), ItemID: String(item.sourceId),
             DesignID: item.kind === 'custom' ? item.sourceId : undefined, ProductID: item.kind === 'product' ? item.sourceId : undefined,
             BookingID: item.kind === 'booking' ? item.sourceId : undefined, itemType: item.kind, itemSnapshot: clone(item),
             quantity: item.quantity, Price: item.totalPrice,
             CustomerName: normalized.deliveryDetails.firstName + ' ' + normalized.deliveryDetails.lastName,
             status: 'pending', paymentStatus: 'pending', fulfillmentStatus: 'pending'
-          }], { session });
-          if (item.kind === 'custom') {
-            const [production] = await models.Production.create([{
-              customerId: userId, sourceDesignId: item.sourceId, salesOrderId: order._id, paymentId: payment._id,
-              config: { clothingType: item.design.clothingType, size: item.size, color: item.color, quantity: item.quantity, notes: item.name },
-              design: { designImageUrl: item.imageUrl, designMeta: clone(item.design) },
-              previewGallery: item.imageUrl ? [item.imageUrl] : [], price: item.totalPrice, status: 'pending'
-            }], { session });
-            await models.Order.updateOne({ _id: order._id }, { $set: { CustomOrderID: production._id } }, { session });
-            await models.History.create([{ customOrderId: production._id, clothCustomizerId: item.sourceId, status: 'pending', createdBy: userId }], { session });
-          }
-          orders.push({ orderId: order.OrderID, _id: order._id, itemName: item.name, quantity: item.quantity, price: item.totalPrice });
+          });
         }
+        const createdOrders = await models.Order.create(orderDocs, { session, ordered: true });
+        const customPairs = calculated.items
+          .map((item, idx) => ({ item, order: createdOrders[idx] }))
+          .filter(({ item }) => item.kind === 'custom');
+        if (customPairs.length) {
+          const createdProductions = await models.Production.create(customPairs.map(({ item, order }) => ({
+            customerId: userId, sourceDesignId: item.sourceId, salesOrderId: order._id, paymentId: payment._id,
+            config: { clothingType: item.design.clothingType, size: item.size, color: item.color, quantity: item.quantity, notes: item.name },
+            design: { designImageUrl: item.imageUrl, designMeta: clone(item.design) },
+            previewGallery: item.imageUrl ? [item.imageUrl] : [], price: item.totalPrice, status: 'pending'
+          })), { session, ordered: true });
+          await models.Order.bulkWrite(createdProductions.map((production, idx) => ({
+            updateOne: { filter: { _id: customPairs[idx].order._id }, update: { $set: { CustomOrderID: production._id } } }
+          })), { session });
+          await models.History.create(createdProductions.map((production, idx) => ({
+            customOrderId: production._id, clothCustomizerId: customPairs[idx].item.sourceId, status: 'pending', createdBy: userId
+          })), { session, ordered: true });
+        }
+        const orders = createdOrders.map((order, idx) => ({
+          orderId: order.OrderID, _id: order._id, itemName: calculated.items[idx].name,
+          quantity: calculated.items[idx].quantity, price: calculated.items[idx].totalPrice
+        }));
         return { paymentId: payment._id, status: 'pending', total: calculated.total, orders, totalOrders: orders.length, replayed: false };
       });
     } catch (error) {
@@ -196,6 +231,7 @@ function createCheckoutService({ models = defaults, transaction = runTransaction
         if (orders.some(order => order.paymentStatus === 'completed')) throw new HttpError(409, 'Cash has already been received for part of this order. A received payment cannot be cancelled.');
         const paidBooking = await models.Booking.exists({ paymentId: payment._id, paymentStatus: 'paid' }).session(session);
         if (paidBooking) throw new HttpError(409, 'Cash has already been received for a rental in this order.');
+        const bookingIdsToRelease = [];
         for (const order of orders) {
           if (!['pending', 'assigned', 'accepted'].includes(order.fulfillmentStatus || 'pending')) throw new HttpError(409, 'An order is already in production or fulfilled');
           const item = order.itemSnapshot;
@@ -204,13 +240,22 @@ function createCheckoutService({ models = defaults, transaction = runTransaction
             if (item.variantId) { filter['variants._id'] = item.variantId; increment['variants.$.stock'] = item.quantity; }
             await models.Product.updateOne(filter, { $inc: increment }, { session });
           }
-          if (item?.kind === 'booking') await models.Booking.updateOne({ _id: item.sourceId, paymentId: payment._id },
-            { $set: { paymentStatus: 'unpaid' }, $unset: { paymentId: 1, paymentMethod: 1, collectionAmount: 1 } }, { session });
+          if (item?.kind === 'booking') bookingIdsToRelease.push(item.sourceId);
+        }
+        if (bookingIdsToRelease.length) {
+          await models.Booking.updateMany(
+            { _id: { $in: bookingIdsToRelease }, paymentId: payment._id },
+            { $set: { paymentStatus: 'unpaid' }, $unset: { paymentId: 1, paymentMethod: 1, collectionAmount: 1 } },
+            { session }
+          );
         }
         const productions = await models.Production.find({ paymentId: payment._id }).session(session);
         await models.Production.updateMany({ paymentId: payment._id }, { $set: { status: 'cancelled' } }, { session });
-        for (const production of productions) {
-          await models.History.create([{ customOrderId: production._id, clothCustomizerId: production.sourceDesignId, status: 'cancelled', createdBy: actorId || payment.userId, note: 'Cash payment arrangement cancelled' }], { session });
+        if (productions.length) {
+          await models.History.create(productions.map(production => ({
+            customOrderId: production._id, clothCustomizerId: production.sourceDesignId, status: 'cancelled',
+            createdBy: actorId || payment.userId, note: 'Cash payment arrangement cancelled'
+          })), { session, ordered: true });
         }
       } else if (status === 'completed') {
         await models.Booking.updateMany({ paymentId: payment._id }, { $set: { paymentStatus: 'paid' } }, { session });

@@ -52,26 +52,33 @@ exports.getMyTailorProfile = async (req, res) => {
 };
 
 // Admin: list all tailors with stats (rating is stored; activeOrderCount computed; busy if > 10)
+const ACTIVE_STATUSES = ['pending', 'assigned', 'accepted', 'in_progress'];
+
+const getActiveOrderCountMap = async (tailorIds) => {
+  if (!tailorIds.length) return new Map();
+  const rows = await CustomOrder.aggregate([
+    { $match: { assignedTailor: { $in: tailorIds }, status: { $in: ACTIVE_STATUSES } } },
+    { $group: { _id: '$assignedTailor', count: { $sum: 1 } } }
+  ]);
+  return new Map(rows.map(r => [String(r._id), r.count]));
+};
+
 exports.listTailors = async (req, res) => {
   try {
     const tailors = await Tailor.find()
       .populate('userId', 'username email type')
       .sort({ createdAt: -1 });
 
-    // Active statuses for orders assigned to a tailor
-    const ACTIVE_STATUSES = ['pending','assigned','accepted','in_progress'];
-
-    // Compute active order count for each tailor in parallel
-    const withStats = await Promise.all(tailors.map(async (t) => {
-      const activeOrderCount = await CustomOrder.countDocuments({ assignedTailor: t._id, status: { $in: ACTIVE_STATUSES } });
-      const busy = activeOrderCount > 10;
+    const countMap = await getActiveOrderCountMap(tailors.map(t => t._id));
+    const withStats = tailors.map((t) => {
+      const activeOrderCount = countMap.get(String(t._id)) || 0;
       return {
         ...t.toObject(),
         user: t.userId ? { id: t.userId._id, username: t.userId.username, email: t.userId.email, type: t.userId.type } : null,
         activeOrderCount,
-        busy,
+        busy: activeOrderCount > 10,
       };
-    }));
+    });
 
     res.json({ status: 'ok', count: withStats.length, data: withStats });
   } catch (err) {
@@ -83,39 +90,33 @@ exports.listTailors = async (req, res) => {
 // Admin: sync Tailor collection from Users with type 'Tailor'
 exports.syncTailorsFromUsers = async (req, res) => {
   try {
-    const users = await User.find({ type: 'Tailor' }).select('_id username email');
-    let created = 0;
-    let updated = 0;
+    const users = await User.find({ type: 'Tailor' }).select('_id username email').lean();
+    const existingList = users.length
+      ? await Tailor.find({ userId: { $in: users.map(u => u._id) } })
+      : [];
+    const existingByUser = new Map(existingList.map(t => [String(t.userId), t]));
+    const toCreate = [];
+    const bulkUpdates = [];
 
     for (const u of users) {
-      const existing = await Tailor.findOne({ userId: u._id });
+      const existing = existingByUser.get(String(u._id));
       if (!existing) {
-        await Tailor.create({
-          userId: u._id,
-          name: u.username || 'Tailor',
-          isActive: true,
-        });
-        created += 1;
+        toCreate.push({ userId: u._id, name: u.username || 'Tailor', isActive: true });
       } else {
-        // Ensure active and has a default name if missing
-        let dirty = false;
-        if (!existing.name && u.username) {
-          existing.name = u.username;
-          dirty = true;
-        }
-        if (existing.isActive !== true) {
-          existing.isActive = true;
-          dirty = true;
-        }
-        if (dirty) {
-          await existing.save();
-          updated += 1;
+        const update = {};
+        if (!existing.name && u.username) update.name = u.username;
+        if (existing.isActive !== true) update.isActive = true;
+        if (Object.keys(update).length) {
+          bulkUpdates.push({ updateOne: { filter: { _id: existing._id }, update: { $set: update } } });
         }
       }
     }
 
+    if (toCreate.length) await Tailor.insertMany(toCreate);
+    if (bulkUpdates.length) await Tailor.bulkWrite(bulkUpdates);
+
     const total = await Tailor.countDocuments();
-    res.json({ status: 'ok', message: 'Sync complete', created, updated, total });
+    res.json({ status: 'ok', message: 'Sync complete', created: toCreate.length, updated: bulkUpdates.length, total });
   } catch (err) {
     console.error('syncTailorsFromUsers error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to sync tailors' });
@@ -127,12 +128,11 @@ exports.adminOverview = async (req, res) => {
   try {
     // Tailors with stats
     const tailors = await Tailor.find().sort({ createdAt: -1 });
-    const ACTIVE_STATUSES = ['pending','assigned','accepted','in_progress'];
-    const tailorsWithStats = await Promise.all(tailors.map(async (t) => {
-      const activeOrderCount = await CustomOrder.countDocuments({ assignedTailor: t._id, status: { $in: ACTIVE_STATUSES } });
-      const busy = activeOrderCount > 10;
-      return { ...t.toObject(), activeOrderCount, busy };
-    }));
+    const countMap = await getActiveOrderCountMap(tailors.map(t => t._id));
+    const tailorsWithStats = tailors.map((t) => {
+      const activeOrderCount = countMap.get(String(t._id)) || 0;
+      return { ...t.toObject(), activeOrderCount, busy: activeOrderCount > 10 };
+    });
 
     // Tailors from User collection (registration source), optionally enriched with Tailor profile
     const tailorUsers = await User.find({ type: 'Tailor' })

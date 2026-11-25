@@ -67,6 +67,7 @@ exports.importCSV = async (req, res) => {
     if (col.itemName === -1) return res.status(400).json({ message: 'CSV must include itemName column' });
 
     let created = 0, updated = 0, errors = 0;
+    const payloads = [];
 
     for (let i = 1; i < lines.length; i++) {
       const raw = lines[i];
@@ -85,11 +86,6 @@ exports.importCSV = async (req, res) => {
         const itemName = read(col.itemName);
         if (!itemName) continue;
         const supplierName = read(col.supplierName);
-
-        // Try to find existing by itemName + supplierName
-        const q = supplierName ? { itemName, supplierName } : { itemName };
-        let doc = await MaterialInventory.findOne(q);
-
         const payload = {
           itemName,
           description: read(col.description),
@@ -101,21 +97,39 @@ exports.importCSV = async (req, res) => {
           location: read(col.location) || 'Main Warehouse',
           minimumStock: Number(read(col.minimumStock)) || 0,
         };
-        // status recalculated by model virtual or keep provided if present
         const s = read(col.status);
         if (s) payload.status = s;
-
-        if (!doc) {
-          await MaterialInventory.create(payload);
-          created += 1;
-        } else {
-          Object.assign(doc, payload);
-          await doc.save();
-          updated += 1;
-        }
+        payloads.push(payload);
       } catch (e) {
         errors += 1;
       }
+    }
+
+    if (payloads.length) {
+      const existingDocs = await MaterialInventory.find({
+        itemName: { $in: payloads.map(p => p.itemName) }
+      }).select('_id itemName supplierName').lean();
+      const existingByKey = new Map();
+      const existingByName = new Map();
+      for (const doc of existingDocs) {
+        existingByKey.set(`${doc.itemName}::${doc.supplierName || ''}`, doc._id);
+        if (!existingByName.has(doc.itemName)) existingByName.set(doc.itemName, doc._id);
+      }
+
+      const bulkOps = [];
+      for (const payload of payloads) {
+        const matchId = payload.supplierName
+          ? existingByKey.get(`${payload.itemName}::${payload.supplierName}`)
+          : existingByName.get(payload.itemName);
+        if (matchId) {
+          bulkOps.push({ updateOne: { filter: { _id: matchId }, update: { $set: payload } } });
+          updated += 1;
+        } else {
+          bulkOps.push({ insertOne: { document: payload } });
+          created += 1;
+        }
+      }
+      await MaterialInventory.bulkWrite(bulkOps);
     }
 
     return res.status(200).json({ message: 'Import complete', created, updated, errors });
@@ -330,26 +344,24 @@ exports.checkLowStockAlerts = async (req, res) => {
       });
     }
     
-    const emailResults = [];
-    
-    for (const item of lowStockItems) {
-      try {
-        const result = await sendLowStockAlert(item);
-        emailResults.push({
+    const settled = await Promise.allSettled(lowStockItems.map(item => sendLowStockAlert(item)));
+    const emailResults = settled.map((entry, idx) => {
+      const item = lowStockItems[idx];
+      if (entry.status === 'fulfilled') {
+        return {
           itemName: item.itemName,
           status: item.status,
-          emailSent: result.success,
-          error: result.error || null
-        });
-      } catch (error) {
-        emailResults.push({
-          itemName: item.itemName,
-          status: item.status,
-          emailSent: false,
-          error: error.message
-        });
+          emailSent: entry.value.success,
+          error: entry.value.error || null
+        };
       }
-    }
+      return {
+        itemName: item.itemName,
+        status: item.status,
+        emailSent: false,
+        error: entry.reason?.message || 'Failed to send alert'
+      };
+    });
     
     res.status(200).json({
       message: `Processed ${lowStockItems.length} low stock items`,

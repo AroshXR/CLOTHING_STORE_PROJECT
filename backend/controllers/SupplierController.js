@@ -11,25 +11,39 @@ const addItemsToInventory = async (order) => {
     
     const inventoryItems = [];
     
-    for (const itemString of itemsArray) {
+    const parsedItems = itemsArray.map((itemString) => {
       const match = itemString.match(/^(.+?)\s*x(\d+)$/i);
       const itemName = match ? match[1].trim() : itemString;
       const quantity = match ? parseInt(match[2], 10) : 1;
       const unitPrice = order.total / itemsArray.length / quantity;
+      return { itemName, quantity, unitPrice };
+    });
 
-      const existingItem = await MaterialInventory.findOne({
-        itemName,
-        supplierId: order.supplierId
-      });
+    const existingDocs = parsedItems.length
+      ? await MaterialInventory.find({
+          supplierId: order.supplierId,
+          itemName: { $in: parsedItems.map(i => i.itemName) }
+        })
+      : [];
+    const existingMap = new Map(existingDocs.map(doc => [doc.itemName, doc]));
+    const bulkOps = [];
+    const toCreate = [];
 
+    for (const { itemName, quantity, unitPrice } of parsedItems) {
+      const existingItem = existingMap.get(itemName);
       if (existingItem) {
         existingItem.quantity += quantity;
         existingItem.totalValue = existingItem.quantity * existingItem.unitPrice;
         existingItem.lastUpdated = new Date();
-        await existingItem.save();
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: existingItem._id },
+            update: { $set: { quantity: existingItem.quantity, totalValue: existingItem.totalValue, lastUpdated: existingItem.lastUpdated } }
+          }
+        });
         inventoryItems.push(existingItem);
       } else {
-        const savedItem = await MaterialInventory.create({
+        toCreate.push({
           itemName,
           quantity,
           unitPrice,
@@ -41,8 +55,13 @@ const addItemsToInventory = async (order) => {
           category: 'Materials',
           unit: 'pieces'
         });
-        inventoryItems.push(savedItem);
       }
+    }
+
+    if (bulkOps.length) await MaterialInventory.bulkWrite(bulkOps);
+    if (toCreate.length) {
+      const createdDocs = await MaterialInventory.insertMany(toCreate);
+      inventoryItems.push(...createdDocs);
     }
     
     console.log(`Added ${inventoryItems.length} items to inventory from order ${order._id}`);
@@ -53,35 +72,29 @@ const addItemsToInventory = async (order) => {
   }
 };
 
+const getSupplierOrderStatsMap = async (supplierIds) => {
+  if (!supplierIds.length) return new Map();
+  const rows = await SupplierOrder.aggregate([
+    { $match: { supplierId: { $in: supplierIds } } },
+    { $group: { _id: '$supplierId', totalOrders: { $sum: 1 }, lastOrder: { $max: '$orderDate' } } }
+  ]);
+  return new Map(rows.map(r => [String(r._id), { totalOrders: r.totalOrders, lastOrder: r.lastOrder || 'Never' }]));
+};
+
 // Get all suppliers
 exports.getAllSuppliers = async (req, res) => {
   try {
-    console.log('Fetching all suppliers');
     const suppliers = await Supplier.find().sort({ createdAt: -1 });
-    console.log('Found suppliers:', suppliers.length);
-    
-    // Automatically calculate and update order counts for each supplier
-    const suppliersWithOrderCounts = await Promise.all(
-      suppliers.map(async (supplier) => {
-        // Count orders for this supplier
-        const orderCount = await SupplierOrder.countDocuments({ supplierId: supplier._id });
-        
-        // Find the most recent order date
-        const latestOrder = await SupplierOrder.findOne({ supplierId: supplier._id })
-          .sort({ orderDate: -1 })
-          .select('orderDate');
-        
-        const lastOrderDate = latestOrder ? latestOrder.orderDate : 'Never';
-        
-        // Return supplier with updated counts (without saving to database)
-        return {
-          ...supplier.toObject(),
-          totalOrders: orderCount,
-          lastOrder: lastOrderDate
-        };
-      })
-    );
-    
+    const statsMap = await getSupplierOrderStatsMap(suppliers.map(s => s._id));
+    const suppliersWithOrderCounts = suppliers.map((supplier) => {
+      const stats = statsMap.get(String(supplier._id)) || { totalOrders: 0, lastOrder: 'Never' };
+      return {
+        ...supplier.toObject(),
+        totalOrders: stats.totalOrders,
+        lastOrder: stats.lastOrder
+      };
+    });
+
     res.status(200).json(suppliersWithOrderCounts);
   } catch (error) {
     console.error('Error fetching suppliers:', error);
@@ -292,40 +305,30 @@ exports.fixSupplierOrderCounts = async (req, res) => {
   try {
     console.log('Starting supplier order count fix...');
     
-    // Get all suppliers
     const suppliers = await Supplier.find();
-    console.log(`Found ${suppliers.length} suppliers to update`);
-    
-    let updatedCount = 0;
-    
+    const statsMap = await getSupplierOrderStatsMap(suppliers.map(s => s._id));
+    const bulkOps = [];
+
     for (const supplier of suppliers) {
-      // Count orders for this supplier
-      const orderCount = await SupplierOrder.countDocuments({ supplierId: supplier._id });
-      
-      // Find the most recent order date
-      const latestOrder = await SupplierOrder.findOne({ supplierId: supplier._id })
-        .sort({ orderDate: -1 })
-        .select('orderDate');
-      
-      const lastOrderDate = latestOrder ? latestOrder.orderDate : 'Never';
-      
-      // Update supplier if values are different
-      if (supplier.totalOrders !== orderCount || supplier.lastOrder !== lastOrderDate) {
-        supplier.totalOrders = orderCount;
-        supplier.lastOrder = lastOrderDate;
-        await supplier.save();
-        updatedCount++;
-        
-        console.log(`Updated supplier ${supplier.name}: ${orderCount} orders, last order: ${lastOrderDate}`);
+      const stats = statsMap.get(String(supplier._id)) || { totalOrders: 0, lastOrder: 'Never' };
+      if (supplier.totalOrders !== stats.totalOrders || supplier.lastOrder !== stats.lastOrder) {
+        supplier.totalOrders = stats.totalOrders;
+        supplier.lastOrder = stats.lastOrder;
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: supplier._id },
+            update: { $set: { totalOrders: stats.totalOrders, lastOrder: stats.lastOrder } }
+          }
+        });
       }
     }
-    
-    console.log(`Fix completed. Updated ${updatedCount} suppliers.`);
-    
+
+    if (bulkOps.length) await Supplier.bulkWrite(bulkOps);
+
     res.status(200).json({
       message: 'Supplier order counts fixed successfully',
       totalSuppliers: suppliers.length,
-      updatedSuppliers: updatedCount,
+      updatedSuppliers: bulkOps.length,
       details: suppliers.map(s => ({
         name: s.name,
         totalOrders: s.totalOrders,

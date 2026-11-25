@@ -15,7 +15,7 @@ exports.getAllClothCustomizers = async (req, res) => {
 };
 exports.addClothCustomizer = async (req, res) => {
   const { design } = pricing.priceCustomization(req.body, await pricing.getPrices());
-  for (const layer of design.placedDesigns) await authorizeArtwork(req.user._id, layer);
+  await Promise.all(design.placedDesigns.map(layer => authorizeArtwork(req.user._id, layer)));
   const saved = await Design.create({ ...design, userId: req.user._id, inCart: true });
   res.status(201).json({ status: 'ok', message: 'Design saved to cart', data: saved });
 };
@@ -32,7 +32,7 @@ exports.updateClothCustomizer = async (req, res) => {
     if (Object.prototype.hasOwnProperty.call(req.body, field)) input[field] = req.body[field];
   }
   const { design } = pricing.priceCustomization(input, await pricing.getPrices());
-  for (const layer of design.placedDesigns) await authorizeArtwork(req.user._id, layer);
+  await Promise.all(design.placedDesigns.map(layer => authorizeArtwork(req.user._id, layer)));
   const updates = { ...design };
   if (req.body.inCart === true) updates.inCart = true;
   const saved = await Design.findOneAndUpdate(filter, { $set: updates, $inc: { revision: 1 } }, { new: true, runValidators: true });

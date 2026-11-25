@@ -23,15 +23,17 @@ const checkAvailabilityOfOutfit = async (req, res) => {
 
         // Fetch all available outfits for the given location
         const outfits = await Outfit.find({ location, isAvailable: true });
-
-        // Check outfit availability for the given date range using promises
-        const availableOutfitsPromises = outfits.map(async (outfit) => {
-            const isAvailable = await checkAvailability(outfit._id, reservationDate, returnDate);
-            return { ...outfit._doc, isAvailable };
-        });
-
-        let availableOutfits = await Promise.all(availableOutfitsPromises);
-        availableOutfits = availableOutfits.filter(outfit => outfit.isAvailable === true);
+        const bookedIds = outfits.length
+            ? new Set((await Booking.distinct('outfit', {
+                outfit: { $in: outfits.map(o => o._id) },
+                status: { $in: ["pending", "confirmed"] },
+                reservationDate: { $lte: returnDate },
+                returnDate: { $gte: reservationDate }
+            })).map(String))
+            : new Set();
+        const availableOutfits = outfits
+            .filter(outfit => !bookedIds.has(String(outfit._id)))
+            .map(outfit => ({ ...outfit._doc, isAvailable: true }));
 
         res.json({ success: true, availableOutfits });
     } catch (error) {
