@@ -58,23 +58,15 @@ const MyBookings = () => {
 
   // Refresh data when page becomes visible
   useEffect(() => {
-    const handleFocus = () => {
-      if (isAuthenticated()) {
-        fetchMyBookings()
-      }
-    }
-
     const handleVisibilityChange = () => {
       if (!document.hidden && isAuthenticated()) {
         fetchMyBookings()
       }
     }
 
-    window.addEventListener('focus', handleFocus)
     document.addEventListener('visibilitychange', handleVisibilityChange)
-    
+
     return () => {
-      window.removeEventListener('focus', handleFocus)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [isAuthenticated])

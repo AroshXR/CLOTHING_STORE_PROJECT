@@ -12,36 +12,40 @@ import { useLocation } from 'react-router-dom'
 
 const Outfits = () => {
   const [input, setInput] = useState('')
-  const [outfits, setOutfits] = useState([])
   const [filteredOutfits, setFilteredOutfits] = useState([])
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedLocation, setSelectedLocation] = useState('')
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
   const location = useLocation()
 
-  const fetchOutfits = async () => {
-    try {
-      const BASE_URL = API_ORIGIN;
-      const params = new URLSearchParams();
-      
-      if (input) params.append('search', input);
-      if (selectedCategory) params.append('category', selectedCategory);
-      if (selectedLocation) params.append('location', selectedLocation);
-      if (priceRange.min) params.append('minPrice', priceRange.min);
-      if (priceRange.max) params.append('maxPrice', priceRange.max);
-
-      const { data } = await axios.get(`${BASE_URL}/api/owner/all-outfits?${params}`);
-      if (data?.success) {
-        setOutfits(data.outfits);
-        setFilteredOutfits(data.outfits);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   useEffect(() => {
-    fetchOutfits();
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams();
+        if (input) params.append('search', input);
+        if (selectedCategory) params.append('category', selectedCategory);
+        if (selectedLocation) params.append('location', selectedLocation);
+        if (priceRange.min) params.append('minPrice', priceRange.min);
+        if (priceRange.max) params.append('maxPrice', priceRange.max);
+
+        const { data } = await axios.get(`${API_ORIGIN}/api/owner/all-outfits?${params}`, {
+          signal: controller.signal
+        });
+        if (data?.success) {
+          setFilteredOutfits(data.outfits);
+        }
+      } catch (err) {
+        if (err.name !== 'CanceledError' && err.code !== 'ERR_CANCELED') {
+          console.error(err);
+        }
+      }
+    }, input ? 250 : 0);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [input, selectedCategory, selectedLocation, priceRange]);
 
   // Pick up category from query string (e.g., /Outfits?category=Evening%20Gowns)

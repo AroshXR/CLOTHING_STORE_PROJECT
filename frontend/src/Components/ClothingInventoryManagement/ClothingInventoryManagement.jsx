@@ -109,7 +109,7 @@ const ClothingInventoryManagement = () => {
       const { data } = await axios.post(`${API_BASE_URL}/clothing/report`, { ids: selectedIds });
       setReportData(data);
       // also fetch timeseries charts
-      fetchTimeseries(selectedIds);
+      await fetchTimeseries(selectedIds);
     } catch (err) {
       console.error('Report generation failed', err);
       const serverMsg = err?.response?.data?.message || err?.message || 'Failed to generate report';

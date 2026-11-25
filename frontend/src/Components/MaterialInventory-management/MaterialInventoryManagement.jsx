@@ -2,7 +2,7 @@ import { API_BASE_URL as API_ORIGIN, apiFetch as fetch } from '../../config/api'
 
 
 import "./MaterialInventoryManagement.css"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 
 export default function MaterialInventoryManagement() {
@@ -185,7 +185,7 @@ export default function MaterialInventoryManagement() {
   }, [])
 
   // Filter and sort inventory items
-  const filteredItems = inventoryItems
+  const filteredItems = useMemo(() => inventoryItems
     .filter(item => {
       const matchesSearch = item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -214,10 +214,10 @@ export default function MaterialInventoryManagement() {
       } else {
         return aValue < bValue ? 1 : -1
       }
-    })
+    }), [inventoryItems, searchTerm, filterStatus, filterCategory, sortBy, sortOrder])
 
   // Get unique categories for filter
-  const categories = [...new Set(inventoryItems.map(item => item.category))]
+  const categories = useMemo(() => [...new Set(inventoryItems.map(item => item.category))], [inventoryItems])
 
   // Modal handlers
   const openModal = (type, item = null) => {
