@@ -120,17 +120,11 @@ Customizer prices come from the stored administrator configuration, falling back
 ## Verification
 
 ~~~powershell
+$env:TEST_MONGODB_URI = 'mongodb+srv://...'
 npm test
 ~~~
 
-Tests start a separate temporary MongoDB replica set, use loopback-only connections and a dedicated database name, and never load .env or connect to MONGODB_URI. They cover ownership and roles, websocket authentication, mixed checkout, server pricing, immutable snapshots, transaction rollback, retry idempotency, cash receipt, cancellation, production transitions, private artwork, concurrent stock reservations, and overlapping rentals.
-
-mongodb-memory-server downloads a MongoDB test binary on its first run. To use an already installed compatible mongod executable:
-
-~~~powershell
-$env:MONGOMS_SYSTEM_BINARY = 'C:\path\to\mongod.exe'
-npm test
-~~~
+Tests require `TEST_MONGODB_URI` to point to a MongoDB replica set (such as MongoDB Atlas or a local replica set), connect using the dedicated `platform-priority-tests` database name, and never load `.env` or `MONGODB_URI`. They cover ownership and roles, websocket authentication, mixed checkout, server pricing, immutable snapshots, transaction rollback, retry idempotency, cash receipt, cancellation, production transitions, private artwork, concurrent stock reservations, and overlapping rentals.
 
 The older root-level test-payment and debug scripts predate the checkout contract. Use the isolated test suite above for regression checks.
 

@@ -4,7 +4,6 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 const mongoose = require('mongoose');
-const { MongoMemoryReplSet } = require('mongodb-memory-server');
 const jwt = require('jsonwebtoken');
 process.env.JWT_SECRET = 'isolated-integration-test-secret-never-used-in-production';
 const createApp = require('../createApp');
@@ -17,7 +16,7 @@ const Payment = require('../models/PaymentDetailsModel');
 const Order = require('../models/OrderModel');
 const Production = require('../models/CustomOrder');
 const Tailor = require('../models/Tailor');
-let replica, server, sockets, base, people;
+let server, sockets, base, people;
 const uploaded = [];
 const delivery = { firstName: 'Test', lastName: 'Customer', email: 'test@example.com', phone: '0771234567', address: '1 Test Road', city: 'Colombo', state: 'Western', zipCode: '00100', country: 'Sri Lanka' };
 const token = user => jwt.sign({ id: String(user._id) }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -29,9 +28,8 @@ async function request(method, url, user, body, headers = {}) {
   return { status: response.status, data };
 }
 before(async () => {
-  replica = await MongoMemoryReplSet.create({ binary: { downloadDir: path.join(os.tmpdir(), 'platform-mongodb-test-binaries') }, replSet: { count: 1 } });
-  const uri = replica.getUri();
-  assert.match(uri, /^mongodb:\/\/127\.0\.0\.1:/);
+  const uri = process.env.TEST_MONGODB_URI;
+  if (!uri) throw new Error('TEST_MONGODB_URI must be set to a MongoDB replica set URI to run priority tests.');
   await mongoose.connect(uri, { dbName: 'platform-priority-tests' });
   await Promise.all(Object.values(mongoose.models).map(model => model.init()));
   server = createApp().listen(0, '127.0.0.1');
@@ -41,7 +39,6 @@ before(async () => {
 }, { timeout: 300000 });
 beforeEach(async () => {
   assert.equal(mongoose.connection.name, 'platform-priority-tests');
-  assert.equal(mongoose.connection.host, '127.0.0.1');
   await Promise.all(Object.values(mongoose.models).map(model => model.deleteMany({})));
   const roles = [['customer', 'Customer', 'customer'], ['other', 'Customer', 'customer'], ['admin', 'Admin', 'admin'], ['owner', 'Customer', 'owner'], ['tailor', 'Tailor', 'customer'], ['otherTailor', 'Tailor', 'customer']];
   people = {};
@@ -51,7 +48,6 @@ after(async () => {
   if (sockets) await new Promise(resolve => sockets.close(resolve));
   if (server?.listening) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
   await mongoose.disconnect();
-  if (replica) await replica.stop();
   for (const filename of uploaded) {
     assert.match(filename, /^image-[\w-]+\.png$/);
     fs.rmSync(path.join(__dirname, '..', 'uploads', filename), { force: true });
