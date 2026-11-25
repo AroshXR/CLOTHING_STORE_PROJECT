@@ -8,6 +8,7 @@ import Title from '../Components/pasindu/Title'
 import axios from 'axios'
 import { useAuth } from '../AuthGuard/authGuard'
 import './MyBookings.css'
+import { addBookingToCart } from '../Components/OrderManagement/cartItems'
 
 const MyBookings = () => {
 
@@ -179,10 +180,14 @@ const MyBookings = () => {
               {/* Action Buttons */}
               <div className="flex flex-col gap-2">
                 {booking.status === 'confirmed' && !['pending', 'paid'].includes(booking.paymentStatus) && (
+                  <><button onClick={() => {
+                    try { addBookingToCart(booking); navigate('/orderManagement'); }
+                    catch (failure) { alert(failure.message || 'The booking could not be added to your cart.'); }
+                  }} className="supbtn supbtn-neutral">Add booking to cart</button>
                   <button onClick={() => {
                     sessionStorage.setItem('directPurchase', JSON.stringify({ type: 'booking', id: booking._id, bookingId: booking._id, quantity: 1 }));
                     navigate('/paymentManagement');
-                  }} className="supbtn supbtn-primary">Arrange cash collection</button>
+                  }} className="supbtn supbtn-primary">Arrange cash collection</button></>
                 )}
                 {booking.paymentStatus === 'pending' && <p>Cash due on collection</p>}
                 {booking.paymentStatus === 'paid' && <p>Cash payment received</p>}

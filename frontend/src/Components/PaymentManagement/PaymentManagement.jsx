@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../AuthGuard/authGuard';
 import { apiUrl } from '../../config/api';
 import { cartRequest, clearPurchasedCart } from '../../utils/checkoutCart';
@@ -14,6 +14,8 @@ const contactFields = [['firstName', 'First name'], ['lastName', 'Last name'], [
 const addressFields = [['address', 'Street address'], ['city', 'City'], ['state', 'Province / state'], ['zipCode', 'Postal code'], ['country', 'Country']];
 export default function CheckoutPage() {
   const { currentUser } = useAuth();
+  const location = useLocation();
+  const selectedItems = location.state?.cartItems;
   const [cart, setCart] = useState(null), [quote, setQuote] = useState(null);
   const [error, setError] = useState(''), [loading, setLoading] = useState(true), [quoting, setQuoting] = useState(false);
   const [shippingMethod, setShippingMethod] = useState('standard'), [giftWrap, setGiftWrap] = useState(false);
@@ -29,8 +31,9 @@ export default function CheckoutPage() {
     let cancelled = false;
     async function load() {
       try {
-        let request = cartRequest([]);
-        if (!request.direct) {
+        const fromBag = Array.isArray(selectedItems) && selectedItems.length > 0;
+        let request = fromBag ? { direct: false, items: selectedItems } : cartRequest([]);
+        if (!request.direct && !fromBag) {
           const { data } = await axios.get(apiUrl('/cloth-customizer'));
           request = cartRequest(data.data || []);
         }
@@ -43,7 +46,7 @@ export default function CheckoutPage() {
     }
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [selectedItems]);
 
   useEffect(() => {
     if (!cart?.items.length || result) return undefined;

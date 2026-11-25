@@ -56,3 +56,8 @@ npm run build
 Tests cover saved buyer branding, logo publishing, report escaping, role routing, mixed-cart request construction, Buy Now isolation, cart cleanup, and cash collection retries. The production build still reports existing repository lint warnings and outdated Browserslist data; dependency modernization is separate work.
 
 For transaction requirements, backend setup, payment semantics, and deployment considerations, see ../backend/README.md.
+
+
+The customer cart groups shop items, custom designs, and confirmed rental bookings with a single summary and checkout action. Search filters affect the visible list only. Rental entries use one booking, show live booking eligibility, and removing them from the browser cart never cancels the booking. My Bookings can add eligible reservations to the cart. Cart checkout passes the reviewed item IDs/options through router state, so shop-only checkout does not depend on loading custom designs again; prices and availability are still verified by the checkout API.
+
+Careers (/career) and the Colour Guide (/color-guide) use the shared editorial page frame and expanded footer. Careers lists real active roles, distinguishes no openings from a network error, and uses an accessible application dialog. Failed submissions retain the entered fields/CV for retry and are never presented as successfully submitted local copies. The Colour Guide preserves its real swatch colours, offers accessible shade selection and hex copying, and links to the studio, shop, and rentals.

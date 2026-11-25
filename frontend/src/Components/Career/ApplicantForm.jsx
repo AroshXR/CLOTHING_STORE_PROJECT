@@ -1,8 +1,10 @@
-import UIIcon from '../Layout/UIIcon';
-import React, { useState } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { X } from 'lucide-react';
+import React, { useRef, useState } from 'react';
 import './ApplicantForm.css';
 
 const ApplicantForm = ({ job, onSubmit, onClose }) => {
+  const returnFocus = useRef(typeof document === 'undefined' ? null : document.activeElement);
   const [formData, setFormData] = useState({
     name: '',
     gmail: '',
@@ -39,6 +41,7 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+    setFormData(prev => ({ ...prev, resume: null }));
     if (file) {
       // Check file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
@@ -137,6 +140,7 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
       return;
     }
 
+    setErrors(prev => ({ ...prev, submit: '' }));
     setIsSubmitting(true);
 
     try {
@@ -156,8 +160,8 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
       await onSubmit(submitData);
       
     } catch (error) {
-      console.error('Error submitting application:', error);
-      setErrors({ submit: 'Failed to submit application. Please try again.' });
+
+      setErrors(prev => ({ ...prev, submit: error.message || 'Failed to submit application. Please try again.' }));
     } finally {
       setIsSubmitting(false);
     }
@@ -170,25 +174,30 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
   };
 
   return (
-    <div className="applicant-form-overlay">
-      <div className="applicant-form-modal">
+    <Dialog.Root open onOpenChange={open => { if (!open) handleClose(); }}>
+      <Dialog.Portal><Dialog.Overlay className="ed-application-overlay" />
+      <Dialog.Content className="ed-application-modal" onCloseAutoFocus={event => { event.preventDefault(); if (returnFocus.current?.isConnected) returnFocus.current.focus(); }} onEscapeKeyDown={event => { if (isSubmitting) event.preventDefault(); }} onInteractOutside={event => event.preventDefault()}>
         <div className="form-header">
-          <h2>Job Application</h2>
+          <Dialog.Title>Job application</Dialog.Title>
           <button 
-            className="close-btn" 
+            className="close-btn"
+            type="button"
+            aria-label="Close application"
             onClick={handleClose}
             disabled={isSubmitting}
           >
-            <UIIcon className="bx bx-x"></UIIcon>
+            <X size={21} aria-hidden="true" />
           </button>
         </div>
 
+        <Dialog.Description className="ed-application-description">Share your details and CV for this application.</Dialog.Description>
         <div className="job-info">
           <h3>{job?.title || 'General Application'}</h3>
           <p>{job?.department || 'Various Departments'}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="applicant-form">
+        <form onSubmit={handleSubmit} className="applicant-form" aria-busy={isSubmitting}>
+          <fieldset disabled={isSubmitting}><legend>Your application details</legend>
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="name">Full Name *</label>
@@ -199,9 +208,9 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="Enter your full name"
-                className={errors.name ? 'error' : ''}
+                aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'application-name-error' : undefined} className={errors.name ? 'error' : ''}
               />
-              {errors.name && <span className="error-message">{errors.name}</span>}
+              {errors.name && <span className="error-message" id="application-name-error">{errors.name}</span>}
             </div>
 
             <div className="form-group">
@@ -213,9 +222,9 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
                 value={formData.gmail}
                 onChange={handleInputChange}
                 placeholder="Enter your email address"
-                className={errors.gmail ? 'error' : ''}
+                aria-invalid={Boolean(errors.gmail)} aria-describedby={errors.gmail ? 'application-gmail-error' : undefined} className={errors.gmail ? 'error' : ''}
               />
-              {errors.gmail && <span className="error-message">{errors.gmail}</span>}
+              {errors.gmail && <span className="error-message" id="application-gmail-error">{errors.gmail}</span>}
             </div>
           </div>
 
@@ -231,9 +240,9 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
                 placeholder="Enter your age"
                 min="16"
                 max="100"
-                className={errors.age ? 'error' : ''}
+                aria-invalid={Boolean(errors.age)} aria-describedby={errors.age ? 'application-age-error' : undefined} className={errors.age ? 'error' : ''}
               />
-              {errors.age && <span className="error-message">{errors.age}</span>}
+              {errors.age && <span className="error-message" id="application-age-error">{errors.age}</span>}
             </div>
 
             <div className="form-group">
@@ -245,9 +254,9 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
                 value={formData.phone}
                 onChange={handleInputChange}
                 placeholder="Enter your phone number"
-                className={errors.phone ? 'error' : ''}
+                aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? 'application-phone-error' : undefined} className={errors.phone ? 'error' : ''}
               />
-              {errors.phone && <span className="error-message">{errors.phone}</span>}
+              {errors.phone && <span className="error-message" id="application-phone-error">{errors.phone}</span>}
             </div>
           </div>
 
@@ -260,9 +269,9 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
               onChange={handleInputChange}
               placeholder="Enter your full address"
               rows="3"
-              className={errors.address ? 'error' : ''}
+              aria-invalid={Boolean(errors.address)} aria-describedby={errors.address ? 'application-address-error' : undefined} className={errors.address ? 'error' : ''}
             />
-            {errors.address && <span className="error-message">{errors.address}</span>}
+            {errors.address && <span className="error-message" id="application-address-error">{errors.address}</span>}
           </div>
 
           <div className="form-row">
@@ -275,9 +284,9 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
                 value={formData.position}
                 onChange={handleInputChange}
                 placeholder="Enter the position you're applying for"
-                className={errors.position ? 'error' : ''}
+                aria-invalid={Boolean(errors.position)} aria-describedby={errors.position ? 'application-position-error' : undefined} className={errors.position ? 'error' : ''}
               />
-              {errors.position && <span className="error-message">{errors.position}</span>}
+              {errors.position && <span className="error-message" id="application-position-error">{errors.position}</span>}
             </div>
 
             <div className="form-group">
@@ -289,9 +298,9 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
                 value={formData.experience}
                 onChange={handleInputChange}
                 placeholder="e.g., 2-5 years"
-                className={errors.experience ? 'error' : ''}
+                aria-invalid={Boolean(errors.experience)} aria-describedby={errors.experience ? 'application-experience-error' : undefined} className={errors.experience ? 'error' : ''}
               />
-              {errors.experience && <span className="error-message">{errors.experience}</span>}
+              {errors.experience && <span className="error-message" id="application-experience-error">{errors.experience}</span>}
             </div>
           </div>
 
@@ -304,9 +313,9 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
               onChange={handleInputChange}
               placeholder="Enter your educational background"
               rows="3"
-              className={errors.education ? 'error' : ''}
+              aria-invalid={Boolean(errors.education)} aria-describedby={errors.education ? 'application-education-error' : undefined} className={errors.education ? 'error' : ''}
             />
-            {errors.education && <span className="error-message">{errors.education}</span>}
+            {errors.education && <span className="error-message" id="application-education-error">{errors.education}</span>}
           </div>
 
           <div className="form-group">
@@ -318,9 +327,9 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
               onChange={handleInputChange}
               placeholder="List your relevant skills and qualifications"
               rows="3"
-              className={errors.skills ? 'error' : ''}
+              aria-invalid={Boolean(errors.skills)} aria-describedby={errors.skills ? 'application-skills-error' : undefined} className={errors.skills ? 'error' : ''}
             />
-            {errors.skills && <span className="error-message">{errors.skills}</span>}
+            {errors.skills && <span className="error-message" id="application-skills-error">{errors.skills}</span>}
           </div>
 
           <div className="form-group">
@@ -332,9 +341,9 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
               onChange={handleInputChange}
               placeholder="Write a cover letter explaining why you're interested in this position and what makes you a good fit"
               rows="6"
-              className={errors.coverLetter ? 'error' : ''}
+              aria-invalid={Boolean(errors.coverLetter)} aria-describedby={errors.coverLetter ? 'application-coverLetter-error' : undefined} className={errors.coverLetter ? 'error' : ''}
             />
-            {errors.coverLetter && <span className="error-message">{errors.coverLetter}</span>}
+            {errors.coverLetter && <span className="error-message" id="application-coverLetter-error">{errors.coverLetter}</span>}
           </div>
 
           <div className="form-group">
@@ -345,14 +354,14 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
               name="resume"
               onChange={handleFileChange}
               accept=".pdf,.doc,.docx"
-              className={errors.resume ? 'error' : ''}
+              aria-invalid={Boolean(errors.resume)} aria-describedby={errors.resume ? 'application-resume-error' : undefined} className={errors.resume ? 'error' : ''}
             />
             <small className="file-help">Accepted formats: PDF, DOC, DOCX (Max size: 5MB)</small>
-            {errors.resume && <span className="error-message">{errors.resume}</span>}
+            {errors.resume && <span className="error-message" id="application-resume-error">{errors.resume}</span>}
           </div>
 
           {errors.submit && (
-            <div className="error-message submit-error">{errors.submit}</div>
+            <div className="error-message submit-error" role="alert">{errors.submit}</div>
           )}
 
           <div className="form-actions">
@@ -372,9 +381,10 @@ const ApplicantForm = ({ job, onSubmit, onClose }) => {
               {isSubmitting ? 'Submitting...' : 'Submit Application'}
             </button>
           </div>
+          </fieldset>
         </form>
-      </div>
-    </div>
+      </Dialog.Content></Dialog.Portal>
+    </Dialog.Root>
   );
 };
 

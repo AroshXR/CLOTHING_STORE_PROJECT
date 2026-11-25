@@ -1,279 +1,55 @@
-import UIIcon from '../Layout/UIIcon';
-import { API_BASE_URL as API_ORIGIN } from '../../config/api';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowUpRight, MapPin, Clock3, Asterisk } from 'lucide-react';
 import axios from 'axios';
-import './Career.css';
+import { apiUrl } from '../../config/api';
+import { useBranding } from '../../config/branding';
+import Reveal from '../Editorial/Reveal';
+import EditorialPhoto from '../Editorial/EditorialPhoto';
 import ApplicantForm from './ApplicantForm';
+import '../Editorial/Editorial.css';
+import '../Editorial/Information.css';
+import './Career.css';
 
-
-const Career = () => {
-  const [showApplicationForm, setShowApplicationForm] = useState(false);
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [jobOpenings, setJobOpenings] = useState([]);
-  const [allJobs, setAllJobs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const API_BASE_URL = API_ORIGIN;
-
-  // Load jobs from backend API when component mounts
+export default function Career() {
+  const { branding } = useBranding();
+  const [jobs, setJobs] = useState([]), [state, setState] = useState('loading'), [attempt, setAttempt] = useState(0);
+  const [query, setQuery] = useState(''), [search, setSearch] = useState(''), [selectedJob, setSelectedJob] = useState(null), [notice, setNotice] = useState('');
   useEffect(() => {
-    fetchJobs();
-  }, []);
-
-  const fetchJobs = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const response = await axios.get(`${API_BASE_URL}/jobs`);
-      if (response.data.data && response.data.data.length > 0) {
-        setAllJobs(response.data.data);
-        setJobOpenings(response.data.data);
-      } else {
-        setAllJobs([]);
-        setJobOpenings([]);
-      }
-    } catch (err) {
-      console.error('Error fetching jobs from API:', err);
-      setError('Failed to fetch jobs from server. Please try again.');
-
-      // Fallback to localStorage if API fails
-      const storedJobs = localStorage.getItem('adminJobs');
-      if (storedJobs) {
-        const parsedJobs = JSON.parse(storedJobs);
-        // Filter only active jobs
-        const activeJobs = parsedJobs.filter(job => job.status === 'active');
-        setAllJobs(activeJobs);
-        setJobOpenings(activeJobs);
-      } else {
-        setAllJobs([]);
-        setJobOpenings([]);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const applySearch = () => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) {
-      setJobOpenings(allJobs);
-      return;
-    }
-    const filtered = allJobs.filter(job => {
-      const hay = [job.title, job.department, job.location, job.type, job.description]
-        .filter(Boolean)
-        .join(' ') // combine
-        .toLowerCase();
-      const reqs = Array.isArray(job.requirements) ? job.requirements.join(' ').toLowerCase() : '';
-      return hay.includes(q) || reqs.includes(q);
+    const controller = new AbortController(); setState('loading');
+    axios.get(apiUrl('/jobs'), { signal: controller.signal }).then(({ data }) => {
+      if (!Array.isArray(data?.data)) throw new Error('Unable to load roles');
+      setJobs(data.data.filter(job => !job.status || job.status === 'active')); setState('ready');
+    }).catch(error => {
+      if (error.code === 'ERR_CANCELED') return;
+      if (error.response?.status === 404 && Array.isArray(error.response.data?.data) && error.response.data.data.length === 0) { setJobs([]); setState('ready'); }
+      else setState('error');
     });
-    setJobOpenings(filtered);
-  };
-
-  const handleSearchKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      applySearch();
-    }
-  };
-
-  const handleApplyNow = (job) => {
-    setSelectedJob(job);
-    setShowApplicationForm(true);
-  };
-
-  const handleCloseForm = () => {
-    setShowApplicationForm(false);
-    setSelectedJob(null);
-  };
-
-  const handleApplicationSubmit = async (formData) => {
+    return () => controller.abort();
+  }, [attempt]);
+  const visible = useMemo(() => {
+    const value = search.trim().toLowerCase();
+    return jobs.filter(job => !value || [job.title, job.department, job.location, job.type, job.description, ...(Array.isArray(job.requirements) ? job.requirements : [])].filter(Boolean).join(' ').toLowerCase().includes(value));
+  }, [jobs, search]);
+  function apply(job) { setNotice(''); setSelectedJob(job); }
+  async function submit(data) {
     try {
-      // Send application to backend API
-      const response = await axios.post(`${API_BASE_URL}/applicant`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      if (response.data.message) {
-        alert('Thank you for your application! We will review it and get back to you soon.');
-        handleCloseForm();
-      }
-    } catch (error) {
-      console.error('Error submitting application:', error);
-
-      // If backend responded, show its error and do NOT fallback
-      if (error.response) {
-        const msg = error.response.data?.message || 'Submission failed.';
-        const errs = error.response.data?.errors;
-        alert(errs && Array.isArray(errs) ? `${msg}\n- ${errs.join('\n- ')}` : msg);
-        return;
-      }
-
-      // Network error: fallback to localStorage
-      try {
-        const applicationData = {
-          id: Date.now().toString(),
-          ...Object.fromEntries(formData),
-          appliedAt: new Date().toISOString(),
-          status: 'pending'
-        };
-
-        const existingApplications = localStorage.getItem('jobApplications') || '[]';
-        const applications = JSON.parse(existingApplications);
-        applications.push(applicationData);
-        localStorage.setItem('jobApplications', JSON.stringify(applications));
-
-        alert('Application saved locally (API unavailable). Please check your backend connection.');
-        handleCloseForm();
-      } catch (fallbackError) {
-        console.error('Fallback error:', fallbackError);
-        alert('There was an error submitting your application. Please try again.');
-      }
+      await axios.post(apiUrl('/applicant'), data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setSelectedJob(null); setNotice('Your application was submitted successfully.');
+    } catch (failure) {
+      const message = failure.response?.data?.message || 'Your application was not submitted. Please check your connection and try again.';
+      const details = failure.response?.data?.errors;
+      throw new Error(Array.isArray(details) ? message + ' ' + details.join(' ') : message);
     }
-  };
-
-  return (
-    <div className='main'>
-      
-      <div className="career-header">
-        <h1>Join Our Team</h1>
-        <p>Be part of our mission to create amazing fashion experiences</p>
-      </div>
-      <div className="career-page">
-
-
-        <div className="career-content">
-          <div className="career-intro">
-            <h2>Why Work With Us?</h2>
-            <div className="benefits-grid">
-              <div className="benefit-card">
-                <UIIcon className="bx bx-heart"></UIIcon>
-                <h3>Passion for Fashion</h3>
-                <p>Work in an environment where creativity and innovation are celebrated</p>
-              </div>
-              <div className="benefit-card">
-                <UIIcon className="bx bx-trending-up"></UIIcon>
-                <h3>Growth Opportunities</h3>
-                <p>Continuous learning and career development programs</p>
-              </div>
-              <div className="benefit-card">
-                <UIIcon className="bx bx-group"></UIIcon>
-                <h3>Great Team</h3>
-                <p>Collaborate with talented professionals in a supportive environment</p>
-              </div>
-              <div className="benefit-card">
-                <UIIcon className="bx bx-gift"></UIIcon>
-                <h3>Benefits & Perks</h3>
-                <p>Competitive salary, health insurance, and flexible work arrangements</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="job-openings">
-            <h2>Current Openings</h2>
-            <div className="job-search">
-              <input
-                type="text"
-                className="job-search-input"
-                placeholder="Search by title, department, location, or keyword..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearchKeyDown}
-              />
-              <button className="job-search-btn" onClick={applySearch}>
-                Search
-              </button>
-            </div>
-            {loading ? (
-              <div className="loading-message">
-                <p>Loading job openings...</p>
-              </div>
-            ) : error ? (
-              <div className="error-message">
-                <p>{error}</p>
-              </div>
-            ) : jobOpenings.length === 0 ? (
-              <div className="no-jobs-message">
-                <div className="no-jobs-icon">📋</div>
-                <h3>No Job Openings Available</h3>
-                <p>Currently, there are no active job openings. Please check back later or contact us to learn about future opportunities.</p>
-                <p>Administrators can post new job openings through the Manage Jobs section.</p>
-              </div>
-            ) : (
-              <div className="jobs-grid">
-                {jobOpenings.map((job) => (
-                  <div key={job._id || job.id} className="job-card">
-                    <div className="job-header">
-                      <h3>{job.title}</h3>
-                      <span className="job-type">{job.type}</span>
-                    </div>
-                    <div className="job-details">
-                      <p><UIIcon className="bx bx-building"></UIIcon> {job.department}</p>
-                      <p><UIIcon className="bx bx-map"></UIIcon> {job.location}</p>
-                      <p><UIIcon className="bx bx-time"></UIIcon> {job.experience}</p>
-                      {job.salary && (job.salary.min !== undefined || job.salary.max !== undefined) && (
-                        <p>
-                          <UIIcon className="bx bx-money"></UIIcon>{' '}
-                          {job.salary.currency || 'LKR'}{' '}
-                          {job.salary.min !== undefined ? job.salary.min : '-'}
-                          {' - '}
-                          {job.salary.max !== undefined ? job.salary.max : '-'}
-                        </p>
-                      )}
-                      {job.deadline && (
-                        <p>
-                          <UIIcon className="bx bx-calendar"></UIIcon>{' '}
-                          Apply before: {new Date(job.deadline).toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-                    <p className="job-description">{job.description}</p>
-                    <div className="job-requirements">
-                      <h4>Key Requirements:</h4>
-                      <ul>
-                        {job.requirements.slice(0, 3).map((req, index) => (
-                          <li key={index}>{req}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <button
-                      className="apply-btn"
-                      onClick={() => handleApplyNow(job)}
-                    >
-                      Apply Now
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="career-cta">
-            <h2>Don't See the Right Fit?</h2>
-            <p>We're always looking for talented individuals to join our team. Send us your resume and we'll keep you in mind for future opportunities.</p>
-            <button
-              className="general-apply-btn"
-              onClick={() => handleApplyNow({ title: "General Application", department: "Various" })}
-            >
-              Submit General Application
-            </button>
-          </div>
-        </div>
-
-        {showApplicationForm && (
-          <ApplicantForm
-            job={selectedJob}
-            onSubmit={handleApplicationSubmit}
-            onClose={handleCloseForm}
-          />
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default Career;
+  }
+  return <div className="ed-page ed-information ed-careers">
+    <section className="ed-information-hero ed-pad"><div className="ed-hero-meta"><span>{branding.name} / CAREERS</span><span>CREATIVITY STARTS WITH PEOPLE.</span></div><div className="ed-information-hero-grid"><Reveal><span className="ed-kicker">BRING YOUR POINT OF VIEW</span><h1>WORK<br />WITH US.</h1><p>Bring your skills, your ideas, and your attention to the details. Explore the roles currently open at {branding.name}.</p><a className="ed-button" href="#open-roles">Explore open roles <ArrowUpRight size={18} /></a></Reveal><Reveal className="ed-information-photo ed-fold-right" delay={.15}><EditorialPhoto panel={0} eager alt="An individual approach to tailoring — fashion editorial inspiration" /></Reveal></div></section>
+    <section className="ed-career-values ed-pad"><Reveal><span className="ed-kicker">A LITTLE MORE PERSPECTIVE</span><h2>GOOD IDEAS.<br />THOUGHTFUL WORK.</h2></Reveal><div>{[['01','Creativity','An eye for a fresh idea and the confidence to share your point of view.'],['02','Craft','Care for the way things are made, from the first idea to the finishing touches.'],['03','Collaboration','Clear communication, shared ideas, and respect for the people you work with.']].map(([number,title,copy]) => <Reveal key={number}><article><span>{number}</span><div><h3>{title}</h3><p>{copy}</p></div></article></Reveal>)}</div></section>
+    <section className="ed-information-band ed-pad" id="open-roles"><Reveal><span className="ed-kicker">FIND YOUR NEXT CHAPTER</span><h2>OPEN<br />ROLES.</h2><p>Each role includes its own requirements and application details.</p></Reveal><Reveal delay={.1}><form className="ed-career-search" onSubmit={event => { event.preventDefault(); setSearch(query); }}><label htmlFor="role-search">Search by role, department, location, or skill</label><div><input id="role-search" type="search" value={query} onChange={event => { setQuery(event.target.value); if (!event.target.value) setSearch(''); }} placeholder="Find your place" /><button className="ed-button ed-button--light" type="submit">Search roles <ArrowUpRight size={18} /></button></div></form></Reveal></section>
+    <section className="ed-career-roles ed-pad" aria-busy={state === 'loading'}>{notice && <p className="ed-career-notice" role="status">{notice}</p>}
+      {state === 'loading' ? <p role="status">Loading open roles…</p> : state === 'error' ? <div className="ed-career-empty"><h2>ONE MOMENT.</h2><p>Open roles could not be loaded. Please try again.</p><button className="ed-button" onClick={() => setAttempt(value => value + 1)}>Try again <ArrowUpRight size={17} /></button></div> : !visible.length ? <div className="ed-career-empty"><h2>{jobs.length ? 'NO MATCHING ROLES.' : 'MORE TO COME.'}</h2><p>{jobs.length ? 'Try a different keyword to explore the current openings.' : 'There are no open roles listed right now. You can still send a general application below.'}</p>{search && <button className="ed-text-link" onClick={() => { setQuery(''); setSearch(''); }}>Clear search</button>}</div> : <><div className="ed-career-count ed-kicker">{visible.length} {visible.length === 1 ? 'OPEN ROLE' : 'OPEN ROLES'}</div>{visible.map((job, index) => <Reveal key={job._id || job.id || index} className="ed-role" delay={Math.min(index, 4) * .05}><article><div className="ed-role-heading"><div><span className="ed-kicker">{job.department || 'THE TEAM'}</span><h2>{job.title}</h2></div><button className="ed-button" onClick={() => apply(job)} aria-label={'Apply for ' + job.title}>Apply now <ArrowUpRight size={18} /></button></div><div className="ed-role-meta">{job.location && <span><MapPin size={13} />{job.location}</span>}{job.type && <span><Clock3 size={13} />{job.type}</span>}{job.experience && <span>{job.experience}</span>}{job.salary && typeof job.salary === 'object' && (job.salary.min != null || job.salary.max != null) && <span>{job.salary.currency || 'LKR'} {job.salary.min ?? '—'} – {job.salary.max ?? '—'}</span>}{job.deadline && <span>Apply by {new Date(job.deadline).toLocaleDateString()}</span>}</div>{job.description && <p className="ed-role-description">{job.description}</p>}{(job.requirements?.length > 0 || job.responsibilities?.length > 0 || job.benefits?.length > 0) && <details className="ed-role-details"><summary>Role details</summary>{[['Requirements', job.requirements], ['Responsibilities', job.responsibilities], ['Role benefits', job.benefits]].map(([title, list]) => Array.isArray(list) && list.length > 0 ? <div key={title}><h3>{title}</h3><ul>{list.map((value, position) => <li key={position}>{value}</li>)}</ul></div> : null)}</details>}</article></Reveal>)}</>}
+    </section>
+    <section className="ed-information-close ed-pad"><Reveal><Asterisk size={46} strokeWidth={1.2} /><span className="ed-kicker">A DIFFERENT KIND OF FIT?</span><h2>SHOW US<br />YOUR SKILLS.</h2></Reveal><Reveal delay={.1}><p>If you cannot find the right role, share a general application and tell us about the work you would like to do.</p><button className="ed-button ed-button--light" onClick={() => apply({ title: 'General Application', department: 'Various' })}>General application <ArrowUpRight size={18} /></button><Link className="ed-text-link" to="/contact">Have a question? <ArrowUpRight size={17} /></Link></Reveal></section>
+    {selectedJob && <ApplicantForm job={selectedJob} onSubmit={submit} onClose={() => setSelectedJob(null)} />}
+  </div>;
+}
