@@ -1,5 +1,5 @@
 import { API_BASE_URL as API_ORIGIN } from '../../config/api';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 
@@ -21,8 +21,12 @@ export default function AdminCustomOrders() {
   const [selectedTailors, setSelectedTailors] = useState({}); // orderId -> tailorId mapping
   const [searchParams, setSearchParams] = useSearchParams();
   const [updatingStatusId, setUpdatingStatusId] = useState('');
-  const [info] = useState('');
   const [lastAssigned, setLastAssigned] = useState(null);
+  const assignTimerRef = useRef(null);
+
+  useEffect(() => () => {
+    if (assignTimerRef.current) clearTimeout(assignTimerRef.current);
+  }, []);
 
   const statusFilter = searchParams.get('status') || '';
   const tailorFilter = searchParams.get('tailorId') || '';
@@ -40,11 +44,6 @@ export default function AdminCustomOrders() {
         if (unassignedFilter) params.unassigned = 'true';
         if (idFilter) params.id = idFilter;
         
-        // Add detailed logging
-        console.log('Token:', token);
-        console.log('Request URL:', `${API_BASE_URL}/api/custom-orders`);
-        console.log('Request params:', params);
-        
         const res = await axios.get(`${API_BASE_URL}/api/custom-orders`, {
             headers: { 
                 Authorization: `Bearer ${token}`,
@@ -53,9 +52,6 @@ export default function AdminCustomOrders() {
             },
             params,
         });
-        
-        // Log full response
-        console.log('Full API Response:', res);
         
         if (!res.data || !Array.isArray(res.data.data)) {
             throw new Error('Invalid response format');
@@ -90,7 +86,7 @@ export default function AdminCustomOrders() {
   useEffect(() => {
     fetchOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, tailorFilter]);
+  }, [statusFilter, tailorFilter, unassignedFilter, idFilter]);
 
   useEffect(() => { fetchTailors(); }, [fetchTailors]);
 
@@ -117,7 +113,8 @@ export default function AdminCustomOrders() {
       );
 
       setLastAssigned(orderId);
-      setTimeout(() => setLastAssigned(null), 3000);
+      if (assignTimerRef.current) clearTimeout(assignTimerRef.current);
+      assignTimerRef.current = setTimeout(() => setLastAssigned(null), 3000);
 
       // Clear selection for this order only
       setSelectedTailors(prev => {

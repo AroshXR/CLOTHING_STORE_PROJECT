@@ -13,7 +13,7 @@ export default function PrintLayout({ resources, panel, selected, onMove, onEnd 
       ctx.strokeRect(point.x - 32, point.y - 32, 64, 64); ctx.setLineDash([]);
       ctx.strokeStyle = '#3dd6b0'; ctx.beginPath(); ctx.moveTo(point.x - 16, point.y); ctx.lineTo(point.x + 16, point.y); ctx.moveTo(point.x, point.y - 16); ctx.lineTo(point.x, point.y + 16); ctx.stroke();
     }
-  }, [resources.canvases, resources.masks, panel, selected]);
+  }, [resources.canvases, resources.masks, resources.version, panel, selected]);
   const canMove = selected?.side === panel;
   return <div className="studio-layout-view">
     <div className="studio-stage-label"><span className="studio-dot" />{panelLabel(panel)} placement</div>

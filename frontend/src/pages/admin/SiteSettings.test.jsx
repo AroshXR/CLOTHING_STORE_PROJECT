@@ -25,6 +25,8 @@ test('saving buyer branding updates visible identity, browser metadata and subse
   axios.put.mockImplementation((_url, settings) => { stored = settings; return Promise.resolve({ data: { data: stored } }); });
   const first = show();
   await screen.findByLabelText('Site name');
+  await waitFor(() => expect(axios.get).toHaveBeenCalled());
+  await new Promise(resolve => setTimeout(resolve, 0));
   fireEvent.change(screen.getByLabelText('Site name'), { target: { value: 'Thread & Needle' } });
   fireEvent.change(screen.getByLabelText('Public contact email'), { target: { value: 'help@example.com' } });
   fireEvent.change(screen.getByLabelText('Header color'), { target: { value: '#334455' } });

@@ -38,7 +38,6 @@ export default function MaterialInventoryManagement() {
         throw new Error(errorData.message || 'Failed to fetch inventory items')
       }
       const data = await response.json()
-      console.log('Fetched inventory items:', data)
       setInventoryItems(data)
     } catch (error) {
       console.error('Error fetching inventory items:', error)
@@ -170,13 +169,6 @@ export default function MaterialInventoryManagement() {
     const loadData = async () => {
       setLoading(true)
       try {
-        // Test backend connection first
-        const testResponse = await fetch(`${API_ORIGIN}/test`)
-        if (!testResponse.ok) {
-          throw new Error('Backend server is not responding')
-        }
-        console.log('Backend connection test successful')
-
         await Promise.all([
           fetchInventoryItems(),
           fetchSuppliers(),

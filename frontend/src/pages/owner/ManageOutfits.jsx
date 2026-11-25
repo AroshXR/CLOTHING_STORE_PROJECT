@@ -44,7 +44,7 @@ const ManageOutfits = () => {
             <tr>
               <th className="p-3 font-medium">Outfit</th>
               <th className="p-3 font-medium max-md:hidden">Category</th>
-              <th className="p-3 font-medium'">Price</th>
+              <th className="p-3 font-medium">Price</th>
               <th className="p-3 font-medium max-md:hidden">Status</th>
               <th className="p-3 font-medium">Actions</th>
             </tr>

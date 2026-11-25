@@ -10,8 +10,6 @@ const Dashboard = () => {
 
   const currency = process.env.REACT_APP_CURRENCY
 
-  console.log("Dashboard component is rendering"); // Check if this log shows up
-
   const [data,setData] = useState({
     totalOutfits: 0,
     totalBookings:0,
@@ -33,7 +31,7 @@ const Dashboard = () => {
       const BASE_URL = API_ORIGIN
       const { data: resp } = await axios.get(`${BASE_URL}/api/owner/dashboard`)
       if(resp?.success && resp.dashboardData){
-        const { totalOutfits, totalBookings, pendingBookings, confirmedBookings, cancelledBookings, monthlyRevenue } = resp.dashboardData
+        const { totalOutfits, totalBookings, pendingBookings, confirmedBookings, monthlyRevenue } = resp.dashboardData
         setData({
           totalOutfits,
           totalBookings,

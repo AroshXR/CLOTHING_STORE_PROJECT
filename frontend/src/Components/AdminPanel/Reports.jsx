@@ -12,8 +12,6 @@ export default function Reports() {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [reportStatus, setReportStatus] = useState('all');
-  const [reportGenerating, setReportGenerating] = useState(false);
 
   const fetchAnalytics = async () => {
     try {

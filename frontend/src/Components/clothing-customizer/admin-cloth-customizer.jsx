@@ -1,6 +1,6 @@
 import { API_BASE_URL as API_ORIGIN } from '../../config/api';
 import MediaImage from '../MediaImage';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 
 import './ClothCustomizer.css';
@@ -20,6 +20,11 @@ export default function AdminClothCustomizer() {
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [message, setMessage] = useState('');
+	const messageTimerRef = useRef(null);
+
+	useEffect(() => () => {
+		if (messageTimerRef.current) clearTimeout(messageTimerRef.current);
+	}, []);
 
     // Use hardcoded images with database prices
     const processedPresetDesigns = prices?.presetDesigns?.map((design, index) => {
@@ -33,15 +38,11 @@ export default function AdminClothCustomizer() {
 	// Fetch current prices
 	const fetchPrices = async () => {
 		try {
-			console.log('Fetching prices...');
 			const response = await axios.get(`${API_ORIGIN}/customizer-prices`);
-			console.log('Fetch response:', response.data);
 			if (response.data.status === "ok") {
 				setPrices(response.data.data);
 			}
 		} catch (error) {
-			console.error('Error fetching prices:', error);
-			console.error('Error response:', error.response?.data);
 			setMessage('Error fetching prices. Please try again.');
 		} finally {
 			setLoading(false);
@@ -58,26 +59,20 @@ export default function AdminClothCustomizer() {
 			setSaving(true);
 			const token = getToken();
 			
-			console.log('Updating prices:', prices);
-			console.log('Token:', token);
-			
 			const response = await axios.put(`${API_ORIGIN}/customizer-prices`, prices, {
 				headers: {
 					Authorization: `Bearer ${token}`
 				}
 			});
 
-			console.log('Update response:', response.data);
-
 			if (response.data.status === "ok") {
 				setMessage('Prices updated successfully!');
-				setTimeout(() => setMessage(''), 3000);
+				if (messageTimerRef.current) clearTimeout(messageTimerRef.current);
+				messageTimerRef.current = setTimeout(() => setMessage(''), 3000);
 			} else {
 				setMessage('Error updating prices. Please try again.');
 			}
 		} catch (error) {
-			console.error('Error updating prices:', error);
-			console.error('Error response:', error.response?.data);
 			setMessage(`Error updating prices: ${error.response?.data?.message || error.message}`);
 		} finally {
 			setSaving(false);

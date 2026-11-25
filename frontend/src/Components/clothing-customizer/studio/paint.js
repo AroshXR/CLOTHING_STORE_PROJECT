@@ -2,8 +2,10 @@ import * as THREE from 'three';
 export const WIDTH = 768, HEIGHT = 1152;
 export const center = layer => ({ x: WIDTH * (.5 + (layer.position?.x || 0) * .004), y: HEIGHT * (.43 + (layer.position?.y || 0) * .0035) });
 const fonts = { sans: 'Arial, sans-serif', serif: 'Georgia, serif', mono: 'Courier New, monospace' };
-export function paintPanel(side, design, images) {
-  const canvas = document.createElement('canvas'); canvas.width = WIDTH; canvas.height = HEIGHT;
+export function paintPanel(side, design, images, targetCanvas) {
+  const canvas = targetCanvas || document.createElement('canvas');
+  if (canvas.width !== WIDTH) canvas.width = WIDTH;
+  if (canvas.height !== HEIGHT) canvas.height = HEIGHT;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = design.panelColors[side] || design.color; ctx.fillRect(0, 0, WIDTH, HEIGHT);
   design.placedDesigns.filter(layer => layer.side === side).forEach(layer => {
