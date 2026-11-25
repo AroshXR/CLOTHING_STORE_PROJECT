@@ -1,7 +1,7 @@
 const { isAdmin } = require('../middleware/auth');
 const Applicant = require("../models/ApplicantModel");
 const User = require("../models/User");
-const { sendEmail } = require("../utils/email");
+const { sendEmail } = require("../services/emailService");
 const { getIO } = require("../utils/socket");
 
 // Input validation helper

@@ -30,18 +30,43 @@ const getEmailConfig = () => {
   };
 };
 
-// Create transporter
-const transporter = nodemailer.createTransport(getEmailConfig());
+// Create transporter lazily on first send
+let cachedTransporter = null;
+const getTransporter = () => {
+  if (!cachedTransporter) {
+    cachedTransporter = nodemailer.createTransport(getEmailConfig());
+  }
+  return cachedTransporter;
+};
 
 // Test email connection
 const testEmailConnection = async () => {
   try {
-    await transporter.verify();
+    await getTransporter().verify();
     console.log('Email service is ready to send messages');
     return true;
   } catch (error) {
     console.log('Email service configuration error:', error.message);
     return false;
+  }
+};
+
+// Send generic email (used by recruitment/applicant notifications)
+const sendEmail = async ({ to, subject, html, text }) => {
+  const missing = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS'].filter((key) => !process.env[key]);
+  if (missing.length) {
+    return { success: false, error: 'Email transporter not configured' };
+  }
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+  if (!from) {
+    return { success: false, error: 'No from address configured' };
+  }
+  try {
+    const info = await getTransporter().sendMail({ from, to, subject, html, text });
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('[email] Failed to send email:', error.message);
+    return { success: false, error: error.message };
   }
 };
 
@@ -52,7 +77,7 @@ const sendLowStockAlert = async (item, recipientEmail = process.env.STOCK_ALERT_
   try {
     const brand = await getEmailBranding();
     // Try to send real email
-    const emailResult = await transporter.sendMail({
+    const emailResult = await getTransporter().sendMail({
       from: process.env.SMTP_FROM || process.env.EMAIL_USER || process.env.SMTP_USER,
       to: recipientEmail,
       subject: `LOW STOCK ALERT - ${item.itemName}`,
@@ -305,7 +330,7 @@ const sendPayOnReturnEmail = async (booking, recipientEmail) => {
   
   try {
     const brand = await getEmailBranding();
-    const emailResult = await transporter.sendMail({
+    const emailResult = await getTransporter().sendMail({
       from: process.env.SMTP_FROM || process.env.EMAIL_USER || process.env.SMTP_USER,
       to: recipientEmail,
       subject: `Payment on Return Confirmed - Booking #${booking._id.toString().slice(-6)}`,
@@ -574,7 +599,7 @@ const sendReturnReminderEmail = async (booking, recipientEmail) => {
       reminderMessage = 'Your rental item is OVERDUE. Additional charges are now being applied.';
     }
 
-    const emailResult = await transporter.sendMail({
+    const emailResult = await getTransporter().sendMail({
       from: process.env.SMTP_FROM || process.env.EMAIL_USER || process.env.SMTP_USER,
       to: recipientEmail,
       subject: `${reminderType} - Booking #${booking._id.toString().slice(-6)}`,
@@ -819,6 +844,7 @@ const sendReturnReminderEmail = async (booking, recipientEmail) => {
 
 module.exports = {
   testEmailConnection,
+  sendEmail,
   sendLowStockAlert,
   sendBulkLowStockAlerts,
   sendPayOnReturnEmail,
