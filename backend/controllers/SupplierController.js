@@ -280,20 +280,20 @@ exports.deleteOrder = async (req, res) => {
 // Get dashboard statistics
 exports.getDashboardStats = async (req, res) => {
   try {
-    const totalSuppliers = await Supplier.countDocuments();
-    const activeSuppliers = await Supplier.countDocuments({ status: 'active' });
-    const totalOrders = await SupplierOrder.countDocuments();
-    const pendingOrders = await SupplierOrder.countDocuments({ status: 'pending' });
-    
-    const orders = await SupplierOrder.find();
-    const totalValue = orders.reduce((sum, order) => sum + order.total, 0);
-    
+    const [supplierStats, orderStats] = await Promise.all([
+      Supplier.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      SupplierOrder.aggregate([{ $group: { _id: '$status', count: { $sum: 1 }, totalValue: { $sum: '$total' } } }])
+    ]);
+
+    const supplierMap = new Map(supplierStats.map(s => [s._id, s.count]));
+    const orderMap = new Map(orderStats.map(s => [s._id, s.count]));
+
     res.status(200).json({
-      totalSuppliers,
-      activeSuppliers,
-      totalOrders,
-      pendingOrders,
-      totalValue
+      totalSuppliers: supplierStats.reduce((sum, s) => sum + s.count, 0),
+      activeSuppliers: supplierMap.get('active') || 0,
+      totalOrders: orderStats.reduce((sum, s) => sum + s.count, 0),
+      pendingOrders: orderMap.get('pending') || 0,
+      totalValue: orderStats.reduce((sum, s) => sum + (s.totalValue || 0), 0)
     });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching dashboard stats', error: error.message });

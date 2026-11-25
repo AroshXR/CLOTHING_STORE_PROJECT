@@ -30,17 +30,17 @@ exports.listAll = async (req, res) => {
   if (req.query.tailorId) { checkId(req.query.tailorId); query.assignedTailor = req.query.tailorId; }
   if (req.query.id) { checkId(req.query.id); query._id = req.query.id; }
   if (req.query.unassigned === 'true') query.assignedTailor = null;
-  const docs = await populate(CustomOrder.find(query).sort({ createdAt: -1 }));
+  const docs = await populate(CustomOrder.find(query).sort({ createdAt: -1 })).lean();
   res.json({ status: 'ok', count: docs.length, data: docs });
 };
 exports.listMine = async (req, res) => {
-  const docs = await populate(CustomOrder.find({ customerId: req.user._id }).sort({ createdAt: -1 }));
+  const docs = await populate(CustomOrder.find({ customerId: req.user._id }).sort({ createdAt: -1 })).lean();
   res.json({ status: 'ok', count: docs.length, data: docs });
 };
 exports.listAssignedToMe = async (req, res) => {
-  const tailor = await Tailor.findOne({ userId: req.user._id, isActive: true });
+  const tailor = await Tailor.findOne({ userId: req.user._id, isActive: true }).select('_id').lean();
   if (!tailor) return res.json({ status: 'ok', count: 0, data: [] });
-  const docs = await populate(CustomOrder.find({ assignedTailor: tailor._id }).sort({ createdAt: -1 }));
+  const docs = await populate(CustomOrder.find({ assignedTailor: tailor._id }).sort({ createdAt: -1 })).lean();
   res.json({ status: 'ok', count: docs.length, data: docs });
 };
 exports.getOne = async (req, res) => res.json({ status: 'ok', data: await authorizedOrder(req.user, req.params.id) });

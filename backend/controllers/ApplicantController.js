@@ -800,7 +800,9 @@ const getApplicantReport = async (req, res, next) => {
 const getRecruitmentAnalytics = async (req, res, next) => {
   try {
     // Get all applicants with their data
-    const applicants = await Applicant.find({}).lean();
+    const applicants = await Applicant.find({})
+      .select('status position name gmail appliedAt resume interview')
+      .lean();
     
     // Calculate metrics
     const totalApplicants = applicants.length;

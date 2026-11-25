@@ -18,7 +18,7 @@ exports.getAll = async (req, res) => {
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
-    const items = await ClothingItem.find(query).sort({ createdAt: -1 });
+    const items = await ClothingItem.find(query).sort({ createdAt: -1 }).lean();
     return res.status(200).json(items);
   } catch (err) {
     console.error('Error fetching clothing items:', err);
@@ -34,7 +34,7 @@ exports.report = async (req, res) => {
       return res.status(400).json({ message: 'ids array is required' });
     }
 
-    const items = await ClothingItem.find({ _id: { $in: ids } });
+    const items = await ClothingItem.find({ _id: { $in: ids } }).lean();
     const data = items.map((it) => {
       const reviews = Array.isArray(it.reviews) ? it.reviews : [];
       const totalReviews = reviews.length;

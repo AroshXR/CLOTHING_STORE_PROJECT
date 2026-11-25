@@ -89,7 +89,7 @@ const addOutfit = async (req, res) => {
 const getOwnerOutfits = async (req, res) => {
     try {
         const { _id } = req.user;
-        const outfits = await Outfit.find({ owner: _id, archivedAt: null });
+        const outfits = await Outfit.find({ owner: _id, archivedAt: null }).lean();
         res.json({ success: true, outfits });
     } catch (error) {
         console.log(error.message);
@@ -120,7 +120,7 @@ const getAllOutfits = async (req, res) => {
         }
         
         // Get all outfits matching the query
-        let outfits = await Outfit.find(query).populate('owner', 'username email');
+        let outfits = await Outfit.find(query).populate('owner', 'username email').lean();
         
         // Filter out outfits with pending or confirmed bookings in one query
         const bookedIds = outfits.length
@@ -189,22 +189,38 @@ const getDashboardData = async (req, res) => {
             bookingQuery = { owner: _id };
         }
         
-        const outfits = await Outfit.find(outfitQuery)
-        const bookings = await Booking.find(bookingQuery).populate('outfit').populate('user', 'username email').sort({createdAt: -1}) ;
+        const [totalOutfits, bookingStats, pendingBookings] = await Promise.all([
+            Outfit.countDocuments(outfitQuery),
+            Booking.aggregate([
+                { $match: bookingQuery },
+                {
+                    $group: {
+                        _id: '$status',
+                        count: { $sum: 1 },
+                        revenue: { $sum: { $cond: [{ $eq: ['$status', 'confirmed'] }, '$price', 0] } }
+                    }
+                }
+            ]),
+            Booking.find({ ...bookingQuery, status: "pending" })
+                .populate('outfit')
+                .populate('user', 'username email')
+                .sort({ createdAt: -1 })
+                .limit(3)
+                .lean()
+        ]);
 
-        const pendingBookings = await Booking.find({ ...bookingQuery, status: "pending" }).populate('outfit').populate('user', 'username email').sort({ createdAt: -1 });
-        const confirmedBookings = await Booking.find({ ...bookingQuery, status: "confirmed" }).sort({ createdAt: -1 });
-        const cancelledBookings = await Booking.find({ ...bookingQuery, status: "cancelled" }).sort({ createdAt: -1 });
-
-        // Calculate monthlyRevenue from bookings where status is confirmed
-        const monthlyRevenue = confirmedBookings.reduce((acc, booking) => acc + booking.price, 0);
+        const statusMap = new Map(bookingStats.map(s => [s._id, s]));
+        const totalBookings = bookingStats.reduce((sum, s) => sum + s.count, 0);
+        const confirmedBookings = statusMap.get('confirmed')?.count || 0;
+        const cancelledBookings = statusMap.get('cancelled')?.count || 0;
+        const monthlyRevenue = statusMap.get('confirmed')?.revenue || 0;
 
         const dashboardData = {
-            totalOutfits: outfits.length,
-            totalBookings: bookings.length,
-            pendingBookings: pendingBookings.slice(0,3),
-            confirmedBookings: confirmedBookings.length,
-            cancelledBookings: cancelledBookings.length,
+            totalOutfits,
+            totalBookings,
+            pendingBookings,
+            confirmedBookings,
+            cancelledBookings,
             monthlyRevenue
         }
 

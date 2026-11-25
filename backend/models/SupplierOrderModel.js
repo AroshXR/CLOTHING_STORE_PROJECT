@@ -49,4 +49,6 @@ supplierOrderSchema.pre('save', function(next) {
   next();
 });
 
+supplierOrderSchema.index({ supplierId: 1, orderDate: -1 });
+
 module.exports = mongoose.model('SupplierOrder', supplierOrderSchema);

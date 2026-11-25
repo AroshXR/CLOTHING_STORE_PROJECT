@@ -378,36 +378,27 @@ exports.checkLowStockAlerts = async (req, res) => {
 // Get inventory dashboard stats
 exports.getInventoryStats = async (req, res) => {
   try {
-    const totalItems = await MaterialInventory.countDocuments();
-    const availableItems = await MaterialInventory.countDocuments({ status: 'available' });
-    const lowStockItems = await MaterialInventory.countDocuments({ status: 'low_stock' });
-    const outOfStockItems = await MaterialInventory.countDocuments({ status: 'out_of_stock' });
-    
-    // Calculate total inventory value
-    const items = await MaterialInventory.find();
-    const totalValue = items.reduce((sum, item) => sum + item.totalValue, 0);
-    
-    // Get items by category
-    const categoryStats = await MaterialInventory.aggregate([
-      {
-        $group: {
-          _id: '$category',
-          count: { $sum: 1 },
-          totalValue: { $sum: '$totalValue' }
-        }
-      }
+    const [statusStats, categoryStats, lowStockAlerts] = await Promise.all([
+      MaterialInventory.aggregate([
+        { $group: { _id: '$status', count: { $sum: 1 }, totalValue: { $sum: '$totalValue' } } }
+      ]),
+      MaterialInventory.aggregate([
+        { $group: { _id: '$category', count: { $sum: 1 }, totalValue: { $sum: '$totalValue' } } }
+      ]),
+      MaterialInventory.find({
+        status: { $in: ['low_stock', 'out_of_stock'] }
+      }).select('itemName quantity minimumStock status').lean()
     ]);
-    
-    // Get low stock alerts
-    const lowStockAlerts = await MaterialInventory.find({ 
-      status: { $in: ['low_stock', 'out_of_stock'] } 
-    }).select('itemName quantity minimumStock status');
-    
+
+    const statusMap = new Map(statusStats.map(s => [s._id, s.count]));
+    const totalItems = statusStats.reduce((sum, s) => sum + s.count, 0);
+    const totalValue = statusStats.reduce((sum, s) => sum + (s.totalValue || 0), 0);
+
     res.status(200).json({
       totalItems,
-      availableItems,
-      lowStockItems,
-      outOfStockItems,
+      availableItems: statusMap.get('available') || 0,
+      lowStockItems: statusMap.get('low_stock') || 0,
+      outOfStockItems: statusMap.get('out_of_stock') || 0,
       totalValue,
       categoryStats,
       lowStockAlerts

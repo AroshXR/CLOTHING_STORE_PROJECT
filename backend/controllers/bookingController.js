@@ -52,7 +52,7 @@ const createBooking = async (req, res) => {
 const getUserBooking = async (req, res) => {
     try {
         const { _id } = req.user;
-        const bookings = await Booking.find({ user: _id }).populate("outfit").sort({ createdAt: -1 });
+        const bookings = await Booking.find({ user: _id }).populate("outfit").sort({ createdAt: -1 }).lean();
 
         res.json({ success: true, bookings });
     } catch (error) {
@@ -79,7 +79,8 @@ const getOwnerBooking = async (req, res) => {
         const bookings = await Booking.find(bookingQuery)
             .populate('outfit').populate('user', 'username email')
             .select("-user.password")
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .lean();
 
         res.json({ success: true, bookings });
     } catch (error) {
@@ -138,7 +139,8 @@ const buildBookingReportData = async (req) => {
         .populate({ path: 'outfit', select: 'brand model category pricePerDay location image' })
         .populate({ path: 'user', select: 'username email' })
         .populate({ path: 'owner', select: 'username email' })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
 
     if (location && location !== 'all') {
         bookings = bookings.filter(booking => booking.outfit && booking.outfit.location === location);

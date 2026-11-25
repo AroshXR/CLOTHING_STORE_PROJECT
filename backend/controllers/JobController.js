@@ -18,7 +18,8 @@ const getAllJobs = async (req, res, next) => {
     const jobs = await Job.find(query)
       .sort(options.sort)
       .limit(options.limit)
-      .skip((options.page - 1) * options.limit);
+      .skip((options.page - 1) * options.limit)
+      .lean();
     
     const total = await Job.countDocuments(query);
     
@@ -272,7 +273,8 @@ const getAllJobsAdmin = async (req, res, next) => {
     const jobs = await Job.find(query)
       .sort(options.sort)
       .limit(options.limit)
-      .skip((options.page - 1) * options.limit);
+      .skip((options.page - 1) * options.limit)
+      .lean();
     
     const total = await Job.countDocuments(query);
     

@@ -20,7 +20,7 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 // Retrieve all users (admin consumption)
 const getAllUsers = async (request, response) => {
     try {
-        const users = await User.find().select("-password").sort({ createdAt: -1 });
+        const users = await User.find().select("-password").sort({ createdAt: -1 }).lean();
         return response.status(200).json({ status: "ok", users });
     } catch (error) {
         console.error("Failed to fetch users:", error);

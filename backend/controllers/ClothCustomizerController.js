@@ -11,7 +11,7 @@ exports.getAllClothCustomizers = async (req, res) => {
   const query = { userId: req.user._id };
   if (req.query.scope === 'saved') query.inCart = false;
   else if (req.query.scope !== 'all') query.inCart = { $ne: false };
-  res.json({ status: 'ok', data: await Design.find(query).sort({ createdAt: -1 }) });
+  res.json({ status: 'ok', data: await Design.find(query).sort({ createdAt: -1 }).lean() });
 };
 exports.addClothCustomizer = async (req, res) => {
   const { design } = pricing.priceCustomization(req.body, await pricing.getPrices());

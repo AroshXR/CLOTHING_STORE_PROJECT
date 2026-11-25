@@ -11,20 +11,20 @@ exports.getAllOrders = async (req, res) => {
     if (!mongoose.isValidObjectId(req.query.AdminID)) throw new HttpError(400, 'Invalid customer ID');
     query.AdminID = req.query.AdminID;
   }
-  const [orders, total] = await Promise.all([Order.find(query).sort({ CreatedAt: -1 }).skip((page - 1) * limit).limit(limit),
+  const [orders, total] = await Promise.all([Order.find(query).sort({ CreatedAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
     Order.countDocuments(query)]);
   res.json({ status: 'ok', data: orders, pagination: { currentPage: page, totalPages: Math.ceil(total / limit), totalItems: total, itemsPerPage: limit } });
 };
 exports.getMyOrders = async (req, res) => {
-  const paymentIds = (await Payment.find({ userId: req.user._id }).select('_id')).map(p => String(p._id));
+  const paymentIds = (await Payment.find({ userId: req.user._id }).select('_id').lean()).map(p => String(p._id));
   const data = await Order.find({ $or: [{ AdminID: req.user._id }, { PaymentID: { $in: paymentIds } }] }).sort({ CreatedAt: -1 })
-    .populate('DesignID', 'clothingType color size selectedDesign totalPrice');
+    .populate('DesignID', 'clothingType color size selectedDesign totalPrice').lean();
   res.json({ status: 'ok', data });
 };
 exports.getOrderById = async (req, res) => {
   const query = mongoose.isValidObjectId(req.params.id) ? { $or: [{ _id: req.params.id }, { OrderID: req.params.id }] } : { OrderID: req.params.id };
   if (!isAdmin(req.user)) query.AdminID = req.user._id;
-  const order = await Order.findOne(query).populate('DesignID', 'clothingType color size selectedDesign totalPrice');
+  const order = await Order.findOne(query).populate('DesignID', 'clothingType color size selectedDesign totalPrice').lean();
   if (!order) throw new HttpError(404, 'Order not found');
   res.json({ status: 'ok', data: order });
 };
