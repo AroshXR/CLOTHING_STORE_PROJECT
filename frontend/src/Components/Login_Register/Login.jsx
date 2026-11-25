@@ -65,17 +65,6 @@ function LoginPage() {
     return defaultRoute;
   };
 
-  const testBackendConnection = async () => {
-    try {
-      const response = await axios.get(`${API_ORIGIN}/test`);
-      console.log('Backend connection test:', response.data);
-      return true;
-    } catch (error) {
-      console.error('Backend connection test failed:', error);
-      return false;
-    }
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUser((prev) => ({
@@ -131,12 +120,6 @@ function LoginPage() {
     setError('');
 
     try {
-      const isBackendConnected = await testBackendConnection();
-      if (!isBackendConnected) {
-        setError('Cannot connect to server. Please check if the backend is running.');
-        return;
-      }
-
       const response = await sendRequest();
 
       if (response.status === 'ok') {

@@ -354,13 +354,6 @@ export default function SupplierManagement() {
     const loadData = async () => {
       setLoading(true)
       try {
-        // Test backend connection first
-        const testResponse = await fetch(`${API_ORIGIN}/test`)
-        if (!testResponse.ok) {
-          throw new Error('Backend server is not responding')
-        }
-        console.log('Backend connection test successful')
-
         await Promise.all([fetchSuppliers(), fetchOrders()])
       } catch (error) {
         console.error('Error loading data:', error)
