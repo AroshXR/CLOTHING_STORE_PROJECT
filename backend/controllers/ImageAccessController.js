@@ -35,7 +35,7 @@ exports.serve = async (req, res) => {
     }
   }
   const file = path.join(__dirname, '..', 'uploads', filename);
-  if (!fs.existsSync(file)) return res.sendStatus(404);
+  try { await fs.promises.access(file); } catch { return res.sendStatus(404); }
   res.set('Cache-Control', published ? 'public, max-age=300' : 'private, no-store');
   res.sendFile(file);
 };

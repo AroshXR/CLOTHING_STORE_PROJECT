@@ -23,7 +23,7 @@ module.exports = function createApp() {
     const application = await Applicant.findOne(query);
     if (!application) return res.sendStatus(404);
     const file = path.join(__dirname, 'uploads', 'resumes', application.resume.filename);
-    if (!fs.existsSync(file)) return res.sendStatus(404);
+    try { await fs.promises.access(file); } catch { return res.sendStatus(404); }
     res.download(file, application.resume.originalName || 'resume');
   });
   app.use('/uploads/resumes', (_req, res) => res.sendStatus(404));

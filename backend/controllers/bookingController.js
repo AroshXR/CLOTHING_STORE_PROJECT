@@ -5,6 +5,23 @@ const Outfit = require("../models/Outfit");
 const { sendPayOnReturnEmail } = require("../services/emailService");
 const puppeteer = require('puppeteer');
 
+let sharedBrowserPromise = null;
+const getPdfBrowser = async () => {
+    if (!sharedBrowserPromise) {
+        sharedBrowserPromise = puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        }).then((browser) => {
+            browser.on('disconnected', () => { sharedBrowserPromise = null; });
+            return browser;
+        }).catch((err) => {
+            sharedBrowserPromise = null;
+            throw err;
+        });
+    }
+    return sharedBrowserPromise;
+};
+
 // Function to check the availability of the Outfit at a given date
 const checkAvailability = async (outfit, reservationDate, returnDate) => {
     const bookings = await Booking.find({
@@ -369,27 +386,25 @@ const generateBookingReportPDF = async (req, res) => {
         </html>
         `;
 
-        // Launch puppeteer and generate PDF
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        
+        // Reuse a shared Puppeteer browser instance to avoid per-request launches
+        const browser = await getPdfBrowser();
         const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-        
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: {
-                top: '20px',
-                right: '20px',
-                bottom: '20px',
-                left: '20px'
-            }
-        });
-        
-        await browser.close();
+        let pdfBuffer;
+        try {
+            await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+            pdfBuffer = await page.pdf({
+                format: 'A4',
+                printBackground: true,
+                margin: {
+                    top: '20px',
+                    right: '20px',
+                    bottom: '20px',
+                    left: '20px'
+                }
+            });
+        } finally {
+            await page.close().catch(() => {});
+        }
 
         // Set response headers for PDF download
         const filename = `booking-report-${new Date().toISOString().split('T')[0]}.pdf`;

@@ -5,17 +5,12 @@ const Applicant = require('../models/ApplicantModel');
 // Get overview analytics (revenue, orders, AOV)
 const getOverviewAnalytics = async (req, res) => {
   try {
-    // Calculate total revenue
-    const revenueResult = await Order.aggregate([
+    const [result] = await Order.aggregate([
       { $match: { status: { $ne: 'cancelled' } } },
-      { $group: { _id: null, totalRevenue: { $sum: '$totalAmount' } } }
+      { $group: { _id: null, totalRevenue: { $sum: '$Price' }, totalOrders: { $sum: 1 } } }
     ]);
-    const totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
-
-    // Count total orders
-    const totalOrders = await Order.countDocuments({ status: { $ne: 'cancelled' } });
-
-    // Calculate average order value
+    const totalRevenue = result?.totalRevenue || 0;
+    const totalOrders = result?.totalOrders || 0;
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
     res.json({
@@ -32,26 +27,23 @@ const getOverviewAnalytics = async (req, res) => {
 // Get stock analytics
 const getStockAnalytics = async (req, res) => {
   try {
-    // Get total items count
-    const totalItems = await ClothingItem.countDocuments();
-
-    // Calculate total stock value
-    const stockResult = await ClothingItem.aggregate([
-      { $group: { _id: null, totalValue: { $sum: { $multiply: ['$price', '$stock'] } } } }
+    const [result] = await ClothingItem.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalItems: { $sum: 1 },
+          totalValue: { $sum: { $multiply: ['$price', '$stock'] } },
+          lowStockCount: { $sum: { $cond: [{ $and: [{ $gt: ['$stock', 0] }, { $lt: ['$stock', 10] }] }, 1, 0] } },
+          outOfStockCount: { $sum: { $cond: [{ $eq: ['$stock', 0] }, 1, 0] } }
+        }
+      }
     ]);
-    const totalValue = stockResult.length > 0 ? stockResult[0].totalValue : 0;
-
-    // Count low stock items (stock < 10)
-    const lowStockCount = await ClothingItem.countDocuments({ stock: { $lt: 10, $gt: 0 } });
-
-    // Count out of stock items
-    const outOfStockCount = await ClothingItem.countDocuments({ stock: 0 });
 
     res.json({
-      totalItems,
-      totalValue: Math.round(totalValue * 100) / 100,
-      lowStockCount,
-      outOfStockCount
+      totalItems: result?.totalItems || 0,
+      totalValue: Math.round((result?.totalValue || 0) * 100) / 100,
+      lowStockCount: result?.lowStockCount || 0,
+      outOfStockCount: result?.outOfStockCount || 0
     });
   } catch (error) {
     console.error('Error fetching stock analytics:', error);
@@ -64,9 +56,10 @@ const getRecentOrders = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
     const orders = await Order.find({ status: { $ne: 'cancelled' } })
-      .sort({ createdAt: -1 })
+      .sort({ CreatedAt: -1 })
       .limit(limit)
-      .populate('user', 'name email');
+      .populate('AdminID', 'username email')
+      .lean();
 
     res.json({ orders });
   } catch (error) {
@@ -81,7 +74,8 @@ const getRecentApplications = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const applicants = await Applicant.find()
       .sort({ createdAt: -1 })
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     res.json({ applicants });
   } catch (error) {

@@ -34,7 +34,7 @@ const addOutfit = async (req, res) => {
             return res.json({ success: false, message: "Main image is required" });
         }
 
-        const mainFileBuffer = fs.readFileSync(mainImageFile.path);
+        const mainFileBuffer = await fs.promises.readFile(mainImageFile.path);
         const mainResponse = await imagekit.upload({
             file: mainFileBuffer,
             fileName: mainImageFile.originalname,
@@ -81,6 +81,9 @@ const addOutfit = async (req, res) => {
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });
+    } finally {
+        const tempFiles = [req.files?.mainImage?.[0], ...(req.files?.additionalImages || [])].filter(Boolean);
+        await Promise.allSettled(tempFiles.map(file => fs.promises.unlink(file.path)));
     }
 };
 
@@ -144,6 +147,9 @@ const toggleOutfitAvailability = async (req, res) => {
         const { _id } = req.user;
         const { outfitId } = req.body;
         const outfit = await Outfit.findById(outfitId);
+        if (!outfit) {
+            return res.json({ success: false, message: "Outfit not found" });
+        }
 
         // Checking if the outfit belongs to the user
         if (outfit.owner.toString() !== _id.toString()) {
@@ -241,7 +247,7 @@ const updateUserImage = async (req, res) => {
         const imageFile = req.file;
 
         // Upload Imagekit
-        const fileBuffer = fs.readFileSync(imageFile.path);
+        const fileBuffer = await fs.promises.readFile(imageFile.path);
         const response = await imagekit.upload({
             file: fileBuffer,
             fileName: imageFile.originalname,
@@ -266,6 +272,8 @@ const updateUserImage = async (req, res) => {
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });
+    } finally {
+        if (req.file?.path) fs.promises.unlink(req.file.path).catch(() => {});
     }
 };
 
@@ -315,7 +323,7 @@ const updateOutfit = async (req, res) => {
         // Update main image if provided
         if (files && files.mainImage) {
             const mainImageFile = files.mainImage[0];
-            const fileBuffer = fs.readFileSync(mainImageFile.path);
+            const fileBuffer = await fs.promises.readFile(mainImageFile.path);
             const mainImageUpload = await imagekit.upload({
                 file: fileBuffer,
                 fileName: `outfit_${Date.now()}_main.${mainImageFile.originalname.split('.').pop()}`,
@@ -352,6 +360,9 @@ const updateOutfit = async (req, res) => {
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });
+    } finally {
+        const tempFiles = [req.files?.mainImage?.[0], ...(req.files?.additionalImages || [])].filter(Boolean);
+        await Promise.allSettled(tempFiles.map(file => fs.promises.unlink(file.path)));
     }
 };
 

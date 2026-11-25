@@ -9,7 +9,7 @@ const protect = async (req, res, next) => {
   try {
     const decoded = jwt.verify(match[1], process.env.JWT_SECRET, { algorithms: ['HS256'] });
     if (typeof decoded.id !== 'string' || !/^[a-f\d]{24}$/i.test(decoded.id)) throw new Error('Invalid subject');
-    const user = await User.findById(decoded.id).select('-password');
+    const user = await User.findById(decoded.id).select('-password').lean();
     if (!user) return res.status(401).json({ status: 'error', message: 'Account not found' });
     req.user = user;
     next();

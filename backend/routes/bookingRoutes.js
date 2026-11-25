@@ -45,7 +45,8 @@ router.get('/:bookingId/document', async (req, res) => {
   if (!booking || (!isAdmin(req.user) && ![booking.user, booking.owner].some(id => String(id) === String(req.user._id)))) throw new HttpError(404, 'Booking not found');
   const file = path.resolve(booking.document);
   const roots = [path.resolve(__dirname, '..', 'private-uploads'), path.resolve(os.tmpdir())];
-  if (!roots.some(root => file.toLowerCase().startsWith(root.toLowerCase() + path.sep)) || !fs.existsSync(file)) throw new HttpError(404, 'Document not found');
+  if (!roots.some(root => file.toLowerCase().startsWith(root.toLowerCase() + path.sep))) throw new HttpError(404, 'Document not found');
+  try { await fs.promises.access(file); } catch { throw new HttpError(404, 'Document not found'); }
   res.set('Cache-Control', 'private, no-store');
   res.download(file);
 });

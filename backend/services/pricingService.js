@@ -18,7 +18,7 @@ const priceValue = value => {
 };
 
 async function getPrices(session) {
-  const query = CustomizerPrices.findOne().sort({ lastUpdated: -1 });
+  const query = CustomizerPrices.findOne().sort({ lastUpdated: -1 }).lean();
   if (session) query.session(session);
   return (await query) || defaultPrices;
 }

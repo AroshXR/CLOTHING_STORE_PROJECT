@@ -240,17 +240,21 @@ const updateCurrentUser = async (request, response) => {
     }
 
     try {
+        const conflictChecks = [];
         if (Object.prototype.hasOwnProperty.call(updatePayload, 'username')) {
-            const existingUsername = await User.findOne({ username: updatePayload.username, _id: { $ne: userId } });
-            if (existingUsername) {
-                return response.status(409).json({ status: "error", message: "Username is already taken" });
-            }
+            conflictChecks.push({ username: updatePayload.username });
         }
-
         if (Object.prototype.hasOwnProperty.call(updatePayload, 'email')) {
-            const existingEmail = await User.findOne({ email: updatePayload.email, _id: { $ne: userId } });
-            if (existingEmail) {
-                return response.status(409).json({ status: "error", message: "Email is already in use" });
+            conflictChecks.push({ email: updatePayload.email });
+        }
+        if (conflictChecks.length) {
+            const existing = await User.findOne({ $or: conflictChecks, _id: { $ne: userId } }).select('username email').lean();
+            if (existing) {
+                const isUsername = existing.username === updatePayload.username;
+                return response.status(409).json({
+                    status: "error",
+                    message: isUsername ? "Username is already taken" : "Email is already in use"
+                });
             }
         }
 
