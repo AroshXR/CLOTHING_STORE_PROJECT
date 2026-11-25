@@ -9,6 +9,6 @@ module.exports = async function authorizeArtwork(userId, design) {
   if (!/^image-[\w.-]+\.(png|jpe?g|gif|webp)$/i.test(filename || '')) throw new HttpError(400, 'Invalid artwork');
   if (await Upload.exists({ filename, userId })) return;
   const preview = new RegExp('/uploads/' + filename.replace(/\./g, '\\.') + '$');
-  if (await Design.exists({ userId, 'selectedDesign.preview': preview })) return;
+  if (await Design.exists({ userId, $or: [{ 'selectedDesign.preview': preview }, { 'placedDesigns.preview': preview }] })) return;
   throw new HttpError(403, 'You can only use artwork uploaded to your account');
 };

@@ -22,6 +22,7 @@ function normalize(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new HttpError(400, 'Site settings are required');
   if (Object.keys(input).some(key => !fields.includes(key))) throw new HttpError(400, 'Unsupported site setting');
   const result = { ...defaults, ...input };
+  if (!['monochrome', 'custom'].includes(result.appearanceMode)) throw new HttpError(400, 'Choose a valid appearance mode');
   for (const [field, limit] of Object.entries({ name: 80, tagline: 160, heroTitle: 120, heroDescription: 600, contactEmail: 254, contactPhone: 40, address: 500, aboutText: 8000 })) {
     result[field] = text(result[field], field, limit, ['name', 'heroTitle'].includes(field), ['aboutText', 'address'].includes(field));
   }

@@ -5,6 +5,7 @@ import Title from '../Components/pasindu/Title'
 import OutfitCard from '../Components/pasindu/OutfitCard'
 
 import axios from 'axios'
+import Reveal from '../Components/Editorial/Reveal'
 
 import "./outfits.css"
 import { useLocation } from 'react-router-dom'
@@ -71,7 +72,7 @@ const Outfits = () => {
   };
 
   return (
-    <div>
+    <div className="rental-catalog">
       
       <div className="flex flex-col items-center bg-light max-md:px-4">
         <Title title='Available Outfits' subTitle= 'Find Your Perfect Fit with Stunning Dresses for Every Celebration!'/>
@@ -91,6 +92,7 @@ const Outfits = () => {
           value={input}
           type="text"
           placeholder="Search by brand, model or features"
+          aria-label="Search rental outfits"
           className="search-input"
         />
         <div className="filter-icon">
@@ -102,7 +104,8 @@ const Outfits = () => {
 
       {/* Filters */}
       <div className="filters-grid">
-        <select value={selectedCategory} onChange={handleCategoryChange} className="filter-select">
+        <select value={selectedCategory} onChange={handleCategoryChange} className="filter-select" aria-label="Rental category">
+          {selectedCategory && !['Party Dresses & Suits', 'Evening Gowns', 'Cocktail Dresses', 'Wedding & Bridal Wear', "Men's Tuxedos & Suits", 'Mini Dresses', 'Maxi Dresses', 'Top', 'Skirt & Top'].includes(selectedCategory) && <option value={selectedCategory}>{selectedCategory}</option>}
           <option value="">All Categories</option>
           <option value="Party Dresses & Suits">Party Dresses & Suits</option>
           <option value="Evening Gowns">Evening Gowns</option>
@@ -115,7 +118,7 @@ const Outfits = () => {
           <option value="Skirt & Top">Skirt & Top</option>
         </select>
 
-        <select value={selectedLocation} onChange={handleLocationChange} className="filter-select">
+        <select value={selectedLocation} onChange={handleLocationChange} className="filter-select" aria-label="Rental location">
           <option value="">All Locations</option>
           <option value="Colombo">Colombo</option>
           <option value="Gampaha">Gampaha</option>
@@ -126,6 +129,7 @@ const Outfits = () => {
         <input
           type="number"
           placeholder="Min Price"
+          aria-label="Minimum daily price"
           value={priceRange.min}
           onChange={(e) => handlePriceChange("min", e.target.value)}
           className="price-input"
@@ -133,6 +137,7 @@ const Outfits = () => {
         <input
           type="number"
           placeholder="Max Price"
+          aria-label="Maximum daily price"
           value={priceRange.max}
           onChange={(e) => handlePriceChange("max", e.target.value)}
           className="price-input"
@@ -146,9 +151,9 @@ const Outfits = () => {
 
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 xl:px-20 max-w-7xl mx-auto'>
           {filteredOutfits.map((outfit, index) => (
-            <div key={outfit._id}>
+            <Reveal key={outfit._id} delay={Math.min(index, 5) * .05}>
               <OutfitCard outfit={outfit}/>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

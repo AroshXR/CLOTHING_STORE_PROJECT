@@ -71,7 +71,7 @@ function createCheckoutService({ models = defaults, transaction = runTransaction
         const calculated = pricing.priceCustomization({ ...(design.toObject ? design.toObject() : design), quantity: item.quantity }, prices);
         snapshots.push({ kind: 'custom', sourceId: design._id, name: calculated.design.nickname,
           quantity: item.quantity, unitPrice: calculated.unitPrice, totalPrice: calculated.design.totalPrice,
-          size: calculated.design.size, color: calculated.design.color, designVersion: 1,
+          size: calculated.design.size, color: calculated.design.color, designVersion: calculated.design.designVersion,
           imageUrl: calculated.design.selectedDesign?.preview, design: clone(calculated.design) });
       } else if (item.kind === 'product') {
         const product = await read(models.Product, item.id, session);

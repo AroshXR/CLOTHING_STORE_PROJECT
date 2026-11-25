@@ -7,7 +7,7 @@ import { useAuth } from '../../AuthGuard/authGuard';
 import './AdminOutlet.css';
 
 const AdminOutlet = () => {
-  const { user } = useAuth();
+  const { currentUser: user } = useAuth();
   const navigate = useNavigate();
   const [clothingItems, setClothingItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +29,7 @@ const AdminOutlet = () => {
   });
 
   useEffect(() => {
-    if (user?.type?.toLowerCase() !== 'admin') {
+    if (user?.type?.toLowerCase() !== 'admin' && user?.role !== 'admin') {
       navigate('/unauthorized');
       return;
     }

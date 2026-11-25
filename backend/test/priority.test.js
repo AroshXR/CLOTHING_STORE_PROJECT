@@ -142,6 +142,14 @@ test('installation branding is public to read, admin-only to edit, and persists 
   assert.equal(emailBrand.name, 'Thread &amp; Needle');
 });
 
+test('buyers can retain the monochrome theme or explicitly select their custom brand colours', async () => {
+  const initial = await request('GET', '/site-settings'); assert.equal(initial.data.data.appearanceMode, 'monochrome');
+  const response = await request('PUT', '/site-settings', people.admin, { ...require('../config/siteDefaults'), appearanceMode: 'custom', primaryColor: '#333333', accentColor: '#eeeeee' });
+  assert.equal(response.status, 200); assert.equal(response.data.data.appearanceMode, 'custom');
+  assert.equal((await request('GET', '/site-settings')).data.data.appearanceMode, 'custom');
+  assert.equal((await request('PUT', '/site-settings', people.admin, { appearanceMode: 'unknown' })).status, 400);
+});
+
 test('the buyer bootstrap creates a hashed admin account and never promotes an existing account', async () => {
   const { createAdmin } = require('../create-admin');
   const password = 'BuyerAdminTestPassword';
@@ -336,6 +344,60 @@ test('private artwork cannot be accessed or reused by another account', async ()
   const body = { clothingType: 'tshirt', color: '#ffffff', size: 'M', quantity: 1, selectedDesign: { id: 'uploaded', preview: url, isCustomUpload: true } };
   assert.equal((await request('POST', '/cloth-customizer', people.other, body)).status, 403);
   assert.equal((await request('POST', '/cloth-customizer', people.customer, body)).status, 201);
+});
+
+const studioInput = () => ({ designVersion: 2, clothingType: 'tshirt', nickname: 'Four-sided original', color: '#263238', size: 'L', quantity: 2,
+  panelColors: { front: '#263238', back: '#880e4f', leftSleeve: '#263238', rightSleeve: '#4db6ac' }, trimColor: '#ffffff',
+  placedDesigns: ['front','back','leftSleeve','rightSleeve'].map((side, index) => ({ id: 1, layerId: 'art-' + index, side, preview: '/static/media/print-1.test.jpg', price: .01, mode: index === 0 ? 'half-left' : 'repeat', rotation: 27, repeat: 4, size: 95, position: { x: 20, y: -10 } })),
+  lettering: [{ layerId: 'message', side: 'back', text: 'My own idea', color: '#ffffff', font: 'mono', size: 10, rotation: -4, position: { x: 0, y: 30 } }], totalPrice: .01 });
+
+test('studio designs persist every panel and use server prices for all artwork and lettering', async () => {
+  await require('../models/CustomizerPricesModel').create({ ...require('../config/commerce').defaultPrices, customTextPrice: 2.5 });
+  const response = await request('POST', '/cloth-customizer', people.customer, studioInput());
+  assert.equal(response.status, 201, JSON.stringify(response.data));
+  const saved = response.data.data;
+  assert.equal(saved.totalPrice, 181); // (25 base + 3 size + 4 x 15 artwork + 2.50 text) x 2
+  assert.equal(saved.designVersion, 2); assert.equal(saved.placedDesigns.length, 4);
+  assert.equal(saved.panelColors.back, '#880e4f'); assert.equal(saved.trimColor, '#ffffff');
+  assert.equal(saved.placedDesigns[0].mode, 'half-left'); assert.equal(saved.placedDesigns[3].rotation, 27);
+  assert.equal(saved.placedDesigns[1].repeat, 4); assert.equal(saved.lettering[0].font, 'mono');
+  const updated = await request('PUT', '/cloth-customizer/' + saved._id, people.customer, { lettering: [], placedDesigns: [], quantity: 1 });
+  assert.equal(updated.status, 200); assert.equal(updated.data.data.totalPrice, 28); assert.equal(updated.data.data.selectedDesign, null);
+});
+
+test('studio validation rejects unsupported panels, duplicate layers, invalid transforms and excessive artwork', async () => {
+  const cases = [
+    input => { input.placedDesigns[1].side = 'hood'; },
+    input => { input.placedDesigns[1].layerId = input.placedDesigns[0].layerId; },
+    input => { input.placedDesigns[0].rotation = 999; },
+    input => { input.placedDesigns[0].repeat = 0; },
+    input => { input.panelColors.back = 'red'; },
+    input => { input.lettering[0].side = 'leftSleeve'; },
+    input => { input.lettering[0].text = 'a'.repeat(41); },
+    input => { input.placedDesigns = Array.from({length: 9}, (_, index) => ({ ...input.placedDesigns[0], layerId: 'art-' + index })); }
+  ];
+  for (const mutate of cases) { const input = studioInput(); mutate(input); assert.equal((await request('POST', '/cloth-customizer', people.customer, input)).status, 400); }
+  assert.equal(await Design.countDocuments(), 0);
+});
+
+test('back artwork stays private and survives checkout as an immutable production snapshot', async () => {
+  const form = new FormData();
+  form.append('image', new Blob([Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jVqkAAAAASUVORK5CYII=', 'base64')], { type: 'image/png' }), 'test.png');
+  const upload = await request('POST', '/upload/image', people.customer, form); assert.equal(upload.status, 200); uploaded.push(upload.data.data.filename);
+  const url = upload.data.data.url, input = studioInput();
+  input.placedDesigns[1] = { ...input.placedDesigns[1], preview: url, isCustomUpload: true };
+  assert.equal((await request('POST', '/cloth-customizer', people.other, input)).status, 403);
+  const saved = await request('POST', '/cloth-customizer', people.customer, input); assert.equal(saved.status, 201, JSON.stringify(saved.data));
+  const body = await bodyFor([{ kind: 'custom', id: saved.data.data._id, quantity: 2 }]);
+  assert.equal((await request('POST', '/payment', people.customer, body, { 'Idempotency-Key': 'studio-snapshot-checkout-test' })).status, 201);
+  const production = await Production.findOne(), tailor = await Tailor.create({ userId: people.tailor._id, name: 'Studio tailor' });
+  assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/assign', people.admin, { tailorId: String(tailor._id) })).status, 200);
+  await request('DELETE', '/cloth-customizer/' + saved.data.data._id, people.customer);
+  const snapshot = (await Order.findOne()).itemSnapshot;
+  assert.equal(snapshot.designVersion, 2); assert.equal(snapshot.design.panelColors.back, '#880e4f'); assert.equal(snapshot.design.lettering[0].text, 'My own idea');
+  assert.equal(production.design.designMeta.placedDesigns[1].preview, url);
+  assert.equal((await request('GET', url, people.tailor)).status, 200);
+  assert.equal((await request('GET', url, people.otherTailor)).status, 404);
 });
 
 test('concurrent checkout cannot oversell the last item', async () => {

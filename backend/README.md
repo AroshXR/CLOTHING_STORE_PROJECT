@@ -32,6 +32,8 @@ Distribute source and .env.example to buyers, excluding operational .env.local f
 
 GET /site-settings exposes only display settings. PUT /site-settings requires an administrator and validates allowed fields, URLs, and colors. Upload a logo through the existing image uploader; it becomes public only when explicitly published in site settings. Another customer's private artwork cannot be published as the store logo.
 
+appearanceMode selects monochrome (the default editorial black/white theme) or custom (saved primary/accent colours). Existing installations without this field receive the monochrome default; names, logos, contact details, and saved custom colours are preserved.
+
 The same saved identity is used in navigation, footer, legal-page identity/contact links, report headers/download names, and inventory/rental email branding. The browser title, description, favicon, and web manifest use the installation settings. Set PUBLIC_SITE_URL and PUBLIC_API_URL to the deployed HTTPS origins when using separate hosts or a reverse proxy.
 
 SMTP credentials remain server environment settings. Inventory alerts use STOCK_ALERT_EMAIL, falling back to the installation's EMAIL_USER or SMTP_USER; no original developer inbox is used. Legal terms, business rules, catalog, and integrations still need to be configured for each buyer's operation.
@@ -83,7 +85,7 @@ The example total is a placeholder; use the returned quote total. Home delivery 
 
 The transaction creates one payment arrangement and one sales order per line. Custom lines also create a linked production record and an initial history entry. Product stock is reserved atomically. Purchased designs are retained with inCart=false; order snapshots remain independent of later design edits or deletion.
 
-The current renderer supports one front artwork placement. The server stores that canonical selection, size, position, color, garment size, quantity, and design version. Checkout never trusts a submitted user ID, design price, subtotal, tax, or shipping cost.
+The design studio accepts version 2 configurations with front/back/sleeve colours, trim colour, up to eight independently priced artwork layers, transforms and repeat styles, and up to two front/back text layers. Text pricing is configured through customTextPrice (zero by default). The server validates all placements, panel names and layer IDs, authorizes every private upload, and recalculates prices. Existing version 1 front-only designs remain compatible. Checkout stores the complete immutable configuration for production, and assigned tailors can access its private artwork. The browser placement guide does not generate sewing patterns or production-ready print files. Checkout never trusts a submitted user ID, design price, subtotal, tax, or shipping cost.
 
 Idempotency keys are scoped to the authenticated account. A retry returns the original result; reusing the key for a different request returns 409.
 

@@ -90,6 +90,7 @@ export default function OrderManagement() {
                     clothingType: item.clothingType || 'tshirt',
                     selectedDesign: item.selectedDesign || null,
                     placedDesigns: item.placedDesigns || [],
+                    lettering: item.lettering || [],
                     customImage: item.customImage || null,
                     totalPrice: item.totalPrice || 0,
                     createdAt: item.createdAt || new Date().toISOString()
@@ -452,6 +453,7 @@ export default function OrderManagement() {
                                                             {item.placedDesigns && item.placedDesigns.length > 0 && (
                                                                 <p><strong>Designs Applied:</strong> {item.placedDesigns.length}</p>
                                                             )}
+                                                            {item.lettering?.length > 0 && <p><strong>Messages:</strong> {item.lettering.map(layer => layer.text).join(' · ')}</p>}
                                                             {item.selectedDesign?.isCustomUpload && (
                                                                 <p><strong>Custom Image:</strong> Applied</p>
                                                             )}

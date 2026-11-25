@@ -161,7 +161,7 @@ export default function AdminCustomOrders() {
     <div className="admin-custom-orders">
       
       <TailorSubNav />
-      <section style={{ maxWidth: 1200, margin: '0 auto', padding: 16 }}>
+      <section >
         <h1>Custom Orders</h1>
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', margin: '12px 0' }}>

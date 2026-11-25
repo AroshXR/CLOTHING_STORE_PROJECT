@@ -1,5 +1,6 @@
 import { API_BASE_URL as API_ORIGIN } from '../../config/api';
 import MediaImage from '../../Components/MediaImage';
+import DesignSummary from '../../Components/clothing-customizer/studio/DesignSummary';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
@@ -88,7 +89,7 @@ export default function AdminCustomOrderDetail() {
   return (
     <div className="admin-custom-order-detail">
       
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: 16 }}>
+      <section >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h1>Order Detail</h1>
           <Link to="/admin/custom-orders">Back to List</Link>
@@ -116,6 +117,7 @@ export default function AdminCustomOrderDetail() {
               {order.config?.notes && <div><strong>Notes:</strong> {order.config.notes}</div>}
             </section>
 
+            {order.design?.designMeta?.designVersion === 2 && <section className="ui-card"><h3>Complete garment design</h3><DesignSummary design={order.design.designMeta} /></section>}
             {order.design?.designImageUrl && (
               <section style={{ border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
                 <h3>Design</h3>

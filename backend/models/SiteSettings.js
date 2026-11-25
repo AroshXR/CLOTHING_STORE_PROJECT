@@ -5,6 +5,7 @@ const schema = new mongoose.Schema({
   name: { type: String, required: true, maxlength: 80, default: defaults.name },
   tagline: { type: String, maxlength: 160, default: defaults.tagline },
   logoUrl: { type: String, maxlength: 2048, default: '' },
+  appearanceMode: { type: String, enum: ['monochrome', 'custom'], default: 'monochrome' },
   primaryColor: { type: String, default: defaults.primaryColor },
   accentColor: { type: String, default: defaults.accentColor },
   contactEmail: { type: String, maxlength: 254, default: '' },

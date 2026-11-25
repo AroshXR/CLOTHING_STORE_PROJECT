@@ -4,6 +4,7 @@ import { Canvas } from '@react-three/fiber';
 import { Bounds, OrbitControls } from '@react-three/drei';
 import { apiUrl } from '../../../config/api';
 import { TShirtModel } from '../../clothing-customizer/components/TShirtModel';
+import DesignSummary from '../../clothing-customizer/studio/DesignSummary';
 
 
 import './TailorHome.css';
@@ -31,7 +32,7 @@ export default function TailorHome() {
     finally { setBusy(false); }
   }
   return <div className="tailor-container">
-    <section style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 20px', minHeight: '70vh' }}>
+    <section style={{ minHeight: '70vh' }}>
       <h1>Your production orders</h1><p>Review the saved design and update your assigned work.</p>
       {error && <p role="alert" style={{ color: '#a32020' }}>{error}</p>}
       {loading ? <p role="status">Loading orders…</p> : !orders.length ? <p>No orders have been assigned to you yet.</p> :
@@ -51,10 +52,16 @@ export default function TailorHome() {
             <div style={{ height: 360 }}><Canvas camera={{ position: [5, 0, 5], fov: 45 }}>
               <ambientLight intensity={0.7} /><directionalLight position={[5, 5, 5]} intensity={0.6} />
               <Suspense fallback={null}><Bounds fit clip observe margin={1.2}>
-                <TShirtModel selectedColor={selected.config.color} chestDesignUrl={selected.design?.designImageUrl || null} scale={2} position={[0, 0, 0]} />
+                <TShirtModel configuration={selected.design?.designMeta} selectedColor={selected.config.color} chestDesignUrl={selected.design?.designImageUrl || null} scale={2} position={[0, 0, 0]} />
               </Bounds></Suspense><OrbitControls enablePan={false} />
             </Canvas></div>
             <p>Color: {selected.config.color} · Size: {selected.config.size}</p>
+            <DesignSummary design={selected.design?.designMeta} />
+            {selected.design?.designMeta?.designVersion === 2 && <p>
+              Panel colours: {Object.entries(selected.design.designMeta.panelColors || {}).map(([panel, color]) => panel + ' ' + color).join(' · ')}<br />
+              Collar and cuffs: {selected.design.designMeta.trimColor}<br />
+              {selected.design.designMeta.placedDesigns?.length || 0} artwork layers · {selected.design.designMeta.lettering?.length || 0} messages. Rotate the preview to inspect every panel.
+            </p>}
             {selected.design?.designMeta?.selectedDesign && <p>
               Saved artwork: {selected.design.designMeta.selectedDesign.name}<br />
               Size setting: {selected.design.designMeta.selectedDesign.size} · Position: {selected.design.designMeta.selectedDesign.position?.x ?? 0}, {selected.design.designMeta.selectedDesign.position?.y ?? 0}

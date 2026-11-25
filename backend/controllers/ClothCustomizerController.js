@@ -14,8 +14,8 @@ exports.getAllClothCustomizers = async (req, res) => {
   res.json({ status: 'ok', data: await Design.find(query).sort({ createdAt: -1 }) });
 };
 exports.addClothCustomizer = async (req, res) => {
-  await authorizeArtwork(req.user._id, req.body.selectedDesign);
   const { design } = pricing.priceCustomization(req.body, await pricing.getPrices());
+  for (const layer of design.placedDesigns) await authorizeArtwork(req.user._id, layer);
   const saved = await Design.create({ ...design, userId: req.user._id, inCart: true });
   res.status(201).json({ status: 'ok', message: 'Design saved to cart', data: saved });
 };
@@ -28,11 +28,11 @@ exports.updateClothCustomizer = async (req, res) => {
   const filter = owned(req), existing = await Design.findOne(filter);
   if (!existing) throw new HttpError(404, 'Design not found');
   const input = existing.toObject();
-  for (const field of ['clothingType', 'nickname', 'color', 'selectedDesign', 'size', 'quantity']) {
+  for (const field of ['clothingType', 'nickname', 'color', 'selectedDesign', 'size', 'quantity', 'designVersion', 'placedDesigns', 'panelColors', 'trimColor', 'lettering']) {
     if (Object.prototype.hasOwnProperty.call(req.body, field)) input[field] = req.body[field];
   }
   const { design } = pricing.priceCustomization(input, await pricing.getPrices());
-  await authorizeArtwork(req.user._id, design.selectedDesign);
+  for (const layer of design.placedDesigns) await authorizeArtwork(req.user._id, layer);
   const updates = { ...design };
   if (req.body.inCart === true) updates.inCart = true;
   const saved = await Design.findOneAndUpdate(filter, { $set: updates, $inc: { revision: 1 } }, { new: true, runValidators: true });

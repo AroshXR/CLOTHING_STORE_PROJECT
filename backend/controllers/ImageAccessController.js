@@ -23,13 +23,13 @@ exports.serve = async (req, res) => {
     if (!isAdmin(req.user)) {
       const userId = req.user._id;
       let allowed = await Upload.exists({ filename, userId });
-      if (!allowed) allowed = await Design.exists({ userId, 'selectedDesign.preview': imageUrl });
-      if (!allowed) allowed = await Order.exists({ AdminID: userId, 'itemSnapshot.imageUrl': imageUrl });
+      if (!allowed) allowed = await Design.exists({ userId, $or: [{ 'selectedDesign.preview': imageUrl }, { 'placedDesigns.preview': imageUrl }] });
+      if (!allowed) allowed = await Order.exists({ AdminID: userId, $or: [{ 'itemSnapshot.imageUrl': imageUrl }, { 'itemSnapshot.design.placedDesigns.preview': imageUrl }] });
       if (!allowed) {
         const tailor = await Tailor.findOne({ userId, isActive: true }).select('_id');
         const owners = [{ customerId: userId }];
         if (tailor) owners.push({ assignedTailor: tailor._id });
-        allowed = await Production.exists({ 'design.designImageUrl': imageUrl, $or: owners });
+        allowed = await Production.exists({ $and: [{ $or: [{ 'design.designImageUrl': imageUrl }, { 'design.designMeta.placedDesigns.preview': imageUrl }] }, { $or: owners }] });
       }
       if (!allowed) return res.sendStatus(404);
     }

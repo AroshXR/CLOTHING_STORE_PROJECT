@@ -169,3 +169,29 @@ body{margin:0;font-family:var(--ui-font);font-size:15px;line-height:1.6;color:va
 }
 @media print{.site-navigation,.site-footer,.ui-skip-link,.ui-owner-sidebar{display:none!important}.ui-page{max-width:none;padding:0}.ui-table-scroll{overflow:visible;border:0}.ui-page table{min-width:0}}
 }
+
+/* The design studio has its own dark workspace within the shared app shell. */
+@layer app-components {
+.ui-app:has([data-page="customizer"]){background:#0c0f15}
+.ui-page[data-page="customizer"]{--ui-text:#edf2f8;--ui-muted:#99a6ba;--ui-border:#293342;--ui-surface:#171d27;--ui-canvas:#0c0f15;color-scheme:dark;background:#0c0f15}
+.ui-page[data-page="customizer"] .customizer-panel{background:#131a24;border-color:#293342}
+.ui-page[data-page="customizer"] .panel-section{background:#171f2b;border:1px solid #293342;box-shadow:none}
+.ui-page[data-page="customizer"] .canvas-container{background:#10161f;border-color:#293342}
+.ui-page[data-page="customizer"] :where(input:not([type=checkbox]):not([type=radio]):not([type=color]),select,textarea){background:#101720;color:#edf2f8;border-color:#344257}
+.ui-page[data-page="customizer"] :where(button:not(.color-btn)){background:#202b3b;color:#edf2f8;border-color:#344257}
+.ui-page[data-page="customizer"] :where(button.active,.order-btn,.view-cart-button,.login-prompt-btn.primary){background:var(--brand-accent);color:var(--brand-on-accent);border-color:var(--brand-accent)}
+.ui-page[data-page="customizer"] :where(.price-breakdown,.total-price,.preview-label,.panel-section p){color:#dce4ef}
+.ui-app:has([data-page="customizer"]) .site-footer{background:#101720;color:#9aaac0;border-color:#293342}
+.ui-app:has([data-page="customizer"]) .site-footer :where(a,.site-brand__name){color:#cbd6e5}
+.ui-app:has([data-page="customizer"]) .site-footer :where(p,.site-footer__bottom){color:#93a3ba;border-color:#293342}
+.ui-design-summary{margin:12px 0;font-size:13px;color:var(--ui-muted)}
+.ui-design-summary summary{font-weight:600;color:var(--ui-text);cursor:pointer}
+.ui-design-summary dl{display:grid;grid-template-columns:120px minmax(0,1fr);gap:8px 12px;margin-top:14px}
+.ui-design-summary dt{font-weight:600}.ui-design-summary dd{margin:0;overflow-wrap:anywhere}
+.ui-page .dashboard-header-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;justify-content:flex-start}
+.ui-page[data-page="suppliers"] .dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:20px}
+.ui-page[data-page="suppliers"] .metric-card{width:auto;margin-top:0}
+.ui-page[data-page="customizer-settings"] .arosh-preset-designs{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.ui-page[data-page="customizer-settings"] .arosh-preset-design{width:100%}
+@media(max-width:600px){.ui-design-summary dl{grid-template-columns:1fr;gap:4px}.ui-design-summary dd{margin-bottom:10px}}
+}

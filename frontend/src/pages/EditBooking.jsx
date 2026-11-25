@@ -124,7 +124,7 @@ const EditBooking = () => {
       <div className="flex flex-col">
         
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-red-500">Booking not found</div>
+          <h1>Booking not found</h1>
         </div>
         
       </div>
@@ -138,7 +138,7 @@ const EditBooking = () => {
         
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="text-red-500 text-lg mb-4">This booking cannot be edited</div>
+            <h1>This booking cannot be edited</h1>
             <div className="text-gray-600 mb-4">Only pending bookings can be modified</div>
             <button 
               onClick={() => navigate('/my-bookings')}

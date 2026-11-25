@@ -5,7 +5,8 @@ const defaultPrices = {
     id: index + 1, name: `Design ${index + 1}`, price,
     preview: `print${index + 1}`, isActive: true
   })),
-  customUploadPrice: 25
+  customUploadPrice: 25,
+  customTextPrice: 0
 };
 
 // Preserve the current shop's pricing rules in one server-owned configuration.

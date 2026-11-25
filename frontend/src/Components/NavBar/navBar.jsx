@@ -4,7 +4,8 @@ import { useAuth } from '../../AuthGuard/authGuard';
 import SiteBrand from '../SiteBrand';
 import './navBar.css';
 
-const links = [['/outlet', 'Shop'], ['/customizer', 'Customizer'], ['/rentalHome', 'Rentals'], ['/career', 'Careers'], ['/color-guide', 'Color guide'], ['/contact', 'Contact']];
+const leftLinks = [['/about', 'About'], ['/outlet', 'Shop'], ['/rentalHome', 'Rentals']];
+const rightLinks = [['/customizer', 'Customizer'], ['/contact', 'Contact']];
 export default function NavBar() {
   const { currentUser, logout, isAuthenticated } = useAuth();
   const { pathname } = useLocation(), navigate = useNavigate();
@@ -22,14 +23,15 @@ export default function NavBar() {
   const signOut = () => { logout(); setOpen(false); navigate('/login'); };
   return <header className="site-navigation" ref={nav}>
     <div className="site-navigation__inner">
-      <Link to="/" className="site-navigation__brand" aria-label="Home"><SiteBrand /></Link>
+      <Link to="/home" className="site-navigation__brand" aria-label="Home"><SiteBrand /><small>INDIVIDUAL BY DESIGN</small></Link>
       <button type="button" className="site-navigation__toggle" aria-expanded={open} aria-controls="site-navigation-panel" onClick={() => setOpen(value => !value)}>
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d={open ? 'M6 6l12 12M6 18L18 6' : 'M4 6h16M4 12h16M4 18h16'} /></svg>
         <span>{open ? 'Close menu' : 'Menu'}</span>
       </button>
       <div id="site-navigation-panel" className={'site-navigation__panel' + (open ? ' is-open' : '')}>
         <nav aria-label="Main navigation" className="site-navigation__links">
-          {links.map(([to, label]) => <NavLink key={to} to={to}>{label}</NavLink>)}
+          <div className="site-navigation__left">{leftLinks.map(([to, label]) => <NavLink key={to} to={to}>{label}</NavLink>)}</div>
+          <div className="site-navigation__right">{rightLinks.map(([to, label]) => <NavLink key={to} to={to}>{label}</NavLink>)}</div>
         </nav>
         <div className="site-navigation__actions">
           {loggedIn ? <>

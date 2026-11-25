@@ -1,252 +1,63 @@
-import { API_BASE_URL as API_ORIGIN } from '../../config/api';
-import MediaImage from '../MediaImage';
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { useAuth } from "../../AuthGuard/authGuard";
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, ArrowUpRight, ShoppingBag } from 'lucide-react';
+import axios from 'axios';
+import { apiUrl } from '../../config/api';
+import { CommerceGallery, CommerceState, priceLabel } from '../Editorial/CommerceParts';
+import Reveal from '../Editorial/Reveal';
 
-
-import "./Outlet.css";
-
-const API_BASE_URL = API_ORIGIN;
-
-const OutletDetail = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const [item, setItem] = useState(null);
-    const { isAuthenticated, getToken } = useAuth();
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [review, setReview] = useState({ rating: 5, comment: "", username: "" });
-    const [submitting, setSubmitting] = useState(false);
-    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-    // Selection state
-    const [selectedSize, setSelectedSize] = useState("");
-    const [selectedColor, setSelectedColor] = useState("");
-
-    const fetchItem = async () => {
-        try {
-            setLoading(true);
-            setError("");
-            const res = await axios.get(`${API_BASE_URL}/clothing/${id}`);
-            setItem(res.data);
-        } catch (e) {
-            setError("Failed to load item");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => { 
-        fetchItem();
-        setSelectedImageIndex(0);
-    }, [id]);
-
-    // Initialize default selections when item loads
-    useEffect(() => {
-        if (item) {
-            if (Array.isArray(item.sizes) && item.sizes.length > 0) {
-                setSelectedSize(prev => prev || item.sizes[0]);
-            }
-            if (Array.isArray(item.colors) && item.colors.length > 0) {
-                setSelectedColor(prev => prev || item.colors[0]);
-            }
-        }
-    }, [item]);
-
-    const submitReview = async (e) => {
-        e.preventDefault();
-        try {
-            setSubmitting(true);
-            await axios.post(`${API_BASE_URL}/clothing/${id}/reviews`, {
-                rating: Number(review.rating),
-                comment: review.comment,
-                username: review.username || "Anonymous"
-            });
-            setReview({ rating: 5, comment: "", username: "" });
-            await fetchItem();
-        } catch (e) {
-            alert("Failed to submit review");
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const handleAddToCart = async () => {
-        if (!item) return;
-        try {
-            // Use localStorage cart consistently (no backend /cart route configured)
-            const raw = localStorage.getItem('outletCart');
-            const cart = raw ? JSON.parse(raw) : [];
-            const existingIndex = cart.findIndex(ci => ci._id === item._id);
-            if (existingIndex >= 0) {
-                cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
-                cart[existingIndex].totalPrice = (cart[existingIndex].quantity) * (cart[existingIndex].price || 0);
-                // Preserve existing size/color if already present; otherwise set if available
-                if (!cart[existingIndex].size && selectedSize) cart[existingIndex].size = selectedSize;
-                if (!cart[existingIndex].color && selectedColor) cart[existingIndex].color = selectedColor;
-            } else {
-                cart.push({
-                    _id: item._id,
-                    name: item.name,
-                    price: item.price,
-                    quantity: 1,
-                    imageUrl: item.imageUrl,
-                    totalPrice: item.price,
-                    size: selectedSize || null,
-                    color: selectedColor || null
-                });
-            }
-            localStorage.setItem('outletCart', JSON.stringify(cart));
-            // Navigate user to cart page
-            navigate('/orderManagement');
-        } catch (err) {
-            console.error('Failed to add to cart', err);
-            alert('Failed to add to cart');
-        }
-    };
-
-    const handleBuyNow = () => {
-        if (!item) return;
-        try {
-            const payload = {
-                id: item._id,
-                name: item.name,
-                price: item.price,
-                quantity: 1,
-                imageUrl: item.imageUrl,
-                totalPrice: item.price,
-                size: selectedSize || null,
-                color: selectedColor || null,
-            };
-            sessionStorage.setItem('directPurchase', JSON.stringify(payload));
-        } catch (_) {}
-        navigate('/paymentManagement');
-    };
-
-    if (loading) return <div style={{
-  textAlign: 'center'
-}}>Loading...</div>;
-    if (error) return <div style={{ color: 'red' }}>{error}</div>;
-    if (!item) return <div>Not found</div>;
-
-    const gallery = [item.imageUrl, ...(item.gallery || [])].filter(Boolean);
-
-    return (
-        <div className="outlet-detail">
-            
-            <div style={{ display: 'grid', gap: 16, maxWidth: 1200, margin: '0 auto', padding: 16 }}>
-            <div style={{
-  display: 'grid',
-  gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
-  gap: 16
-}}>
-                <div>
-                    {gallery.length > 0 && (
-                        <MediaImage src={gallery[selectedImageIndex]} alt={item.name} style={{ width: '100%', maxHeight: 420, objectFit: 'cover', borderRadius: 8 }} />
-                    )}
-                    <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-                        {gallery.map((g, idx) => (
-                            <MediaImage
-                                key={idx} 
-                                src={g} 
-                                alt={`g-${idx}`} 
-                                onClick={() => setSelectedImageIndex(idx)}
-                                style={{ 
-                                    width: 88, 
-                                    height: 88, 
-                                    objectFit: 'cover', 
-                                    borderRadius: 6,
-                                    cursor: 'pointer',
-                                    border: idx === selectedImageIndex ? '2px solid #2c5aa0' : '1px solid #e5e7eb',
-                                    boxShadow: idx === selectedImageIndex ? '0 0 0 3px rgba(44,90,160,0.15)' : 'none'
-                                }} 
-                            />
-                        ))}
-                    </div>
-                </div>
-                <div>
-                    <h1 style={{ marginBottom: 4 }}>{item.name}</h1>
-                    <p style={{ color: '#6b7280', margin: 0 }}>{item.brand} {item.category}</p>
-                    <p style={{ color: '#6b7280', marginTop: 8 }}>{item.material}</p>
-                    {item.description && <p style={{ marginTop: 8 }}>{item.description}</p>}
-                    <p style={{ marginTop: 8 }}><strong>Price:</strong> ${item.price} {item.stock === 0 && <span style={{ marginLeft: 8, color: '#b91c1c', fontWeight: 600 }}>(Out of Stock)</span>}</p>
-                    <p><strong>Stock:</strong> {item.stock}</p>
-                    {/* Size & Color selectors */}
-                    {Array.isArray(item.sizes) && item.sizes.length > 0 && (
-                        <div style={{ margin: '8px 0' }}>
-                            <label htmlFor="size-select"><strong>Size:</strong></label>
-                            <select
-                                id="size-select"
-                                value={selectedSize}
-                                onChange={(e) => setSelectedSize(e.target.value)}
-                                style={{ marginLeft: 8 }}
-                            >
-                                {item.sizes.map((s, i) => (
-                                    <option key={i} value={s}>{s}</option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-                    {Array.isArray(item.colors) && item.colors.length > 0 && (
-                        <div style={{ margin: '8px 0' }}>
-                            <label htmlFor="color-select"><strong>Color:</strong></label>
-                            <select
-                                id="color-select"
-                                value={selectedColor}
-                                onChange={(e) => setSelectedColor(e.target.value)}
-                                style={{ marginLeft: 8 }}
-                            >
-                                {item.colors.map((c, i) => (
-                                    <option key={i} value={c}>{c}</option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-                    {typeof item.rating === 'number' && <p><strong>Rating:</strong> {item.rating.toFixed(1)} ({item.numReviews || 0})</p>}
-
-                    <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-                        <button onClick={handleAddToCart} disabled={item.stock === 0} style={{
-  cursor: item.stock === 0 ? 'not-allowed' : 'pointer',
-  opacity: item.stock === 0 ? 0.6 : 1
-}}>Add to Cart</button>
-                        <button onClick={handleBuyNow} disabled={item.stock === 0} style={{
-  cursor: item.stock === 0 ? 'not-allowed' : 'pointer',
-  opacity: item.stock === 0 ? 0.8 : 1
-}}>Buy Now</button>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <h3>Reviews</h3>
-                {(!item.reviews || item.reviews.length === 0) && <p>No reviews yet.</p>}
-                <div style={{ display: 'grid', gap: 8 }}>
-                    {(item.reviews || []).slice().reverse().map((r, idx) => (
-                        <div key={idx} style={{ border: '1px solid #eee', padding: 8, borderRadius: 6 }}>
-                            <p><strong>{r.username || 'Anonymous'}</strong> - {new Date(r.createdAt).toLocaleString()}</p>
-                            <p>Rating: {r.rating}/5</p>
-                            {r.comment && <p>{r.comment}</p>}
-                        </div>
-                    ))}
-                </div>
-
-                <form onSubmit={submitReview} style={{ marginTop: 16, display: 'grid', gap: 8 }}>
-                    <h4>Add a review (anonymous allowed)</h4>
-                    <input placeholder="Your name (optional)" value={review.username} onChange={e => setReview(prev => ({ ...prev, username: e.target.value }))} />
-                    <select value={review.rating} onChange={e => setReview(prev => ({ ...prev, rating: e.target.value }))}>
-                        {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} stars</option>)}
-                    </select>
-                    <textarea placeholder="Your comment (optional)" value={review.comment} onChange={e => setReview(prev => ({ ...prev, comment: e.target.value }))} />
-                    <button type="submit" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit Review'}</button>
-                </form>
-            </div>
-            </div>
-            
-        </div>
-    );
-};
-
-export default OutletDetail;
+export default function OutletDetail() {
+  const { id } = useParams(), navigate = useNavigate();
+  const [item, setItem] = useState(null), [loading, setLoading] = useState(true), [error, setError] = useState(''), [attempt, setAttempt] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(''), [selectedColor, setSelectedColor] = useState(''), [actionError, setActionError] = useState('');
+  const [review, setReview] = useState({ rating: 5, comment: '', username: '' }), [submitting, setSubmitting] = useState(false), [reviewMessage, setReviewMessage] = useState('');
+  useEffect(() => {
+    const controller = new AbortController(); setLoading(true); setError(''); setActionError(''); setReviewMessage('');
+    axios.get(apiUrl('/clothing/' + id), { signal: controller.signal }).then(({ data }) => {
+      if (controller.signal.aborted) return;
+      setItem(data); setSelectedSize(data?.sizes?.[0] || ''); setSelectedColor(data?.colors?.[0] || '');
+    }).catch(failure => { if (failure.code !== 'ERR_CANCELED') setError('This piece could not be loaded. Please try again.'); }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [id, attempt]);
+  async function submitReview(event) {
+    event.preventDefault(); setSubmitting(true); setReviewMessage('');
+    try {
+      await axios.post(apiUrl('/clothing/' + id + '/reviews'), { rating: Number(review.rating), comment: review.comment, username: review.username || 'Anonymous' });
+      setReview({ rating: 5, comment: '', username: '' }); setReviewMessage('Your review has been added.');
+      try { const { data } = await axios.get(apiUrl('/clothing/' + id)); setItem(data); }
+      catch (_) { setReviewMessage('Your review was added. Refresh the page to see it.'); }
+    } catch (_) { setReviewMessage('Your review could not be submitted. Please try again.'); }
+    finally { setSubmitting(false); }
+  }
+  function addToCart() {
+    setActionError('');
+    try {
+      const cart = JSON.parse(localStorage.getItem('outletCart') || '[]');
+      if (!Array.isArray(cart)) throw new Error('Invalid cart');
+      const existing = cart.find(line => line._id === item._id);
+      if (existing) { existing.quantity = (existing.quantity || 1) + 1; existing.totalPrice = existing.quantity * (existing.price || 0); if (!existing.size) existing.size = selectedSize; if (!existing.color) existing.color = selectedColor; }
+      else cart.push({ _id: item._id, name: item.name, price: item.price, quantity: 1, imageUrl: item.imageUrl, totalPrice: item.price, size: selectedSize || null, color: selectedColor || null });
+      localStorage.setItem('outletCart', JSON.stringify(cart)); navigate('/orderManagement');
+    } catch (_) { setActionError('This piece could not be added to your cart. Please try again.'); }
+  }
+  function buyNow() {
+    setActionError('');
+    try { sessionStorage.setItem('directPurchase', JSON.stringify({ id: item._id, name: item.name, price: item.price, quantity: 1, imageUrl: item.imageUrl, totalPrice: item.price, size: selectedSize || null, color: selectedColor || null })); navigate('/paymentManagement'); }
+    catch (_) { setActionError('Checkout could not be opened. Please try again.'); }
+  }
+  if (loading) return <CommerceState title="THE DETAILS." message="Loading this piece…" backTo="/outlet" backLabel="Back to the collection" />;
+  if (error || !item) return <CommerceState title={error ? 'ONE MOMENT.' : 'PIECE NOT FOUND.'} message={error || 'This piece is no longer in the collection.'} backTo="/outlet" backLabel="Back to the collection" onRetry={error ? () => setAttempt(value => value + 1) : undefined} />;
+  const gallery = [...new Set([item.imageUrl, ...(item.gallery || [])].filter(Boolean))], soldOut = item.stock <= 0;
+  return <div className="ed-page ed-commerce ed-product">
+    <section className="ed-pad ed-detail"><nav className="ed-commerce-breadcrumb" aria-label="Product navigation"><Link to="/outlet"><ArrowLeft size={14} /> THE COLLECTION</Link><span>THE DETAILS / {item.category || 'READY TO WEAR'}</span></nav><div className="ed-detail-grid">
+      <Reveal className="ed-detail-media"><CommerceGallery key={id} images={gallery} name={item.name} /></Reveal>
+      <Reveal className="ed-detail-copy" delay={.1} viewport={{ once: true, amount: 0 }}><span className="ed-kicker">{item.brand || 'THE COLLECTION'} / {soldOut ? 'SOLD OUT' : 'READY TO WEAR'}</span><h1>{item.name}</h1><div className="ed-detail-price">{priceLabel(item.price)}</div>{typeof item.rating === 'number' && item.numReviews > 0 && <p className="ed-detail-rating">★ {item.rating.toFixed(1)} · {item.numReviews} reviews</p>}<p>{item.description || 'Explore the photographs and details to find your fit.'}</p>
+        <dl className="ed-detail-facts">{[['Category', item.category], ['Material', item.material], ['In stock', item.stock]].filter(([, value]) => value != null && value !== '').map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+        <div className="ed-detail-selectors">{item.sizes?.length > 0 && <label>Size<select value={selectedSize} onChange={event => setSelectedSize(event.target.value)}>{item.sizes.map(size => <option key={size}>{size}</option>)}</select></label>}{item.colors?.length > 0 && <label>Colour<select value={selectedColor} onChange={event => setSelectedColor(event.target.value)}>{item.colors.map(colour => <option key={colour}>{colour}</option>)}</select></label>}</div>
+        {actionError && <p className="ed-commerce-feedback" role="alert">{actionError}</p>}<div className="ed-commerce-actions"><button className="ed-button" type="button" disabled={soldOut} onClick={addToCart}>Add to cart <ShoppingBag size={18} /></button><button className="ed-button ed-button--outline" type="button" disabled={soldOut} onClick={buyNow}>Buy now <ArrowUpRight size={18} /></button></div><p className="ed-commerce-note">{soldOut ? 'This piece is currently out of stock.' : 'Cash on delivery or collection. Your final total is confirmed at checkout.'}</p>
+      </Reveal></div></section>
+    <section className="ed-reviews ed-pad"><Reveal viewport={{ once: true, amount: 0 }}><span className="ed-kicker">THE WORD ON THIS PIECE</span><h2>YOUR<br />POINT OF VIEW.</h2>{item.reviews?.length ? <div className="ed-review-list">{item.reviews.slice().reverse().map((entry, index) => <article key={entry._id || index}><div><strong>{entry.username || 'Anonymous'}</strong><span>{entry.rating} / 5</span></div>{entry.createdAt && <time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleDateString()}</time>}{entry.comment && <p>{entry.comment}</p>}</article>)}</div> : <p>No reviews yet. Be the first to share your thoughts.</p>}</Reveal><Reveal className="ed-review-form" delay={.1}><span className="ed-kicker">ADD YOUR VOICE</span><h3>Leave a review</h3><form onSubmit={submitReview}><label>Your name (optional)<input value={review.username} onChange={event => setReview(current => ({ ...current, username: event.target.value }))} /></label><label>Rating<select value={review.rating} onChange={event => setReview(current => ({ ...current, rating: event.target.value }))}>{[5,4,3,2,1].map(value => <option key={value} value={value}>{value} stars</option>)}</select></label><label>Your comment (optional)<textarea rows={4} value={review.comment} onChange={event => setReview(current => ({ ...current, comment: event.target.value }))} /></label><button className="ed-button ed-button--light" type="submit" disabled={submitting}>{submitting ? 'Submitting…' : 'Submit review'} <ArrowUpRight size={18} /></button>{reviewMessage && <p role="status">{reviewMessage}</p>}</form></Reveal></section>
+  </div>;
+}
 
 

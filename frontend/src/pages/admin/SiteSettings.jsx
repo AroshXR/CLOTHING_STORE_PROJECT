@@ -49,6 +49,8 @@ export default function SiteSettings() {
         <p className="site-settings__hint">PNG, JPEG, GIF or WebP, up to 5 MB. The logo becomes public when you save.</p>
         {field('logoUrl', 'Logo URL (optional)', 2048)}
         {draft.logoUrl && <div className="site-settings__logo"><MediaImage src={draft.logoUrl} alt="Logo preview" /><button type="button" onClick={() => change('logoUrl', '')}>Remove logo</button></div>}
+        <label>Colour theme<select value={draft.appearanceMode || 'monochrome'} onChange={event => change('appearanceMode', event.target.value)}><option value="monochrome">Editorial black &amp; white</option><option value="custom">Custom brand colours</option></select></label>
+        <p className="site-settings__hint">The editorial theme uses black, charcoal, and off-white. Choose custom brand colours to apply the colours below to shared navigation and controls.</p>
         <div className="site-settings__grid">{field('primaryColor', 'Header color', 7, 'color')}{field('accentColor', 'Accent color', 7, 'color')}</div>
         <div className="site-settings__preview" style={{ background: draft.primaryColor, borderBottomColor: draft.accentColor }}>
           <span style={{ background: '#ffffff', color: '#111827', padding: 12, borderRadius: 6 }}>{draft.name || 'Your Store'}</span>

@@ -1,6 +1,7 @@
 const CustomizerPrices = require('../models/CustomizerPricesModel');
 const HttpError = require('../utils/HttpError');
 const { defaultPrices, shippingPrices, taxRate, giftWrapPrice } = require('../config/commerce');
+const { canonicalStudio, number } = require('./studioDesign');
 
 const money = value => Math.round((Number(value) + Number.EPSILON) * 100) / 100;
 const quantity = value => {
@@ -43,11 +44,15 @@ function artwork(input, prices) {
   if (!Number.isFinite(size) || size <= 0 || size > 1000 || !Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > 100 || Math.abs(y) > 100) {
     throw new HttpError(400, 'Invalid artwork placement');
   }
+  const mode = input.mode || 'graphic';
+  if (!['graphic', 'repeat', 'half-left', 'half-right'].includes(mode)) throw new HttpError(400, 'Invalid artwork style');
   return {
     id: uploaded ? String(input.id || 'custom-image').slice(0, 100) : String(preset.id),
     name: uploaded ? 'Custom Image' : preset.name,
     price: priceValue(uploaded ? prices.customUploadPrice : preset.price),
-    preview: url.pathname, position: { x, y }, size, isCustomUpload: uploaded
+    preview: url.pathname, position: { x, y }, size, isCustomUpload: uploaded,
+    mode, rotation: number(input.rotation, 0, -180, 180, 'artwork rotation'),
+    repeat: number(input.repeat, 3, 1, 10, 'pattern density')
   };
 }
 
@@ -59,13 +64,16 @@ function priceCustomization(input, prices = defaultPrices) {
   const namedColors = { white: '#ffffff', black: '#000000' };
   const color = namedColors[input.color] || String(input.color || '');
   if (!/^#[a-f\d]{6}$/i.test(color)) throw new HttpError(400, 'Select a valid clothing color');
-  const selectedDesign = artwork(input.selectedDesign, prices);
+  const modern = input.designVersion === 2;
+  const studio = modern ? canonicalStudio(input, color, prices, artwork, priceValue) : null;
+  const selectedDesign = modern ? studio.selectedDesign : artwork(input.selectedDesign, prices);
   const count = quantity(input.quantity ?? 1);
-  const unitPrice = money(priceValue(prices.basePrices[clothingType]) + priceValue(prices.sizePrices[size] ?? 0) + (selectedDesign?.price || 0));
+  const unitPrice = money(priceValue(prices.basePrices[clothingType]) + priceValue(prices.sizePrices[size] ?? 0) + (studio ? studio.designPrice : selectedDesign?.price || 0));
   const design = {
     clothingType, nickname: String(input.nickname || 'My Custom T-Shirt').trim().slice(0, 50), color,
-    selectedDesign, placedDesigns: selectedDesign ? [{ ...selectedDesign, side: 'front' }] : [],
-    size, quantity: count, totalPrice: money(unitPrice * count), designVersion: 1
+    selectedDesign, placedDesigns: studio ? studio.placedDesigns : selectedDesign ? [{ ...selectedDesign, side: 'front' }] : [],
+    ...(studio ? { panelColors: studio.panelColors, trimColor: studio.trimColor, lettering: studio.lettering } : {}),
+    size, quantity: count, totalPrice: money(unitPrice * count), designVersion: modern ? 2 : 1
   };
   return { design, unitPrice };
 }

@@ -1,0 +1,47 @@
+import React from 'react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import axios from 'axios';
+import ClothingStudio from './ClothingStudio';
+import { useAuth } from '../../../AuthGuard/authGuard';
+jest.mock('axios', () => ({ get: jest.fn(), post: jest.fn(), put: jest.fn(), interceptors: { request: { use: jest.fn() } } }));
+jest.mock('../../../AuthGuard/authGuard', () => ({ useAuth: jest.fn() }));
+jest.mock('./StudioWorkspace', () => ({ __esModule: true, default: ({ design }) => <output data-testid="preview-config">{JSON.stringify(design)}</output> }));
+beforeEach(() => {
+  localStorage.clear(); sessionStorage.clear(); jest.clearAllMocks();
+  useAuth.mockReturnValue({ token: 'test-token', isAuthenticated: () => true });
+  axios.get.mockResolvedValue({ data: { status: 'ok', data: { basePrices: { tshirt: 25 }, sizePrices: { M: 0 }, presetDesigns: [{ id: 1, name: 'Design 1', price: 15 }], customUploadPrice: 25, customTextPrice: 0 } } });
+  axios.post.mockResolvedValue({ data: { status: 'ok', data: { _id: 'saved-design' } } });
+  axios.put.mockResolvedValue({ data: { status: 'ok', data: { _id: 'saved-design' } } });
+});
+const show = () => render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><ClothingStudio /></MemoryRouter>);
+test('a back-panel pattern and message reach the preview and saved cart payload, and a second save updates the same design', async () => {
+  show();
+  await screen.findByRole('button', { name: 'Add Design 1 to Front' });
+  fireEvent.click(screen.getByRole('button', { name: 'Back', exact: true }));
+  fireEvent.click(screen.getByRole('button', { name: 'Add Design 1 to Back' }));
+  fireEvent.change(screen.getByLabelText('Print style'), { target: { value: 'half-right' } });
+  fireEvent.change(screen.getByLabelText('Rotation'), { target: { value: '30' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Add a message' }));
+  fireEvent.change(screen.getByLabelText('Your message'), { target: { value: 'Made by me' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Save to cart' }));
+  await screen.findByText('Your design is saved in your cart.');
+  const payload = axios.post.mock.calls[0][1];
+  expect(payload.placedDesigns[0]).toMatchObject({ side: 'back', mode: 'half-right', rotation: 30 });
+  expect(payload.lettering[0]).toMatchObject({ side: 'back', text: 'Made by me' });
+  expect(payload).not.toHaveProperty('totalPrice'); expect(payload).not.toHaveProperty('userId');
+  expect(JSON.parse(screen.getByTestId('preview-config').textContent).lettering[0].text).toBe('Made by me');
+  fireEvent.click(screen.getByRole('button', { name: 'Update in cart' }));
+  await waitFor(() => expect(axios.put).toHaveBeenCalledWith(expect.stringContaining('/cloth-customizer/saved-design'), expect.objectContaining({ inCart: true, designVersion: 2 })));
+  expect(await screen.findByRole('link', { name: 'View cart' })).toHaveAttribute('href', '/orderManagement');
+}, 15000);
+test('panel colour edits can be undone without changing another panel', async () => {
+  show(); await screen.findByRole('button', { name: 'Add Design 1 to Front' });
+  fireEvent.click(screen.getByRole('button', { name: 'Back', exact: true }));
+  fireEvent.change(screen.getByLabelText('Apply colour to'), { target: { value: 'panel' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Colour #880e4f' }));
+  let value = JSON.parse(screen.getByTestId('preview-config').textContent);
+  expect(value.panelColors.back).toBe('#880e4f'); expect(value.panelColors.front).toBe('#f5f5f5');
+  fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+  value = JSON.parse(screen.getByTestId('preview-config').textContent); expect(value.panelColors.back).toBe('#f5f5f5');
+});

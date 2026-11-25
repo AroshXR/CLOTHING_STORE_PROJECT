@@ -49,3 +49,13 @@ test('owners receive their workspace link without administrator-only links', () 
   expect(screen.queryByRole('link', { name: 'Admin Hub' })).not.toBeInTheDocument();
   expect(screen.getByRole('main')).toHaveAttribute('data-page', 'owner-dashboard');
 });
+test('a page failure preserves navigation and the footer and supports retry', () => {
+  let fail = true;
+  const log = jest.spyOn(console, 'error').mockImplementation(() => {});
+  function Page() { if (fail) throw new Error('Test-only page failure'); return <h1>Recovered page</h1>; }
+  render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><AppShell><Page /></AppShell></MemoryRouter>);
+  expect(screen.getByRole('alert')).toHaveTextContent('Unable to display this page');
+  expect(document.querySelectorAll('.site-navigation')).toHaveLength(1); expect(screen.getAllByRole('contentinfo')).toHaveLength(1);
+  fail = false; fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+  expect(screen.getByRole('heading', { name: 'Recovered page' })).toBeInTheDocument(); log.mockRestore();
+});

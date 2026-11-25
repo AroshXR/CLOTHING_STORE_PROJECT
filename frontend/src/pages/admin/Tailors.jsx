@@ -53,7 +53,7 @@ export default function AdminTailors() {
     <div className="admin-tailors">
       
       <TailorSubNav />
-      <section style={{ maxWidth: 1100, margin: '0 auto', padding: 16 }}>
+      <section >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <h1 style={{ margin: 0 }}>Tailor Management</h1>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

@@ -282,6 +282,13 @@ export default function AdminClothCustomizer() {
 							</div>
 						</div>
 
+						<div className="arosh-pricing-section">
+							<h3>Message Price</h3>
+							<div className="arosh-price-input">
+								<label htmlFor="custom-text-price">Price per text layer:</label>
+								<input id="custom-text-price" type="number" min="0" step="0.01" value={prices.customTextPrice ?? 0} onChange={event => setPrices(current => ({ ...current, customTextPrice: Math.max(0, Number(event.target.value) || 0) }))} />
+							</div>
+						</div>
 						{/* Save Button */}
 						<div className="arosh-save-section">
 							<button

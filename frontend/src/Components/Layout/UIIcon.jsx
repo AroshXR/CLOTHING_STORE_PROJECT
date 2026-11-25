@@ -19,7 +19,7 @@ const icons = {
   'fa-user': User, 'fa-users': Users, 'fa-check': CheckCircle2, 'fa-envelope': Mail,
   'fa-phone': UserCircle, 'fa-arrow-left': ArrowLeft, 'fa-plus': Plus, 'fa-trash': Trash2
 };
-export default function UIIcon({ className = '', children, ...props }) {
+export default function UIIcon({ className = '', ...props }) {
   const Icon = String(className).split(/\s+/).map(name => icons[name]).find(Boolean) || Circle;
   return <Icon size={20} strokeWidth={1.7} {...props} className={'ui-icon ' + className} aria-hidden="true" focusable="false" />;
 }

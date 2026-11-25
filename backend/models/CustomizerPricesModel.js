@@ -36,6 +36,7 @@ const customizerPricesSchema = new Schema({
         default: 25
     },
     
+    customTextPrice: { type: Number, min: 0, default: 0 },
     // Metadata
     lastUpdated: {
         type: Date,

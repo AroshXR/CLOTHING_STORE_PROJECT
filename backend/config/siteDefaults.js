@@ -2,6 +2,7 @@ module.exports = Object.freeze({
   name: 'Your Store',
   tagline: 'Custom clothing, made for you.',
   logoUrl: '',
+  appearanceMode: 'monochrome',
   primaryColor: '#111827',
   accentColor: '#2563eb',
   contactEmail: '',

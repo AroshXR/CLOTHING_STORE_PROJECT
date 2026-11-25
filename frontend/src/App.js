@@ -6,6 +6,8 @@ import { BrandingProvider } from './config/branding';
 import SiteSettings from './pages/admin/SiteSettings';
 import ProtectedRoute from './AuthGuard/ProtectedRoute';
 import Home from './Components/Home/Home';
+import Splash from './Components/Editorial/Splash';
+import About from './Components/Editorial/About';
 import LoginPage from './Components/Login_Register/Login';
 import RegisterPage from './Components/Login_Register/Register';
 import ClothCustomizer from './Components/clothing-customizer/ClothCustomizer';
@@ -73,7 +75,9 @@ function App() {
       <Routes>
         <Route path="/admin/site-settings" element={<ProtectedRoute allowedUserTypes="Admin"><SiteSettings /></ProtectedRoute>} />
         {/* Public routes */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Splash />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/learn-more" element={<LearnMore />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
