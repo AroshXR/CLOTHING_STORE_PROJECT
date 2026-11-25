@@ -1,67 +1,68 @@
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AppShell from './Components/Layout/AppShell';
 import NotFound from './Components/Layout/NotFound';
 import { AuthProvider } from './AuthGuard/authGuard';
 import { BrandingProvider } from './config/branding';
-import SiteSettings from './pages/admin/SiteSettings';
 import ProtectedRoute from './AuthGuard/ProtectedRoute';
-import HomeLanding from './Components/Editorial/HomeLanding';
-import Splash from './Components/Editorial/Splash';
-import About from './Components/Editorial/About';
-import LoginPage from './Components/Login_Register/Login';
-import RegisterPage from './Components/Login_Register/Register';
-import ClothingStudio from './Components/clothing-customizer/studio/ClothingStudio';
-import Career from './Components/Career/Career';
-import ApplicantDashboard from './Components/ApplicantDashboard/ApplicantDashboard';
-import AdminJobManagement from './Components/AdminJobManagement/AdminJobManagement';
-import AdminApplicantManagement from './Components/AdminApplicantManagement/AdminApplicantManagement';
-import AdminApplicantDetail from './Components/AdminApplicantManagement/AdminApplicantDetail';
-import AdminPanel from './Components/AdminPanel/AdminPanel';
-import Contact from './Components/Editorial/Contact';
-import OrderManagement from './Components/OrderManagement/OrderManagement';
-import PaymentManagement from './Components/PaymentManagement/PaymentManagement';
-import PaymentDetailsDisplay from './Components/PaymentDetailsDisplay/PaymentDetailsDisplay';
-import TailorHome from './Components/Home/Tailor_Interface/TailorHome';
-import SupplierManagement from './Components/Supplier-management/SupplierManagement';
-import MaterialInventoryManagement from './Components/MaterialInventory-management/MaterialInventoryManagement';
-import SkinToneColorGuide from './Components/SkinToneColorGuide/SkinToneColorGuide';
-import Unauthorized from './Components/Unauthorized/Unauthorized';
-import UserAccount from './Components/UserManagement/UserAccount';
-import AdminUserManagement from './Components/AdminManagement/AdminUserManagement';
-import PrivacyPolicy from './Components/PrivacyPolicy_Terms/PrivacyPolicy';
-import TermsConditions from './Components/PrivacyPolicy_Terms/TermsAndConditions';
-import Outlet from './Components/Outlet/Outlet';
-import OutletDetail from './Components/Outlet/OutletDetail';
-import AdminOutlet from './Components/AdminOutlet/AdminOutlet';
-import ClothingInventoryManagement from './Components/ClothingInventoryManagement/ClothingInventoryManagement';
-import OrderSummaryPage from './Components/OrderManagement/OrderSummaryPage';
-import BookingReport from './pages/admin/BookingReport';
-import LearnMore from './Components/LearnMore/LearnMore';
 
+const SiteSettings = lazy(() => import('./pages/admin/SiteSettings'));
+const HomeLanding = lazy(() => import('./Components/Editorial/HomeLanding'));
+const Splash = lazy(() => import('./Components/Editorial/Splash'));
+const About = lazy(() => import('./Components/Editorial/About'));
+const LoginPage = lazy(() => import('./Components/Login_Register/Login'));
+const RegisterPage = lazy(() => import('./Components/Login_Register/Register'));
+const ClothingStudio = lazy(() => import('./Components/clothing-customizer/studio/ClothingStudio'));
+const Career = lazy(() => import('./Components/Career/Career'));
+const ApplicantDashboard = lazy(() => import('./Components/ApplicantDashboard/ApplicantDashboard'));
+const AdminJobManagement = lazy(() => import('./Components/AdminJobManagement/AdminJobManagement'));
+const AdminApplicantManagement = lazy(() => import('./Components/AdminApplicantManagement/AdminApplicantManagement'));
+const AdminApplicantDetail = lazy(() => import('./Components/AdminApplicantManagement/AdminApplicantDetail'));
+const AdminPanel = lazy(() => import('./Components/AdminPanel/AdminPanel'));
+const Contact = lazy(() => import('./Components/Editorial/Contact'));
+const OrderManagement = lazy(() => import('./Components/OrderManagement/OrderManagement'));
+const PaymentManagement = lazy(() => import('./Components/PaymentManagement/PaymentManagement'));
+const PaymentDetailsDisplay = lazy(() => import('./Components/PaymentDetailsDisplay/PaymentDetailsDisplay'));
+const TailorHome = lazy(() => import('./Components/Home/Tailor_Interface/TailorHome'));
+const SupplierManagement = lazy(() => import('./Components/Supplier-management/SupplierManagement'));
+const MaterialInventoryManagement = lazy(() => import('./Components/MaterialInventory-management/MaterialInventoryManagement'));
+const SkinToneColorGuide = lazy(() => import('./Components/SkinToneColorGuide/SkinToneColorGuide'));
+const Unauthorized = lazy(() => import('./Components/Unauthorized/Unauthorized'));
+const UserAccount = lazy(() => import('./Components/UserManagement/UserAccount'));
+const AdminUserManagement = lazy(() => import('./Components/AdminManagement/AdminUserManagement'));
+const PrivacyPolicy = lazy(() => import('./Components/PrivacyPolicy_Terms/PrivacyPolicy'));
+const TermsConditions = lazy(() => import('./Components/PrivacyPolicy_Terms/TermsAndConditions'));
+const Outlet = lazy(() => import('./Components/Outlet/Outlet'));
+const OutletDetail = lazy(() => import('./Components/Outlet/OutletDetail'));
+const AdminOutlet = lazy(() => import('./Components/AdminOutlet/AdminOutlet'));
+const ClothingInventoryManagement = lazy(() => import('./Components/ClothingInventoryManagement/ClothingInventoryManagement'));
+const OrderSummaryPage = lazy(() => import('./Components/OrderManagement/OrderSummaryPage'));
+const BookingReport = lazy(() => import('./pages/admin/BookingReport'));
+const LearnMore = lazy(() => import('./Components/LearnMore/LearnMore'));
 
-import Rentals from './Components/Editorial/Rentals';
-import OutfitDetails from './pages/OutfitDetails';
-import Outfits from './pages/Outfits';
-import MyBookings from './pages/MyBookings';
-import EditBooking from './pages/EditBooking';
-import Layout from './pages/owner/Layout';
-import Dashboard from './pages/owner/Dashboard';
-import AddOutfit from './pages/owner/AddOutfit';
-import EditOutfit from './pages/owner/EditOutfit';
-import ManageOutfits from './pages/owner/ManageOutfits';
-import ManageBookings from './pages/owner/ManageBookings';
-import Reports from './pages/owner/Reports';
+const Rentals = lazy(() => import('./Components/Editorial/Rentals'));
+const OutfitDetails = lazy(() => import('./pages/OutfitDetails'));
+const Outfits = lazy(() => import('./pages/Outfits'));
+const MyBookings = lazy(() => import('./pages/MyBookings'));
+const EditBooking = lazy(() => import('./pages/EditBooking'));
+const Layout = lazy(() => import('./pages/owner/Layout'));
+const Dashboard = lazy(() => import('./pages/owner/Dashboard'));
+const AddOutfit = lazy(() => import('./pages/owner/AddOutfit'));
+const EditOutfit = lazy(() => import('./pages/owner/EditOutfit'));
+const ManageOutfits = lazy(() => import('./pages/owner/ManageOutfits'));
+const ManageBookings = lazy(() => import('./pages/owner/ManageBookings'));
+const Reports = lazy(() => import('./pages/owner/Reports'));
 
-import AdminHub from './Components/AdminHub/AdminHub';
-import AdminCustomOrders from './pages/admin/CustomOrders';
-import AdminCustomOrderDetail from './pages/admin/CustomOrderDetail';
-import AdminTailors from './pages/admin/Tailors';
-import AdminClothCustomizer from './Components/clothing-customizer/admin-cloth-customizer';
+const AdminHub = lazy(() => import('./Components/AdminHub/AdminHub'));
+const AdminCustomOrders = lazy(() => import('./pages/admin/CustomOrders'));
+const AdminCustomOrderDetail = lazy(() => import('./pages/admin/CustomOrderDetail'));
+const AdminTailors = lazy(() => import('./pages/admin/Tailors'));
+const AdminClothCustomizer = lazy(() => import('./Components/clothing-customizer/admin-cloth-customizer'));
 
 function App() {
   return (
     <BrandingProvider><AuthProvider><AppShell>
-      
+      <Suspense fallback={<div className="p-8 text-center" role="status">Loading…</div>}>
       <Routes>
         <Route path="/admin/site-settings" element={<ProtectedRoute allowedUserTypes="Admin"><SiteSettings /></ProtectedRoute>} />
         {/* Public routes */}
@@ -304,6 +305,7 @@ function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
     </AppShell></AuthProvider></BrandingProvider>
   );
 }
