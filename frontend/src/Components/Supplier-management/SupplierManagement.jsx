@@ -1357,20 +1357,20 @@ For questions about this report, contact: ${branding.contactEmail || "Contact th
         <div class="header">
             <h1>${escapeHtml(branding.name)}</h1>
             <h2>Supplier Management System</h2>
-            <h3>${reportFilters.reportType.toUpperCase()} REPORT</h3>
+            <h3>${escapeHtml(String(reportFilters.reportType || '').toUpperCase())} REPORT</h3>
         </div>
         
         <div class="report-info">
-            <p><strong>Generated:</strong> ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
-            <p><strong>Report Period:</strong> ${reportFilters.dateFrom || "All time"} to ${reportFilters.dateTo || "Present"}</p>
+            <p><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleDateString())} at ${escapeHtml(new Date().toLocaleTimeString())}</p>
+            <p><strong>Report Period:</strong> ${escapeHtml(reportFilters.dateFrom || "All time")} to ${escapeHtml(reportFilters.dateTo || "Present")}</p>
             <p><strong>Filters Applied:</strong></p>
             <ul>
-                <li>Supplier: ${reportFilters.supplierFilter === "all" ? "All Suppliers" : suppliers.find(s => s._id === reportFilters.supplierFilter)?.name || "Unknown"}</li>
-                <li>Status: ${reportFilters.statusFilter === "all" ? "All Statuses" : reportFilters.statusFilter}</li>
+                <li>Supplier: ${escapeHtml(reportFilters.supplierFilter === "all" ? "All Suppliers" : suppliers.find(s => s._id === reportFilters.supplierFilter)?.name || "Unknown")}</li>
+                <li>Status: ${escapeHtml(reportFilters.statusFilter === "all" ? "All Statuses" : reportFilters.statusFilter)}</li>
             </ul>
         </div>
         
-        <div class="report-content">${reportContent}</div>
+        <div class="report-content">${escapeHtml(reportContent)}</div>
         
         <div class="footer">
             <p><strong>Report Summary:</strong></p>
@@ -1399,13 +1399,20 @@ For questions about this report, contact: ${branding.contactEmail || "Contact th
 
     // Create a new window for printing
     const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow pop-ups to print or save the report.');
+      return;
+    }
+    printWindow.opener = null;
+    const allowedSupplierStatuses = new Set(['active', 'inactive']);
+    const allowedOrderStatuses = new Set(['pending', 'completed', 'cancelled']);
     
     // Get the current report data
     const reportData = `
         <!DOCTYPE html>
         <html>
         <head>
-            <title>${escapeHtml(branding.name)} - ${reportFilters.reportType.toUpperCase()} Report</title>
+            <title>${escapeHtml(branding.name)} - ${escapeHtml(String(reportFilters.reportType || '').toUpperCase())} Report</title>
             <style>
                 body { 
                     font-family: Arial, sans-serif; 
@@ -1501,16 +1508,16 @@ For questions about this report, contact: ${branding.contactEmail || "Contact th
             <div class="header">
                 <h1>${escapeHtml(branding.name)}</h1>
                 <h2>Supplier Management System</h2>
-                <h3>${reportFilters.reportType.toUpperCase()} REPORT</h3>
+                <h3>${escapeHtml(String(reportFilters.reportType || '').toUpperCase())} REPORT</h3>
             </div>
             
             <div class="report-info">
-                <p><strong>Generated:</strong> ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
-                <p><strong>Report Period:</strong> ${reportFilters.dateFrom || "All time"} to ${reportFilters.dateTo || "Present"}</p>
+                <p><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleDateString())} at ${escapeHtml(new Date().toLocaleTimeString())}</p>
+                <p><strong>Report Period:</strong> ${escapeHtml(reportFilters.dateFrom || "All time")} to ${escapeHtml(reportFilters.dateTo || "Present")}</p>
                 <p><strong>Filters Applied:</strong></p>
                 <ul>
-                    <li>Supplier: ${reportFilters.supplierFilter === "all" ? "All Suppliers" : suppliers.find(s => s._id === reportFilters.supplierFilter)?.name || "Unknown"}</li>
-                    <li>Status: ${reportFilters.statusFilter === "all" ? "All Statuses" : reportFilters.statusFilter}</li>
+                    <li>Supplier: ${escapeHtml(reportFilters.supplierFilter === "all" ? "All Suppliers" : suppliers.find(s => s._id === reportFilters.supplierFilter)?.name || "Unknown")}</li>
+                    <li>Status: ${escapeHtml(reportFilters.statusFilter === "all" ? "All Statuses" : reportFilters.statusFilter)}</li>
                 </ul>
             </div>
             
@@ -1568,17 +1575,21 @@ For questions about this report, contact: ${branding.contactEmail || "Contact th
                         </tr>
                     </thead>
                     <tbody>
-                        ${suppliers.map(s => `
+                        ${suppliers.map(s => {
+                            const rawStatus = String(s.status || 'unknown').toLowerCase();
+                            const statusClass = allowedSupplierStatuses.has(rawStatus) ? rawStatus : 'unknown';
+                            return `
                             <tr>
-                                <td>${s.name}</td>
-                                <td>${s.contact}</td>
-                                <td>${s.email}</td>
-                                <td>${s.phone}</td>
-                                <td class="status-${s.status}">${s.status.toUpperCase()}</td>
-                                <td>${s.totalOrders || 0}</td>
-                                <td>${s.lastOrder || "N/A"}</td>
+                                <td>${escapeHtml(s.name)}</td>
+                                <td>${escapeHtml(s.contact)}</td>
+                                <td>${escapeHtml(s.email)}</td>
+                                <td>${escapeHtml(s.phone)}</td>
+                                <td class="status-${statusClass}">${escapeHtml(rawStatus.toUpperCase())}</td>
+                                <td>${escapeHtml(s.totalOrders || 0)}</td>
+                                <td>${escapeHtml(s.lastOrder || "N/A")}</td>
                             </tr>
-                        `).join('')}
+                        `;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>
@@ -1600,23 +1611,27 @@ For questions about this report, contact: ${branding.contactEmail || "Contact th
                         </tr>
                     </thead>
                     <tbody>
-                        ${orders.map(o => `
+                        ${orders.map(o => {
+                            const rawStatus = String(o.status || 'unknown').toLowerCase();
+                            const statusClass = allowedOrderStatuses.has(rawStatus) ? rawStatus : 'unknown';
+                            return `
                             <tr>
-                                <td>${o._id}</td>
-                                <td>${o.supplierName}</td>
-                                <td>${o.orderDate}</td>
-                                <td>${o.deliveryDate}</td>
-                                <td class="status-${o.status}">${o.status.toUpperCase()}</td>
-                                <td>$${o.total.toFixed(2)}</td>
-                                <td>${o.items || "N/A"}</td>
+                                <td>${escapeHtml(o._id)}</td>
+                                <td>${escapeHtml(o.supplierName)}</td>
+                                <td>${escapeHtml(o.orderDate)}</td>
+                                <td>${escapeHtml(o.deliveryDate)}</td>
+                                <td class="status-${statusClass}">${escapeHtml(rawStatus.toUpperCase())}</td>
+                                <td>$${Number(o.total || 0).toFixed(2)}</td>
+                                <td>${escapeHtml(o.items || "N/A")}</td>
                             </tr>
-                        `).join('')}
+                        `;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>
             ` : ''}
             
-            <div class="report-content">${reportContent}</div>
+            <div class="report-content">${escapeHtml(reportContent)}</div>
             
             <div class="footer">
                 <p><strong>Report Summary:</strong></p>

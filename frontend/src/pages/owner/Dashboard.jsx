@@ -38,7 +38,7 @@ const Dashboard = () => {
           pendingBookings: pendingBookings?.length || 0,
           completedBookings: confirmedBookings || 0,
           recentBookings: pendingBookings || [],
-          monthlyRevenue
+          monthlyRevenue: Number(monthlyRevenue) || 0
         })
       }
     }catch(err){ console.error(err) }
@@ -99,7 +99,7 @@ const Dashboard = () => {
                       <MediaImage src={assets.listIconColored} alt="Booking" />
                     </div>
                     <div className='pasindu-booking-item__details'>
-                      <h4>{booking.outfit.brand} {booking.outfit.model}</h4>
+                      <h4>{booking.outfit ? `${booking.outfit.brand} ${booking.outfit.model}` : 'Unavailable outfit'}</h4>
                       <p>{new Date(booking.createdAt).toLocaleDateString('en-US', { 
                         year: 'numeric', 
                         month: 'short', 
@@ -128,7 +128,7 @@ const Dashboard = () => {
               <p>Total revenue for the current month</p>
             </div>
             <div className='pasindu-revenue-card__amount'>
-              {currency} {data.monthlyRevenue.toLocaleString()}
+              {currency} {Number(data.monthlyRevenue || 0).toLocaleString()}
             </div>
           </div>
         </section>

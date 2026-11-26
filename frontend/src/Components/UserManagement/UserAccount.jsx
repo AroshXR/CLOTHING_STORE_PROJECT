@@ -666,21 +666,21 @@ const UserAccount = () => {
                             {bookings.map((booking, index) => (
                                 <div key={booking._id} className="booking-card">
                                     <div className="booking-image">
-                                        <MediaImage src={booking.outfit.image} alt={`${booking.outfit.brand} ${booking.outfit.model}`} />
+                                        <MediaImage src={booking.outfit?.image} alt={booking.outfit ? `${booking.outfit.brand} ${booking.outfit.model}` : 'Unavailable outfit'} />
                                     </div>
                                     <div className="booking-details">
                                         <div className="booking-header">
-                                            <h4>{booking.outfit.brand} {booking.outfit.model}</h4>
+                                            <h4>{booking.outfit ? `${booking.outfit.brand} ${booking.outfit.model}` : 'Unavailable outfit'}</h4>
                                             <span className="booking-status confirmed">Confirmed</span>
                                         </div>
                                         <div className="booking-info">
                                             <div className="booking-info-item">
                                                 <UIIcon className="bx bx-calendar"></UIIcon>
-                                                <span>{booking.reservationDate.split('T')[0]} to {booking.returnDate.split('T')[0]}</span>
+                                                <span>{String(booking.reservationDate || '').split('T')[0]} to {String(booking.returnDate || '').split('T')[0]}</span>
                                             </div>
                                             <div className="booking-info-item">
                                                 <UIIcon className="bx bx-map"></UIIcon>
-                                                <span>{booking.outfit.location}</span>
+                                                <span>{booking.outfit?.location || 'Unavailable'}</span>
                                             </div>
                                             <div className="booking-info-item">
                                                 <UIIcon className="bx bx-dollar"></UIIcon>

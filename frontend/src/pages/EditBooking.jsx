@@ -44,10 +44,10 @@ const EditBooking = () => {
         const bookingData = data.booking
         setBooking(bookingData)
         setFormData({
-          reservationDate: bookingData.reservationDate.split('T')[0],
-          returnDate: bookingData.returnDate.split('T')[0],
-          phone: bookingData.phone,
-          email: bookingData.email
+          reservationDate: String(bookingData.reservationDate || '').split('T')[0],
+          returnDate: String(bookingData.returnDate || '').split('T')[0],
+          phone: bookingData.phone || '',
+          email: bookingData.email || ''
         })
         setCurrentDocument(bookingData.document)
       } else {
@@ -167,14 +167,14 @@ const EditBooking = () => {
               <h2 className="text-lg font-semibold mb-3">Outfit Details</h2>
               <div className="flex gap-4">
                 <MediaImage
-                  src={booking.outfit.image} 
-                  alt={booking.outfit.brand}
+                  src={booking.outfit?.image} 
+                  alt={booking.outfit?.brand || 'Outfit'}
                   className="w-20 h-20 object-cover rounded"
                 />
                 <div>
-                  <h3 className="font-medium">{booking.outfit.brand} - {booking.outfit.model}</h3>
-                  <p className="text-gray-600">{booking.outfit.category}</p>
-                  <p className="text-green-600 font-medium">Rs. {booking.outfit.pricePerDay}/day</p>
+                  <h3 className="font-medium">{booking.outfit ? `${booking.outfit.brand} - ${booking.outfit.model}` : 'Unavailable outfit'}</h3>
+                  <p className="text-gray-600">{booking.outfit?.category || 'N/A'}</p>
+                  <p className="text-green-600 font-medium">Rs. {booking.outfit?.pricePerDay ?? 0}/day</p>
                 </div>
               </div>
             </div>
@@ -270,11 +270,11 @@ const EditBooking = () => {
                   <span className="text-gray-700">Estimated Total:</span>
                   <span className="text-xl font-bold text-blue-600">
                     Rs. {(() => {
-                      if (formData.reservationDate && formData.returnDate) {
-                        const days = Math.ceil((new Date(formData.returnDate) - new Date(formData.reservationDate)) / (1000 * 60 * 60 * 24))
-                        return (booking.outfit.pricePerDay * days).toFixed(2)
+                      if (formData.reservationDate && formData.returnDate && booking.outfit?.pricePerDay != null) {
+                        const days = Math.max(0, Math.ceil((new Date(formData.returnDate) - new Date(formData.reservationDate)) / (1000 * 60 * 60 * 24)))
+                        return (Number(booking.outfit.pricePerDay) * days).toFixed(2)
                       }
-                      return booking.price.toFixed(2)
+                      return Number(booking.price || 0).toFixed(2)
                     })()}
                   </span>
                 </div>

@@ -15,7 +15,6 @@ const h = (fnName) => {
   return fn;
 };
 
-ownerRouter.post("/change-role", protect, h('changeRoleToOwner'));
 ownerRouter.post("/add-outfit", protect, ownerOnly, upload.fields([
     { name: 'mainImage', maxCount: 1 },
     { name: 'additionalImages', maxCount: 3 }

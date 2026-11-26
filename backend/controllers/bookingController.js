@@ -3,6 +3,7 @@ const { isAdmin } = require('../middleware/auth');
 const Booking = require("../models/Booking");
 const Outfit = require("../models/Outfit");
 const { sendPayOnReturnEmail } = require("../services/emailService");
+const { escapeHtml } = require("../services/siteSettingsService");
 const puppeteer = require('puppeteer');
 
 let sharedBrowserPromise = null;
@@ -144,18 +145,23 @@ const getBookingById = async (req, res) => {
     }
 };
 
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const ALLOWED_BOOKING_STATUSES = new Set(['pending', 'confirmed', 'cancelled']);
+
 const buildBookingReportData = async (req) => {
-    const { startDate, endDate, status, location } = req.query;
+    const rawStart = typeof req.query.startDate === 'string' && ISO_DATE_RE.test(req.query.startDate) ? req.query.startDate : '';
+    const rawEnd = typeof req.query.endDate === 'string' && ISO_DATE_RE.test(req.query.endDate) ? req.query.endDate : '';
+    const { status, location } = req.query;
     const query = isAdmin(req.user) ? {} : { owner: req.user._id };
 
-    if (startDate && endDate) {
+    if (rawStart && rawEnd) {
         query.createdAt = {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate + 'T23:59:59.999Z')
+            $gte: new Date(rawStart),
+            $lte: new Date(rawEnd + 'T23:59:59.999Z')
         };
     }
 
-    if (status && status !== 'all') {
+    if (typeof status === 'string' && status !== 'all' && ALLOWED_BOOKING_STATUSES.has(status)) {
         query.status = status;
     }
 
@@ -173,7 +179,7 @@ const buildBookingReportData = async (req) => {
     const totalBookings = bookings.length;
     const totalRevenue = bookings
         .filter(booking => booking.status === 'confirmed')
-        .reduce((sum, booking) => sum + booking.price, 0);
+        .reduce((sum, booking) => sum + Number(booking.price || 0), 0);
 
     const statusCounts = bookings.reduce((acc, booking) => {
         acc[booking.status] = (acc[booking.status] || 0) + 1;
@@ -187,8 +193,8 @@ const buildBookingReportData = async (req) => {
             totalRevenue,
             statusCounts,
             reportPeriod: {
-                startDate: startDate || 'All time',
-                endDate: endDate || 'Present'
+                startDate: rawStart || 'All time',
+                endDate: rawEnd || 'Present'
             }
         }
     };
@@ -311,9 +317,9 @@ const generateBookingReportPDF = async (req, res) => {
         <body>
             <div class="header">
                 <h1>📊 Booking Report</h1>
-                <p><strong>Generated on:</strong> ${new Date().toLocaleDateString()}</p>
-                <p><strong>Owner:</strong> ${currentUser?.username || 'Owner'}</p>
-                <p><strong>Report Period:</strong> ${summary.reportPeriod.startDate} to ${summary.reportPeriod.endDate}</p>
+                <p><strong>Generated on:</strong> ${escapeHtml(new Date().toLocaleDateString())}</p>
+                <p><strong>Owner:</strong> ${escapeHtml(currentUser?.username || 'Owner')}</p>
+                <p><strong>Report Period:</strong> ${escapeHtml(summary.reportPeriod.startDate)} to ${escapeHtml(summary.reportPeriod.endDate)}</p>
             </div>
 
             <div class="summary">
@@ -353,34 +359,36 @@ const generateBookingReportPDF = async (req, res) => {
                 </thead>
                 <tbody>
                     ${bookings.map(booking => {
-                        const startDate = new Date(booking.reservationDate).toLocaleDateString()
-                        const endDate = new Date(booking.returnDate).toLocaleDateString()
-                        const duration = Math.ceil((new Date(booking.returnDate) - new Date(booking.reservationDate)) / (1000 * 60 * 60 * 24))
+                        const startDate = new Date(booking.reservationDate).toLocaleDateString();
+                        const endDate = new Date(booking.returnDate).toLocaleDateString();
+                        const duration = Math.ceil((new Date(booking.returnDate) - new Date(booking.reservationDate)) / (1000 * 60 * 60 * 24));
+                        const statusClass = ALLOWED_BOOKING_STATUSES.has(booking.status) ? booking.status : 'unknown';
+                        const statusText = escapeHtml(String(booking.status || 'unknown').toUpperCase());
                         
                         return `
                         <tr>
-                            <td>#${booking._id.toString().slice(-6)}</td>
+                            <td>#${escapeHtml(String(booking._id || '').slice(-6))}</td>
                             <td>
                                 <div class="outfit-info">
                                     <div>
-                                        <strong>${booking.outfit?.brand || 'N/A'} - ${booking.outfit?.model || 'N/A'}</strong><br>
-                                        <small>${booking.outfit?.category || 'N/A'} | ${booking.outfit?.location || 'N/A'}</small>
+                                        <strong>${escapeHtml(booking.outfit?.brand || 'N/A')} - ${escapeHtml(booking.outfit?.model || 'N/A')}</strong><br>
+                                        <small>${escapeHtml(booking.outfit?.category || 'N/A')} | ${escapeHtml(booking.outfit?.location || 'N/A')}</small>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <strong>${booking.user?.username || 'N/A'}</strong><br>
-                                <small>${booking.user?.email || 'N/A'}</small>
+                                <strong>${escapeHtml(booking.user?.username || 'N/A')}</strong><br>
+                                <small>${escapeHtml(booking.user?.email || 'N/A')}</small>
                             </td>
                             <td>
-                                <strong>Start:</strong> ${startDate}<br>
-                                <strong>End:</strong> ${endDate}
+                                <strong>Start:</strong> ${escapeHtml(startDate)}<br>
+                                <strong>End:</strong> ${escapeHtml(endDate)}
                             </td>
                             <td>${duration} day${duration !== 1 ? 's' : ''}</td>
-                            <td><span class="status ${booking.status}">${booking.status.toUpperCase()}</span></td>
-                            <td><strong>${currency}${booking.price.toFixed(2)}</strong></td>
+                            <td><span class="status ${statusClass}">${statusText}</span></td>
+                            <td><strong>${escapeHtml(currency)}${Number(booking.price || 0).toFixed(2)}</strong></td>
                         </tr>
-                        `
+                        `;
                     }).join('')}
                 </tbody>
             </table>
@@ -398,7 +406,15 @@ const generateBookingReportPDF = async (req, res) => {
         const page = await browser.newPage();
         let pdfBuffer;
         try {
-            await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+            await page.setJavaScriptEnabled(false);
+            await page.setRequestInterception(true);
+            page.on('request', (intercepted) => {
+                if (intercepted.isNavigationRequest() && intercepted.frame() === page.mainFrame()) {
+                    return intercepted.continue();
+                }
+                return intercepted.abort();
+            });
+            await page.setContent(htmlContent, { waitUntil: 'load' });
             pdfBuffer = await page.pdf({
                 format: 'A4',
                 printBackground: true,

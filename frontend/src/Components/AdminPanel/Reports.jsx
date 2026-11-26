@@ -144,6 +144,11 @@ export default function Reports() {
 
     // Create a new window for printing
     const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow pop-ups to print or save the report.');
+      return;
+    }
+    printWindow.opener = null;
     
     // Get the current report data
     const reportData = `
@@ -291,11 +296,11 @@ export default function Reports() {
                     <tbody>
                         ${Object.entries(analytics.applicantsByPosition).map(([position, data]) => `
                             <tr>
-                                <td>${position}</td>
-                                <td>${data.total}</td>
-                                <td class="status-pending">${data.pending}</td>
-                                <td class="status-approved">${data.approved}</td>
-                                <td class="status-rejected">${data.rejected}</td>
+                                <td>${escapeHtml(position)}</td>
+                                <td>${escapeHtml(data.total)}</td>
+                                <td class="status-pending">${escapeHtml(data.pending)}</td>
+                                <td class="status-approved">${escapeHtml(data.approved)}</td>
+                                <td class="status-rejected">${escapeHtml(data.rejected)}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -318,11 +323,11 @@ export default function Reports() {
                     <tbody>
                         ${analytics.interviewSchedules.map(interview => `
                             <tr>
-                                <td>${interview.name}</td>
-                                <td>${interview.position}</td>
-                                <td>${new Date(interview.scheduledAt).toLocaleString()}</td>
-                                <td>${interview.mode}</td>
-                                <td>${interview.meetingLink ? 'Online Meeting' : (interview.location || 'N/A')}</td>
+                                <td>${escapeHtml(interview.name)}</td>
+                                <td>${escapeHtml(interview.position)}</td>
+                                <td>${escapeHtml(new Date(interview.scheduledAt).toLocaleString())}</td>
+                                <td>${escapeHtml(interview.mode)}</td>
+                                <td>${interview.meetingLink ? 'Online Meeting' : escapeHtml(interview.location || 'N/A')}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -345,11 +350,11 @@ export default function Reports() {
                     <tbody>
                         ${analytics.pendingApplications.map(app => `
                             <tr>
-                                <td>${app.name}</td>
-                                <td>${app.email}</td>
-                                <td>${app.position}</td>
-                                <td>${new Date(app.appliedAt).toLocaleDateString()}</td>
-                                <td>${app.resume?.filename || 'N/A'}</td>
+                                <td>${escapeHtml(app.name)}</td>
+                                <td>${escapeHtml(app.email)}</td>
+                                <td>${escapeHtml(app.position)}</td>
+                                <td>${escapeHtml(new Date(app.appliedAt).toLocaleDateString())}</td>
+                                <td>${escapeHtml(app.resume?.filename || 'N/A')}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -489,13 +494,18 @@ export default function Reports() {
   const downloadApplicantReportAsPDF = (applicants, sectionLabel, fileLabel) => {
     // Create a new window for printing
     const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow pop-ups to print or save the report.');
+      return;
+    }
+    printWindow.opener = null;
     
     // Get the current report data
     const reportData = `
         <!DOCTYPE html>
         <html>
         <head>
-            <title>${escapeHtml(branding.name)} - ${sectionLabel} Report</title>
+            <title>${escapeHtml(branding.name)} - ${escapeHtml(sectionLabel)} Report</title>
             <style>
                 body { 
                     font-family: Arial, sans-serif; 
@@ -579,12 +589,12 @@ export default function Reports() {
             <div class="header">
                 <h1>${escapeHtml(branding.name)}</h1>
                 <h2>Career Management System</h2>
-                <h3>${sectionLabel.toUpperCase()} REPORT</h3>
+                <h3>${escapeHtml(String(sectionLabel || '').toUpperCase())} REPORT</h3>
             </div>
             
             <div class="report-info">
-                <p><strong>Generated:</strong> ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
-                <p><strong>Report Type:</strong> ${sectionLabel}</p>
+                <p><strong>Generated:</strong> ${escapeHtml(new Date().toLocaleDateString())} at ${escapeHtml(new Date().toLocaleTimeString())}</p>
+                <p><strong>Report Type:</strong> ${escapeHtml(sectionLabel)}</p>
                 <p><strong>Total Applicants:</strong> ${applicants.length}</p>
             </div>
             
@@ -633,17 +643,21 @@ export default function Reports() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${applicants.map(applicant => `
+                        ${applicants.map(applicant => {
+                            const rawStatus = String(applicant.status || 'unknown').toLowerCase();
+                            const statusClass = ['pending', 'approved', 'rejected'].includes(rawStatus) ? rawStatus : 'unknown';
+                            return `
                             <tr>
-                                <td>${applicant.name}</td>
-                                <td>${applicant.email}</td>
-                                <td>${applicant.position}</td>
-                                <td>${applicant.department || 'N/A'}</td>
-                                <td class="status-${applicant.status}">${applicant.status.toUpperCase()}</td>
-                                <td>${applicant.appliedAt ? new Date(applicant.appliedAt).toLocaleDateString() : 'N/A'}</td>
-                                <td>${applicant.resume?.filename || 'N/A'}</td>
+                                <td>${escapeHtml(applicant.name)}</td>
+                                <td>${escapeHtml(applicant.email)}</td>
+                                <td>${escapeHtml(applicant.position)}</td>
+                                <td>${escapeHtml(applicant.department || 'N/A')}</td>
+                                <td class="status-${statusClass}">${escapeHtml(rawStatus.toUpperCase())}</td>
+                                <td>${escapeHtml(applicant.appliedAt ? new Date(applicant.appliedAt).toLocaleDateString() : 'N/A')}</td>
+                                <td>${escapeHtml(applicant.resume?.filename || 'N/A')}</td>
                             </tr>
-                        `).join('')}
+                        `;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>

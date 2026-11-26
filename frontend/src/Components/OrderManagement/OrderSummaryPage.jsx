@@ -1,4 +1,5 @@
 import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import { escapeHtml } from '../../config/branding';
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../AuthGuard/authGuard";
@@ -222,6 +223,12 @@ export default function OrderSummaryPage() {
     const handleDownloadPDF = () => {
         // Create a new window for printing
         const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            alert('Please allow pop-ups to print or save the report.');
+            return;
+        }
+        printWindow.opener = null;
+        const allowedOrderStatuses = new Set(['completed', 'pending', 'cancelled', 'canceled', 'failed', 'processing']);
         
         // Get the current report data
         const reportData = `
@@ -264,8 +271,8 @@ export default function OrderSummaryPage() {
             <body>
                 <div class="header">
                     <h1>Order Summary Report</h1>
-                    <p><strong>Report Period:</strong> ${startDate || "All"} - ${endDate || "All"}</p>
-                    <p><strong>Generated on:</strong> ${new Date().toLocaleDateString()}</p>
+                    <p><strong>Report Period:</strong> ${escapeHtml(startDate || "All")} - ${escapeHtml(endDate || "All")}</p>
+                    <p><strong>Generated on:</strong> ${escapeHtml(new Date().toLocaleDateString())}</p>
                 </div>
                 
                 <div class="summary-section">
@@ -315,34 +322,38 @@ export default function OrderSummaryPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            ${filteredOrders.map((o) => `
+                            ${filteredOrders.map((o) => {
+                                const customerDisplay =
+                                    o.CustomerName ||
+                                    o.customerName ||
+                                    o.customer ||
+                                    (o.deliveryDetails &&
+                                        (o.deliveryDetails.firstName && o.deliveryDetails.lastName
+                                            ? `${o.deliveryDetails.firstName} ${o.deliveryDetails.lastName}`
+                                            : o.deliveryDetails.email)) ||
+                                    (o.AdminID && typeof o.AdminID === 'object' &&
+                                        (o.AdminID.firstName && o.AdminID.lastName
+                                            ? `${o.AdminID.firstName} ${o.AdminID.lastName}`
+                                            : o.AdminID.email)) ||
+                                    (o.userId &&
+                                        (o.userId.firstName && o.userId.lastName
+                                            ? `${o.userId.firstName} ${o.userId.lastName}`
+                                            : o.userId.email)) ||
+                                    o.user?.name ||
+                                    o.user?.email ||
+                                    "";
+                                const rawStatus = String(o.status || "").toLowerCase();
+                                const statusClass = allowedOrderStatuses.has(rawStatus) ? rawStatus : "unknown";
+                                return `
                                 <tr>
-                                    <td>${o.id || o._id || o.OrderID || ""}</td>
-                                    <td>${
-                                        o.CustomerName ||
-                                        o.customerName ||
-                                        o.customer ||
-                                        (o.deliveryDetails && 
-                                            (o.deliveryDetails.firstName && o.deliveryDetails.lastName
-                                                ? `${o.deliveryDetails.firstName} ${o.deliveryDetails.lastName}`
-                                                : o.deliveryDetails.email)) ||
-                                        (o.AdminID && typeof o.AdminID === 'object' &&
-                                            (o.AdminID.firstName && o.AdminID.lastName
-                                                ? `${o.AdminID.firstName} ${o.AdminID.lastName}`
-                                                : o.AdminID.email)) ||
-                                        (o.userId &&
-                                            (o.userId.firstName && o.userId.lastName
-                                                ? `${o.userId.firstName} ${o.userId.lastName}`
-                                                : o.userId.email)) ||
-                                        o.user?.name ||
-                                        o.user?.email ||
-                                        ""
-                                    }</td>
-                                    <td class="status-${String(o.status || "").toLowerCase()}">${o.status || ""}</td>
-                                    <td>${formatCurrency(computeOrderTotal(o))}</td>
-                                    <td>${o.createdAt || o.orderDate || o.date || o.CreatedAt || ""}</td>
+                                    <td>${escapeHtml(o.id || o._id || o.OrderID || "")}</td>
+                                    <td>${escapeHtml(customerDisplay)}</td>
+                                    <td class="status-${statusClass}">${escapeHtml(o.status || "")}</td>
+                                    <td>${escapeHtml(formatCurrency(computeOrderTotal(o)))}</td>
+                                    <td>${escapeHtml(o.createdAt || o.orderDate || o.date || o.CreatedAt || "")}</td>
                                 </tr>
-                            `).join('')}
+                            `;
+                            }).join('')}
                             ${!filteredOrders.length ? `
                                 <tr>
                                     <td colspan="5" style="text-align: center; font-style: italic;">

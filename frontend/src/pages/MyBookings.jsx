@@ -115,11 +115,11 @@ const MyBookings = () => {
             {/* Outfit Image + Info */}
             <div className='md:col-span-1'>
               <div className='rounded-md overflow-hidden mb-3'>
-                <MediaImage src={booking.outfit.image} alt="" className='w-60 h-60 aspect-video object-cover object-top'  />
+                <MediaImage src={booking.outfit?.image} alt={booking.outfit?.brand || 'Outfit'} className='w-60 h-60 aspect-video object-cover object-top'  />
               </div>
 
-              <p className='text-lg font-medium mt-2'>{booking.outfit.brand} {booking.outfit.model} </p>
-              <p className='text-gray-500'>{booking.outfit.category} • {booking.outfit.location} </p>
+              <p className='text-lg font-medium mt-2'>{booking.outfit ? `${booking.outfit.brand} ${booking.outfit.model}` : 'Unavailable outfit'} </p>
+              <p className='text-gray-500'>{booking.outfit?.category || 'N/A'} • {booking.outfit?.location || 'N/A'} </p>
             </div>
 
             {/* Booking Info */}
@@ -139,7 +139,7 @@ const MyBookings = () => {
                 <MediaImage src={assets.calendar_icon_colored} alt="" className='w-4 h-4 mt-1' />
                 <div>
                   <p className='text-gray-500'>Rental Period</p>
-                  <p>{booking.reservationDate.split('T')[0]} To {booking.returnDate.split('T')[0]} </p>
+                  <p>{String(booking.reservationDate || '').split('T')[0]} To {String(booking.returnDate || '').split('T')[0]} </p>
                 </div>
               </div>
 
@@ -147,7 +147,7 @@ const MyBookings = () => {
                 <MediaImage src={assets.location_icon} alt="" className='w-4 h-4 mt-1' />
                 <div>
                   <p className='text-red-500'>Pickup Location</p>
-                  <p>{booking.outfit.location} </p> 
+                  <p>{booking.outfit?.location || 'Unavailable'} </p> 
                 </div>
               </div>
 
@@ -167,7 +167,7 @@ const MyBookings = () => {
               <div className='text-sm text-gray-500 text-right'>
                 <p>Total Price</p>
                 <p className='text-2xl font-semibold text-primary'>{currency || '$'}{booking.collectionAmount ?? booking.price}</p>
-                <p>Booked On {booking.createdAt.split('T')[0]} </p>
+                <p>Booked On {String(booking.createdAt || '').split('T')[0]} </p>
               </div>
               
               {/* Action Buttons */}
