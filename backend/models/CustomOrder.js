@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { statuses, normalizeStatus } = require('../config/production');
 
 const MeasurementSchema = new mongoose.Schema(
   {
@@ -41,18 +42,20 @@ const CustomOrderSchema = new mongoose.Schema(
     measurements: { type: MeasurementSchema },
     status: {
       type: String,
-      enum: ['pending','assigned','accepted','in_progress','completed','delivered','cancelled'],
+      enum: statuses,
       default: 'pending',
       index: true,
     },
-    assignedTailor: { type: mongoose.Schema.Types.ObjectId, ref: 'Tailor', index: true },
-    assignedAt: { type: Date },
     previewGallery: [{ type: String }],
     price: { type: Number },
-    payoutAmount: { type: Number },
-    paidOutAt: { type: Date },
   },
   { timestamps: true }
 );
+
+CustomOrderSchema.set('toJSON', { transform(_doc, value) {
+  value.status = normalizeStatus(value.status);
+  for (const field of ['assignedTailor', 'assignedAt', 'payoutAmount', 'paidOutAt']) delete value[field];
+  return value;
+} });
 
 module.exports = mongoose.model('CustomOrder', CustomOrderSchema);

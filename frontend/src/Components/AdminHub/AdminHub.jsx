@@ -79,8 +79,8 @@ export default function AdminHub() {
 
           <button className="hub-card" onClick={() => navigate('/admin/custom-orders')}>
             <UIIcon className='bx bx-t-shirt'></UIIcon>
-            <h3>Tailor Management</h3>
-            <p>Assign tailors and track order statuses.</p>
+            <h3>Custom Orders</h3>
+            <p>Review custom clothing orders and update production statuses.</p>
           </button>
 
           <button className="hub-card" onClick={() => navigate('/admin-cloth-customizer')}>

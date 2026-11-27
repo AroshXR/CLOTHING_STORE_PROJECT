@@ -32,6 +32,10 @@ const getAllUsers = async (request, response) => {
 const addUsers = async (request, response) => {
     const { username, address, email, password, type, phoneNumber } = request.body;
 
+    if (!User.schema.path('type').enumValues.includes(type)) {
+        return response.status(400).json({ status: "error", message: "Choose a supported account type" });
+    }
+
     if (!username || !address || !email || !password || !type) {
         return response.status(400).json({
             status: "error",
@@ -109,6 +113,10 @@ const updateUser = async (request, response) => {
     } = request.body;
 
     const updatePayload = {};
+
+    if (type !== undefined && !User.schema.path('type').enumValues.includes(type)) {
+        return response.status(400).json({ status: "error", message: "Choose a supported account type" });
+    }
 
     if (username !== undefined) updatePayload.username = username;
     if (address !== undefined) updatePayload.address = address;

@@ -271,7 +271,6 @@ const AdminUserManagement = () => {
                             <select name="type" value={createForm.type} onChange={handleCreateChange}>
                                 <option value="Customer">Customer</option>
                                 <option value="Applicant">Applicant</option>
-                                <option value="Tailor">Tailor</option>
                                 <option value="Admin">Admin</option>
                             </select>
                         </label>
@@ -325,12 +324,13 @@ const AdminUserManagement = () => {
                                             <td>{user.email}</td>
                                             <td>
                                                 <select
-                                                    value={user.type}
+                                                    aria-label={`Account type for ${user.username}`}
+                                                    value={['Customer', 'Applicant', 'Admin'].includes(user.type) ? user.type : ''}
                                                     onChange={(event) => handleUpdateUserType(user._id, event.target.value)}
                                                 >
+                                                    <option value="" disabled>Choose account type</option>
                                                     <option value="Customer">Customer</option>
                                                     <option value="Applicant">Applicant</option>
-                                                    <option value="Tailor">Tailor</option>
                                                     <option value="Admin">Admin</option>
                                                 </select>
                                             </td>

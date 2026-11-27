@@ -20,7 +20,7 @@ test('customer accounts cannot enter administration', () => {
   expect(screen.getByText('Access denied')).toBeInTheDocument();
 });
 test('staff default customer role does not bypass account type restrictions', () => {
-  show({ type: 'Tailor', role: 'customer' }, ['Customer', 'Applicant']);
+  show({ type: 'Admin', role: 'customer' }, ['Customer', 'Applicant']);
   expect(screen.getByText('Access denied')).toBeInTheDocument();
 });
 test('signed-out visitors are redirected to sign in', () => {

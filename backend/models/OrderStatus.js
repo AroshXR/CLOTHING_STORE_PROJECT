@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
+const { statuses } = require('../config/production');
 
 const OrderStatusSchema = new mongoose.Schema({
   clothCustomizerId: { type: mongoose.Schema.Types.ObjectId, ref: 'ClothCustomizer', index: true },
   customOrderId: { type: mongoose.Schema.Types.ObjectId, ref: 'CustomOrder', required: true, index: true },
-  status: { type: String, required: true, enum: ['pending','assigned','accepted','in_progress','completed','delivered','cancelled'] },
-  tailorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tailor' },
+  status: { type: String, required: true, enum: statuses },
   note: { type: String },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   createdAt: { type: Date, default: Date.now }

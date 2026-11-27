@@ -42,7 +42,6 @@ export default function NavBar() {
                 <p>{currentUser?.username || 'Your account'}</p>
                 {admin && <><Link to="/admin-hub">Admin Hub</Link><Link to="/admin/custom-orders">Production orders</Link><Link to="/admin/site-settings">Site settings</Link></>}
                 {(currentUser?.role === 'owner' || admin) && <Link to="/owner">Rental management</Link>}
-                {currentUser?.type === 'Tailor' && <Link to="/tailorHome">My production orders</Link>}
                 {currentUser?.type === 'Applicant' && <Link to="/applicant-dashboard">My applications</Link>}
                 {['Customer', 'Applicant'].includes(currentUser?.type) && <Link to="/my-bookings">My bookings</Link>}
                 <Link to="/user/account">Account settings</Link>

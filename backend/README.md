@@ -48,7 +48,7 @@ SMTP credentials remain server environment settings. Inventory alerts use STOCK_
 - services/bookingService.js owns rental reservation, date overlap checks, booking edits, and collection receipts.
 - CustomOrder is the production record. Order is the sales line. PaymentDetails is the invoice/payment arrangement. OrderStatus retains production history.
 - Upload records associate uploaded artwork with its owner. Private images, booking documents, and application resumes are served through authorized endpoints.
-- Publicly published product images may be read without authentication. Other uploaded artwork requires ownership, an associated customer order, an assigned tailor, or administrator access.
+- Publicly published product images may be read without authentication. Other uploaded artwork requires ownership, an associated customer order, or administrator access.
 - Recruitment Socket.IO events require an authenticated administrator.
 
 ## Cash checkout contract
@@ -85,7 +85,7 @@ The example total is a placeholder; use the returned quote total. Home delivery 
 
 The transaction creates one payment arrangement and one sales order per line. Custom lines also create a linked production record and an initial history entry. Product stock is reserved atomically. Purchased designs are retained with inCart=false; order snapshots remain independent of later design edits or deletion.
 
-The design studio accepts version 2 configurations with front/back/sleeve colours, trim colour, up to eight independently priced artwork layers, transforms and repeat styles, and up to two front/back text layers. Text pricing is configured through customTextPrice (zero by default). The server validates all placements, panel names and layer IDs, authorizes every private upload, and recalculates prices. Existing version 1 front-only designs remain compatible. Checkout stores the complete immutable configuration for production, and assigned tailors can access its private artwork. The browser placement guide does not generate sewing patterns or production-ready print files. Checkout never trusts a submitted user ID, design price, subtotal, tax, or shipping cost.
+The design studio accepts version 2 configurations with front/back/sleeve colours, trim colour, up to eight independently priced artwork layers, transforms and repeat styles, and up to two front/back text layers. Text pricing is configured through customTextPrice (zero by default). The server validates all placements, panel names and layer IDs, authorizes every private upload, and recalculates prices. Existing version 1 front-only designs remain compatible. Checkout stores the complete immutable configuration for production, and administrators can review its private artwork. The browser placement guide does not generate sewing patterns or production-ready print files. Checkout never trusts a submitted user ID, design price, subtotal, tax, or shipping cost.
 
 Idempotency keys are scoped to the authenticated account. A retry returns the original result; reusing the key for a different request returns 409.
 
@@ -104,14 +104,13 @@ Products removed by administrators are archived so pending orders can still rele
 The canonical routes are under /api/custom-orders:
 
 - Customers: GET /my and access to their own order details.
-- Administrators: list orders and PATCH /:id/assign to an active tailor.
-- Assigned tailors: GET /assigned and PATCH /:id/status.
-- Valid progression: pending -> assigned -> accepted -> in_progress -> completed -> delivered. Reassignment is limited to pending/assigned.
+- Administrators: list orders and PATCH /:id/status directly.
+- Valid progression: pending -> in_progress -> completed -> delivered.
 - Sales fulfillment status follows production; payment status remains separate.
 
-Public registration permits Customer and Applicant accounts. Administrator and Tailor accounts must be provisioned by an administrator; existing administrators remain valid. Outfit listing keeps the existing authenticated owner-onboarding flow. User, applicant, booking, production, and upload endpoints enforce applicable ownership or staff access.
+Public registration permits Customer and Applicant accounts. Administrator accounts must be provisioned by an administrator; existing administrators remain valid. Outfit listing keeps the existing authenticated owner-onboarding flow. User, applicant, booking, production, and upload endpoints enforce applicable ownership or staff access.
 
-Legacy AssignmentRoutes and OrderStatusRoutes are not mounted. The current tailor UI uses the canonical CustomOrder workflow.
+Production is managed through Admin Hub -> Custom Orders. The separate staff assignment feature and its account type, dashboard, models, and endpoints have been removed. Existing accounts of the retired type cannot sign in or use previously issued sessions; administrators can change their account type through User Management. Historical assignment records remain in the database. Older orders in assigned/accepted states are displayed as pending and can enter production directly without a migration.
 
 ## Pricing configuration
 
@@ -136,6 +135,6 @@ The older root-level test-payment and debug scripts predate the checkout contrac
 
 ## Existing data and deployment
 
-No production database migration, live checkout, provider operation, or deployment is performed by the tests. Existing records remain readable; older sales records without snapshots are not automatically reconstructed. Back up the database before any explicit migration. If a previously created non-unique Tailor.userId index conflicts with the unique index, inspect and reconcile it deliberately; do not run syncIndexes against a live database without review.
+No production database migration, live checkout, provider operation, or deployment is performed by the tests. Existing records remain readable; older sales records without snapshots are not automatically reconstructed. Back up the database before any explicit migration. Historical collections and indexes are not dropped automatically; do not run syncIndexes against a live database without review.
 
 Credentials previously tracked in .env remain in Git history even after moving local values. Rotate those provider/database credentials before sharing that history or deploying publicly. Existing dependency audit findings also require a separate compatibility review; this change does not apply breaking dependency upgrades.

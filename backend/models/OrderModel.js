@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const { statuses } = require('../config/production');
 
 const orderSchema = new Schema({
     OrderID: {
@@ -59,7 +60,7 @@ const orderSchema = new Schema({
     CustomOrderID: { type: Schema.Types.ObjectId, ref: 'CustomOrder' },
     itemSnapshot: { type: require('./schemas/OrderItemSnapshot'), immutable: true },
     paymentStatus: { type: String, enum: ['pending', 'completed', 'cancelled', 'failed'], default: 'pending' },
-    fulfillmentStatus: { type: String, enum: ['pending', 'assigned', 'accepted', 'in_progress', 'completed', 'delivered', 'cancelled'], default: 'pending' }
+    fulfillmentStatus: { type: String, enum: statuses, default: 'pending' }
 });
 
 module.exports = mongoose.model(

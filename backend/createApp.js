@@ -36,7 +36,7 @@ module.exports = function createApp() {
     '/customizer-prices': './routes/CustomizerPricesRoutes', '/upload': './routes/UploadRoutes',
     '/payment': './routes/PaymentRoutes', '/inventory': './routes/InventoryRoutes', '/clothing': './routes/ClothingRoutes',
     '/analytics': './routes/AnalyticsRoutes', '/orders': './routes/OrderRoutes',
-    '/api/tailors': './routes/TailorRoutes', '/api/custom-orders': './routes/CustomOrderRoutes',
+    '/api/custom-orders': './routes/CustomOrderRoutes',
     '/api/owner': './routes/ownerRoutes', '/api/booking': './routes/bookingRoutes'
   };
   for (const [prefix, file] of Object.entries(routers)) app.use(prefix, require(file));

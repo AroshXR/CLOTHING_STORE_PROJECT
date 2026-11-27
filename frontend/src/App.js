@@ -21,7 +21,6 @@ import ContactUs from './Components/ContactUsPage/ContactUsPage';
 import OrderManagement from './Components/OrderManagement/OrderManagement';
 import PaymentManagement from './Components/PaymentManagement/PaymentManagement';
 import PaymentDetailsDisplay from './Components/PaymentDetailsDisplay/PaymentDetailsDisplay';
-import TailorHome from './Components/Home/Tailor_Interface/TailorHome';
 import UserHome from './Components/Home/UserHome/UserHome';
 import SupplierManagement from './Components/Supplier-management/SupplierManagement';
 import MaterialInventoryManagement from './Components/MaterialInventory-management/MaterialInventoryManagement';
@@ -57,7 +56,6 @@ import Reports from './pages/owner/Reports';
 import AdminHub from './Components/AdminHub/AdminHub';
 import AdminCustomOrders from './pages/admin/CustomOrders';
 import AdminCustomOrderDetail from './pages/admin/CustomOrderDetail';
-import AdminTailors from './pages/admin/Tailors';
 import AdminClothCustomizer from './Components/clothing-customizer/admin-cloth-customizer';
 
 // Gate that redirects logged-in customers to UserHome on outlet routes only
@@ -131,18 +129,8 @@ function App() {
         <Route
           path="/user/account"
           element={(
-            <ProtectedRoute allowedUserTypes={["Customer", "Applicant", "Tailor", "Admin"]}>
+            <ProtectedRoute allowedUserTypes={["Customer", "Applicant", "Admin"]}>
               <UserAccount />
-            </ProtectedRoute>
-          )}
-        />
-
-        {/* Tailor experience */}
-        <Route
-          path="/tailorHome"
-          element={(
-            <ProtectedRoute allowedUserTypes="Tailor">
-              <TailorHome />
             </ProtectedRoute>
           )}
         />
@@ -204,14 +192,6 @@ function App() {
           element={(
             <ProtectedRoute allowedUserTypes="Admin">
               <AdminCustomOrderDetail />
-            </ProtectedRoute>
-          )}
-        />
-        <Route
-          path="/admin/tailors"
-          element={(
-            <ProtectedRoute allowedUserTypes="Admin">
-              <AdminTailors />
             </ProtectedRoute>
           )}
         />

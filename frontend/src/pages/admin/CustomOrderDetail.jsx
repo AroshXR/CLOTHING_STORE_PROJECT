@@ -1,155 +1,90 @@
-import { API_BASE_URL as API_ORIGIN } from '../../config/api';
+import { API_BASE_URL } from '../../config/api';
 import MediaImage from '../../Components/MediaImage';
 import DesignSummary from '../../Components/clothing-customizer/studio/DesignSummary';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
-
-
 import { useAuth } from '../../AuthGuard/authGuard';
-
-const API_BASE_URL = API_ORIGIN;
+import { nextProductionState, productionLabel } from '../../utils/production';
 
 export default function AdminCustomOrderDetail() {
   const { id } = useParams();
   const { getToken } = useAuth();
   const [order, setOrder] = useState(null);
-  const [tailors, setTailors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedTailor, setSelectedTailor] = useState('');
   const [updating, setUpdating] = useState(false);
 
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    setOrder(null);
     try {
-      setLoading(true);
-      setError('');
-      const token = getToken();
       const res = await axios.get(`${API_BASE_URL}/api/custom-orders/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` }
       });
-      setOrder(res.data?.data || null);
-    } catch (e) {
-      setError('Failed to load order');
+      if (!res.data?.data) throw new Error('Order not found');
+      setOrder(res.data.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load order.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [getToken, id]);
 
-  const fetchTailors = async () => {
+  useEffect(() => { fetchOrder(); }, [fetchOrder]);
+
+  const updateStatus = async status => {
+    setUpdating(true);
+    setError('');
     try {
-      const token = getToken();
-      const res = await axios.get(`${API_BASE_URL}/api/tailors`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTailors(res.data?.data || []);
-    } catch (e) {
-      // non-blocking
-    }
-  };
-
-  useEffect(() => {
-    fetchOrder();
-    fetchTailors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
-  const onAssign = async () => {
-    try {
-      if (!selectedTailor) return alert('Please select a tailor');
-      setUpdating(true);
-      const token = getToken();
-      await axios.patch(`${API_BASE_URL}/api/custom-orders/${id}/assign`, { tailorId: selectedTailor }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSelectedTailor('');
-      await fetchOrder();
-    } catch (e) {
-      alert('Failed to assign tailor');
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const onOverrideStatus = async (status) => {
-    try {
-      setUpdating(true);
-      const token = getToken();
       await axios.patch(`${API_BASE_URL}/api/custom-orders/${id}/status`, { status }, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` }
       });
       await fetchOrder();
-    } catch (e) {
-      alert('Failed to update status');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update production status.');
     } finally {
       setUpdating(false);
     }
   };
 
-  return (
-    <div className="admin-custom-order-detail">
-      
-      <section >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1>Order Detail</h1>
-          <Link to="/admin/custom-orders">Back to List</Link>
-        </div>
-
-        {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
-        {loading || !order ? (
-          <div>Loading...</div>
-        ) : (
-          <div style={{ display: 'grid', gap: 16 }}>
-            <section style={{ border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
-              <h3>Metadata</h3>
-              <div><strong>Order:</strong> {order._id}</div>
-              <div><strong>Status:</strong> {order.status}</div>
-              <div><strong>Customer:</strong> {order.customerId?.username} ({order.customerId?.email})</div>
-              <div><strong>Assigned Tailor:</strong> {order.assignedTailor?.name || '—'}</div>
-            </section>
-
-            <section style={{ border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
-              <h3>Configuration</h3>
-              <div><strong>Type:</strong> {order.config?.clothingType}</div>
-              <div><strong>Size:</strong> {order.config?.size}</div>
-              <div><strong>Color:</strong> {order.config?.color}</div>
-              <div><strong>Quantity:</strong> {order.config?.quantity}</div>
-              {order.config?.notes && <div><strong>Notes:</strong> {order.config.notes}</div>}
-            </section>
-
-            {order.design?.designMeta?.designVersion === 2 && <section className="ui-card"><h3>Complete garment design</h3><DesignSummary design={order.design.designMeta} /></section>}
-            {order.design?.designImageUrl && (
-              <section style={{ border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
-                <h3>Design</h3>
-                <MediaImage alt="design" src={order.design.designImageUrl} style={{ maxWidth: 240, borderRadius: 8, border: '1px solid #ddd' }} />
-              </section>
-            )}
-
-            <section style={{ border: '1px solid #eee', borderRadius: 8, padding: 12, display: 'grid', gap: 8 }}>
-              <h3>Assign Tailor</h3>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <select value={selectedTailor} onChange={(e) => setSelectedTailor(e.target.value)}>
-                  <option value="">Select tailor</option>
-                  {tailors.map(t => (
-                    <option key={t._id} value={t._id}>{t.name}</option>
-                  ))}
-                </select>
-                <button disabled={updating} onClick={onAssign}>{updating ? 'Assigning...' : 'Assign'}</button>
-              </div>
-            </section>
-
-            <section style={{ border: '1px solid #eee', borderRadius: 8, padding: 12, display: 'grid', gap: 8 }}>
-              <h3>Update Production Status</h3>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {({ assigned: ['accepted'], accepted: ['in_progress'], in_progress: ['completed'], completed: ['delivered'] }[order.status] || []).map(s => (
-                  <button key={s} disabled={updating} onClick={() => onOverrideStatus(s)}>{s}</button>
-                ))}
-              </div>
-            </section>
-          </div>
-        )}
-      </section>
-      
-    </div>
-  );
+  const next = nextProductionState[order?.status];
+  return <div className="admin-custom-order-detail">
+    <section>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>Order Detail</h1><Link to="/admin/custom-orders">Back to List</Link>
+      </div>
+      {error && <p role="alert">{error}</p>}
+      {loading ? <p role="status">Loading order…</p> : order && <div style={{ display: 'grid', gap: 16 }}>
+        <section className="ui-card">
+          <h2>Order</h2>
+          <div><strong>ID:</strong> {order._id}</div>
+          <div><strong>Status:</strong> {productionLabel(order.status)}</div>
+          <div><strong>Customer:</strong> {order.customerId?.username} ({order.customerId?.email})</div>
+        </section>
+        <section className="ui-card">
+          <h2>Configuration</h2>
+          <div><strong>Type:</strong> {order.config?.clothingType}</div>
+          <div><strong>Size:</strong> {order.config?.size}</div>
+          <div><strong>Color:</strong> {order.config?.color}</div>
+          <div><strong>Quantity:</strong> {order.config?.quantity}</div>
+          {order.config?.notes && <div><strong>Notes:</strong> {order.config.notes}</div>}
+        </section>
+        {order.design?.designMeta?.designVersion === 2 && <section className="ui-card">
+          <h2>Complete garment design</h2><DesignSummary design={order.design.designMeta} />
+        </section>}
+        {order.design?.designImageUrl && <section className="ui-card">
+          <h2>Design</h2>
+          <MediaImage alt="Customer design" src={order.design.designImageUrl} style={{ maxWidth: 240, borderRadius: 8, border: '1px solid #ddd' }} />
+        </section>}
+        {next && <section className="ui-card">
+          <h2>Update Production Status</h2>
+          <button type="button" disabled={updating} onClick={() => updateStatus(next)}>
+            {updating ? 'Updating…' : productionLabel(next, true)}
+          </button>
+        </section>}
+      </div>}
+    </section>
+  </div>;
 }

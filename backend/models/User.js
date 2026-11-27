@@ -32,7 +32,7 @@ const userSchema = new Schema({
     type: {
         type: String,
         required: true,
-        enum: ["Customer", "Admin", "Tailor", "Applicant"]
+        enum: ["Customer", "Admin", "Applicant"]
     },
     role: {
         type: String,

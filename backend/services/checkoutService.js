@@ -3,6 +3,7 @@ const { createHash, randomUUID } = require('crypto');
 const HttpError = require('../utils/HttpError');
 const pricing = require('./pricingService');
 const { taxRate } = require('../config/commerce');
+const { normalizeStatus } = require('../config/production');
 const defaults = {
   Design: require('../models/ClothCustomizerModel'), Product: require('../models/ClothingItemModel'),
   Booking: require('../models/Booking'), Outfit: require('../models/Outfit'),
@@ -197,7 +198,7 @@ function createCheckoutService({ models = defaults, transaction = runTransaction
         const paidBooking = await models.Booking.exists({ paymentId: payment._id, paymentStatus: 'paid' }).session(session);
         if (paidBooking) throw new HttpError(409, 'Cash has already been received for a rental in this order.');
         for (const order of orders) {
-          if (!['pending', 'assigned', 'accepted'].includes(order.fulfillmentStatus || 'pending')) throw new HttpError(409, 'An order is already in production or fulfilled');
+          if (normalizeStatus(order.fulfillmentStatus || 'pending') !== 'pending') throw new HttpError(409, 'An order is already in production or fulfilled');
           const item = order.itemSnapshot;
           if (item?.kind === 'product') {
             const filter = { _id: item.sourceId }, increment = { stock: item.quantity };

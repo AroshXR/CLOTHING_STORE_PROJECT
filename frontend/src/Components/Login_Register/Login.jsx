@@ -26,8 +26,6 @@ function LoginPage() {
     switch (userType) {
       case 'Admin':
         return '/admin-hub';
-      case 'Tailor':
-        return '/tailorHome';
       case 'Applicant':
         return '/userHome';
       case 'Customer':
@@ -46,12 +44,6 @@ function LoginPage() {
 
     if (userType === 'Admin') {
       return requestedPath.startsWith('/admin') || requestedPath === '/supplierManagement'
-        ? requestedPath
-        : defaultRoute;
-    }
-
-    if (userType === 'Tailor') {
-      return requestedPath.startsWith('/tailor') || requestedPath.startsWith('/user')
         ? requestedPath
         : defaultRoute;
     }
@@ -188,7 +180,6 @@ function LoginPage() {
                 <option value="Customer">Customer</option>
                 <option value="Applicant">Applicant</option>
                 <option value="Admin">Admin</option>
-                <option value="Tailor">Tailor</option>
               </select>
             </div>
 

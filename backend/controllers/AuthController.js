@@ -16,7 +16,7 @@ exports.register = async (req, res) => {
 };
 exports.login = async (req, res) => {
   const { username, password, type } = req.body;
-  if (typeof username !== 'string' || typeof password !== 'string' || !['Customer', 'Applicant', 'Tailor', 'Admin'].includes(type)) throw new HttpError(400, 'Username, password and account type are required');
+  if (typeof username !== 'string' || typeof password !== 'string' || !User.schema.path('type').enumValues.includes(type)) throw new HttpError(400, 'Username, password and a supported account type are required');
   const user = await User.findOne({ username: username.trim(), type });
   if (!user || !(await bcrypt.compare(password, user.password))) throw new HttpError(401, 'Invalid credentials');
   res.json({ status: 'ok', data: { token: createToken(user._id), user: {

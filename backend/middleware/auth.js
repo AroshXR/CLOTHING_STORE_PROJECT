@@ -11,6 +11,7 @@ const protect = async (req, res, next) => {
     if (typeof decoded.id !== 'string' || !/^[a-f\d]{24}$/i.test(decoded.id)) throw new Error('Invalid subject');
     const user = await User.findById(decoded.id).select('-password');
     if (!user) return res.status(401).json({ status: 'error', message: 'Account not found' });
+    if (!User.schema.path('type').enumValues.includes(user.type)) return res.status(401).json({ status: 'error', message: 'This account type is no longer supported' });
     req.user = user;
     next();
   } catch (error) {

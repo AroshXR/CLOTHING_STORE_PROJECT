@@ -16,7 +16,7 @@ const Outfit = require('../models/Outfit');
 const Payment = require('../models/PaymentDetailsModel');
 const Order = require('../models/OrderModel');
 const Production = require('../models/CustomOrder');
-const Tailor = require('../models/Tailor');
+const History = require('../models/OrderStatus');
 let replica, server, sockets, base, people;
 const uploaded = [];
 const delivery = { firstName: 'Test', lastName: 'Customer', email: 'test@example.com', phone: '0771234567', address: '1 Test Road', city: 'Colombo', state: 'Western', zipCode: '00100', country: 'Sri Lanka' };
@@ -43,7 +43,7 @@ beforeEach(async () => {
   assert.equal(mongoose.connection.name, 'platform-priority-tests');
   assert.equal(mongoose.connection.host, '127.0.0.1');
   await Promise.all(Object.values(mongoose.models).map(model => model.deleteMany({})));
-  const roles = [['customer', 'Customer', 'customer'], ['other', 'Customer', 'customer'], ['admin', 'Admin', 'admin'], ['owner', 'Customer', 'owner'], ['tailor', 'Tailor', 'customer'], ['otherTailor', 'Tailor', 'customer']];
+  const roles = [['customer', 'Customer', 'customer'], ['other', 'Customer', 'customer'], ['admin', 'Admin', 'admin'], ['owner', 'Customer', 'owner']];
   people = {};
   for (const [name, type, role] of roles) people[name] = await User.create({ username: name, address: 'Test address', email: name + '@example.com', password: 'unused-test-password-hash', type, role });
 });
@@ -231,21 +231,49 @@ test('checkout rejects stale totals, unsupported card payments and another custo
   assert.equal(await Payment.countDocuments(), 0);
 });
 
-test('production routes enforce assignment and status transitions while retaining payment state', async () => {
+test('administrators manage custom production directly while retaining payment state and history', async () => {
   const item = await design(), body = await bodyFor([{ kind: 'custom', id: String(item._id), quantity: 1 }]);
   assert.equal((await request('POST', '/payment', people.customer, body, { 'Idempotency-Key': 'production-checkout-attempt' })).status, 201);
-  const production = await Production.findOne(), tailor = await Tailor.create({ userId: people.tailor._id, name: 'Assigned tailor' });
-  await Tailor.create({ userId: people.otherTailor._id, name: 'Other tailor' });
-  assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/assign', people.customer, { tailorId: String(tailor._id) })).status, 403);
-  assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/assign', people.admin, { tailorId: String(tailor._id) })).status, 200);
-  assert.equal((await request('GET', '/api/custom-orders/assigned', people.tailor)).data.data.length, 1);
+  const production = await Production.findOne();
+  assert.equal((await request('GET', '/api/custom-orders/my', people.customer)).data.data.length, 1);
+  assert.equal((await request('GET', '/api/custom-orders/' + production._id, people.customer)).status, 200);
   assert.equal((await request('GET', '/api/custom-orders/' + production._id, people.other)).status, 404);
-  assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/status', people.otherTailor, { status: 'accepted' })).status, 403);
-  assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/status', people.tailor, { status: 'delivered' })).status, 409);
-  for (const status of ['accepted', 'in_progress', 'completed', 'delivered']) assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/status', people.tailor, { status })).status, 200);
+  assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/status', people.customer, { status: 'in_progress' })).status, 403);
+  assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/status', people.admin, { status: 'delivered' })).status, 409);
+  assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/status', people.admin, { status: 'assigned' })).status, 400);
+  for (const status of ['in_progress', 'completed', 'delivered']) assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/status', people.admin, { status })).status, 200);
+  const history = await History.find({ customOrderId: production._id }).sort({ createdAt: 1 });
+  assert.deepEqual(history.map(entry => entry.status), ['pending', 'in_progress', 'completed', 'delivered']);
+  assert.ok(history.slice(1).every(entry => String(entry.createdBy) === String(people.admin._id)));
   const order = await Order.findOne(); assert.equal(order.fulfillmentStatus, 'delivered'); assert.equal(order.paymentStatus, 'pending');
   assert.equal((await request('PATCH', '/payment/' + order.PaymentID + '/status', people.admin, { status: 'completed' })).status, 200);
   assert.equal((await Order.findOne()).paymentStatus, 'completed');
+});
+
+test('removed staff accounts cannot authenticate or use retired assignment endpoints', async () => {
+  const retired = { username: 'retired', address: 'Test address', email: 'retired@example.com', password: 'unused-test-hash', type: 'Tailor', role: 'customer' };
+  retired._id = (await User.collection.insertOne(retired)).insertedId;
+  assert.equal((await request('POST', '/login', null, { username: retired.username, password: 'Password123', type: retired.type })).status, 400);
+  assert.equal((await request('GET', '/users/me', retired)).status, 401);
+  assert.equal((await request('POST', '/users', people.admin, retired)).status, 400);
+  assert.equal((await request('PUT', '/users/' + people.customer._id, people.admin, { type: retired.type })).status, 400);
+  assert.equal((await request('GET', '/api/tailors', people.admin)).status, 404);
+  assert.equal((await request('POST', '/api/tailors/register', people.admin, {})).status, 404);
+  assert.equal((await request('PATCH', '/api/custom-orders/' + new mongoose.Types.ObjectId() + '/assign', people.admin, {})).status, 404);
+  assert.equal((await request('PUT', '/users/' + retired._id, people.admin, { type: 'Customer' })).status, 200);
+  assert.equal((await request('GET', '/users/me', retired)).status, 200);
+});
+
+test('legacy waiting orders can enter administrator-managed production without migration', async () => {
+  for (const status of ['assigned', 'accepted']) {
+    const production = await Production.create({ customerId: people.customer._id, config: { clothingType: 'tshirt', size: 'M', color: '#ffffff' } });
+    await Production.collection.updateOne({ _id: production._id }, { $set: { status, assignedTailor: new mongoose.Types.ObjectId() } });
+    const waiting = await request('GET', '/api/custom-orders?status=pending', people.admin);
+    const visible = waiting.data.data.find(order => order._id === String(production._id));
+    assert.equal(visible.status, 'pending');
+    assert.equal(visible.assignedTailor, undefined);
+    assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/status', people.admin, { status: 'in_progress' })).status, 200);
+  }
 });
 
 test('cash cancellation restores inventory once and releases rental payment arrangements', async () => {
@@ -390,14 +418,14 @@ test('back artwork stays private and survives checkout as an immutable productio
   const saved = await request('POST', '/cloth-customizer', people.customer, input); assert.equal(saved.status, 201, JSON.stringify(saved.data));
   const body = await bodyFor([{ kind: 'custom', id: saved.data.data._id, quantity: 2 }]);
   assert.equal((await request('POST', '/payment', people.customer, body, { 'Idempotency-Key': 'studio-snapshot-checkout-test' })).status, 201);
-  const production = await Production.findOne(), tailor = await Tailor.create({ userId: people.tailor._id, name: 'Studio tailor' });
-  assert.equal((await request('PATCH', '/api/custom-orders/' + production._id + '/assign', people.admin, { tailorId: String(tailor._id) })).status, 200);
+  const production = await Production.findOne();
   await request('DELETE', '/cloth-customizer/' + saved.data.data._id, people.customer);
   const snapshot = (await Order.findOne()).itemSnapshot;
   assert.equal(snapshot.designVersion, 2); assert.equal(snapshot.design.panelColors.back, '#880e4f'); assert.equal(snapshot.design.lettering[0].text, 'My own idea');
   assert.equal(production.design.designMeta.placedDesigns[1].preview, url);
-  assert.equal((await request('GET', url, people.tailor)).status, 200);
-  assert.equal((await request('GET', url, people.otherTailor)).status, 404);
+  assert.equal((await request('GET', url, people.customer)).status, 200);
+  assert.equal((await request('GET', url, people.admin)).status, 200);
+  assert.equal((await request('GET', url, people.other)).status, 404);
 });
 
 test('concurrent checkout cannot oversell the last item', async () => {

@@ -1,6 +1,6 @@
 # Apparel platform frontend
 
-The React application includes the clothing storefront, browser 3D T-shirt customizer, mixed cart, rental bookings, cash checkout, customer account, owner screens, tailor production workflow, and administration.
+The React application includes the clothing storefront, browser 3D T-shirt customizer, mixed cart, rental bookings, cash checkout, customer account, owner screens, administrator-managed production, and administration.
 
 ## Setup
 
@@ -29,11 +29,11 @@ Checkout supports custom designs, ready-made clothing, and confirmed rental book
 
 Only cash on delivery and cash on collection are offered. Collection requires contact information; delivery also requires an address. The confirmation means the order was placed and cash is due, not that a payment was processed.
 
-The account order table shows saved item details, payment status, and fulfillment status separately. Administrators record cash receipts in Cash Payment Management. Outfit owners record rental receipts in Manage Bookings. Tailors use the assigned CustomOrder workflow, including saved 3D configuration previews.
+The account order table shows saved item details, payment status, and fulfillment status separately. Administrators record cash receipts in Cash Payment Management. Outfit owners record rental receipts in Manage Bookings. Administrators use Admin Hub -> Custom Orders to review saved garment configurations and progress orders from pending to in progress, completed, and delivered.
 
 The dark design studio supports separate front, back, and sleeve colours, collar/cuff trim, up to eight artwork layers, single graphics or repeating/half-panel patterns, and up to two front/back messages. The flat placement guide and live 3D garment share the same texture projection. Layers support movement, scale/density, rotation, ordering, undo/redo, and PNG preview download. Existing presets, private uploads, garment sizes and quantities remain available. Legacy front-only designs open in the new editor.
 
-Version 2 stores each panel, placement, pattern and message. Server pricing charges each artwork layer at its preset/upload price and each message at the configured text price (zero by default). Checkout stores an independent snapshot for the assigned tailor; later cart edits do not change it. The placement view is a visual guide, not a sewing pattern, production-ready print file, or cloth simulation. Colours and placement require production review.
+Version 2 stores each panel, placement, pattern and message. Server pricing charges each artwork layer at its preset/upload price and each message at the configured text price (zero by default). Checkout stores an independent production snapshot for administrator review; later cart edits do not change it. The placement view is a visual guide, not a sewing pattern, production-ready print file, or cloth simulation. Colours and placement require production review.
 
 All routes use the shared AppShell navigation, footer, typography, controls and responsive page frame. Route metadata lives in src/config/pages.json. Legacy styles are scoped to their page and placed in the app-legacy cascade layer; shared components use app-components. Keep new page styles scoped and avoid adding duplicate headers, footers, or main landmarks. The customizer intentionally uses a dark workspace.
 
@@ -43,7 +43,7 @@ Black, charcoal, and off-white form the default appearance. Site Settings -> Col
 
 The shop at /outlet and the product/rental detail pages at /outlet/:id and /outfit-details/:id share the editorial page frame, product galleries, form controls, and expanded footer. Product detail photographs retain their actual colours. Gallery controls support keyboard use and reduced motion. Shop filters preserve server parameters and reset to the unfiltered collection. Booking uploads, cash checkout, cart selections, and product reviews keep their existing API contracts. Rental specifications and features come from the outfit record.
 
-Public registration offers Customer and Applicant accounts. Staff access is provisioned by an administrator. Protected routes recognize account type and the owner/admin roles.
+Public registration offers Customer and Applicant accounts. Administrator access is provisioned by an administrator. Protected routes recognize account type and the owner/admin roles. The separate production staff account, dashboard, and assignment controls have been removed. Former staff accounts can be converted to a supported type in User Management.
 
 ## Verification
 

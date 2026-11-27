@@ -5,7 +5,6 @@ const Design = require('../models/ClothCustomizerModel');
 const ClothingItem = require('../models/ClothingItemModel');
 const Order = require('../models/OrderModel');
 const Production = require('../models/CustomOrder');
-const Tailor = require('../models/Tailor');
 const SiteSettings = require('../models/SiteSettings');
 const { isAdmin } = require('../middleware/auth');
 exports.serve = async (req, res) => {
@@ -26,10 +25,7 @@ exports.serve = async (req, res) => {
       if (!allowed) allowed = await Design.exists({ userId, $or: [{ 'selectedDesign.preview': imageUrl }, { 'placedDesigns.preview': imageUrl }] });
       if (!allowed) allowed = await Order.exists({ AdminID: userId, $or: [{ 'itemSnapshot.imageUrl': imageUrl }, { 'itemSnapshot.design.placedDesigns.preview': imageUrl }] });
       if (!allowed) {
-        const tailor = await Tailor.findOne({ userId, isActive: true }).select('_id');
-        const owners = [{ customerId: userId }];
-        if (tailor) owners.push({ assignedTailor: tailor._id });
-        allowed = await Production.exists({ $and: [{ $or: [{ 'design.designImageUrl': imageUrl }, { 'design.designMeta.placedDesigns.preview': imageUrl }] }, { $or: owners }] });
+        allowed = await Production.exists({ customerId: userId, $or: [{ 'design.designImageUrl': imageUrl }, { 'design.designMeta.placedDesigns.preview': imageUrl }] });
       }
       if (!allowed) return res.sendStatus(404);
     }
